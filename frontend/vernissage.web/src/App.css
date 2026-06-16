@@ -1,0 +1,43 @@
+.container {
+  max-width: 480px;
+  margin: 80px auto;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+}
+
+button {
+  padding: 10px 24px;
+  font-size: 1rem;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.response {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: #2a7a2a;
+}
+
+.error {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #c0392b;
+}
+
