@@ -7,7 +7,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("LocalFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://kind-island-0c4e5b50f.7.azurestaticapps.net")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
