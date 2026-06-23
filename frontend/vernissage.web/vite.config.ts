@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://vernissage-api-dev-a7a4dqf2dacgfuhd.francecentral-01.azurewebsites.net',
         changeOrigin: true,
       },
     },
