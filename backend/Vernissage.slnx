@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Vernissage.Api/Vernissage.Api.csproj" />
+  <Project Path="Vernissage.Api.Tests/Vernissage.Api.Tests.csproj" />
 </Solution>
