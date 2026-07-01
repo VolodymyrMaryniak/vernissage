@@ -27,6 +27,16 @@ public class TestControllerTests
     }
 
     [Fact]
+    public void Another_ReturnsOkWithMessage()
+    {
+        var controller = new TestController(CreateInMemoryDbContext());
+
+        var result = Assert.IsType<OkObjectResult>(controller.Another());
+
+        Assert.NotNull(result.Value);
+    }
+
+    [Fact]
     public async Task DbCheck_ReturnsOk_WhenDatabaseIsReachable()
     {
         var controller = new TestController(CreateInMemoryDbContext());

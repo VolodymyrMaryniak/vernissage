@@ -8,6 +8,7 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: 'Vernissage' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Call API' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Call Another API' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Check DB Connection' })).toBeInTheDocument();
   });
 });
