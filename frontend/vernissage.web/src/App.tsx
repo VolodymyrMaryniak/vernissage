@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { checkDbConnection, fetchTestMessage } from './api/testApi';
+import { checkDbConnection, fetchAnotherTestMessage, fetchTestMessage } from './api/testApi';
 import './App.css';
 
 function App() {
@@ -10,6 +10,9 @@ function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
   const [dbError, setDbError] = useState<string | null>(null);
   const [dbLoading, setDbLoading] = useState(false);
+  const [anotherMessage, setAnotherMessage] = useState<string | null>(null);
+  const [anotherError, setAnotherError] = useState<string | null>(null);
+  const [anotherLoading, setAnotherLoading] = useState(false);
 
   const handleCallApi = async () => {
     setLoading(true);
@@ -39,6 +42,20 @@ function App() {
     }
   };
 
+  const handleCallAnotherApi = async () => {
+    setAnotherLoading(true);
+    setAnotherError(null);
+    setAnotherMessage(null);
+    try {
+      const result = await fetchAnotherTestMessage();
+      setAnotherMessage(result);
+    } catch (err) {
+      setAnotherError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setAnotherLoading(false);
+    }
+  };
+
   return (
     <div className="container">
       <h1>Vernissage</h1>
@@ -47,6 +64,12 @@ function App() {
       </button>
       {message && <p className="response">{message}</p>}
       {error && <p className="error">{error}</p>}
+
+      <button onClick={handleCallAnotherApi} disabled={anotherLoading}>
+        {anotherLoading ? 'Loading…' : 'Call Another API'}
+      </button>
+      {anotherMessage && <p className="response">{anotherMessage}</p>}
+      {anotherError && <p className="error">{anotherError}</p>}
 
       <button onClick={handleCheckDbConnection} disabled={dbLoading}>
         {dbLoading ? 'Checking…' : 'Check DB Connection'}
