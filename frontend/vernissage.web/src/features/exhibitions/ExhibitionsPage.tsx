@@ -61,12 +61,17 @@ export default function ExhibitionsPage() {
 
   useEffect(() => {
     if (view.mode === 'list') {
+      // Fetch-on-view-change: the loading toggle inside refreshList runs
+      // synchronously, which the rule flags. It's the intended pattern here
+      // (no data-fetching library), so allow it.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void refreshList();
     }
   }, [view, refreshList]);
 
   useEffect(() => {
     if (view.mode === 'detail' || view.mode === 'edit') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void loadDetail(view.id);
     }
   }, [view, loadDetail]);
