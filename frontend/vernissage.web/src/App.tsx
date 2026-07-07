@@ -1,85 +1,15 @@
-import { useState } from 'react';
-import { checkDbConnection, fetchAnotherTestMessage, fetchTestMessage } from './api/testApi';
+import ExhibitionsPage from './features/exhibitions/ExhibitionsPage';
 import './App.css';
 
 function App() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-  const [dbError, setDbError] = useState<string | null>(null);
-  const [dbLoading, setDbLoading] = useState(false);
-  const [anotherMessage, setAnotherMessage] = useState<string | null>(null);
-  const [anotherError, setAnotherError] = useState<string | null>(null);
-  const [anotherLoading, setAnotherLoading] = useState(false);
-
-  const handleCallApi = async () => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const result = await fetchTestMessage();
-      setMessage(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCheckDbConnection = async () => {
-    setDbLoading(true);
-    setDbError(null);
-    setDbConnected(null);
-    try {
-      const result = await checkDbConnection();
-      setDbConnected(result);
-    } catch (err) {
-      setDbError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setDbLoading(false);
-    }
-  };
-
-  const handleCallAnotherApi = async () => {
-    setAnotherLoading(true);
-    setAnotherError(null);
-    setAnotherMessage(null);
-    try {
-      const result = await fetchAnotherTestMessage();
-      setAnotherMessage(result);
-    } catch (err) {
-      setAnotherError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setAnotherLoading(false);
-    }
-  };
-
   return (
-    <div className="container">
-      <h1>Vernissage</h1>
-      <button onClick={handleCallApi} disabled={loading}>
-        {loading ? 'Loading…' : 'Call API'}
-      </button>
-      {message && <p className="response">{message}</p>}
-      {error && <p className="error">{error}</p>}
-
-      <button onClick={handleCallAnotherApi} disabled={anotherLoading}>
-        {anotherLoading ? 'Loading…' : 'Call Another API'}
-      </button>
-      {anotherMessage && <p className="response">{anotherMessage}</p>}
-      {anotherError && <p className="error">{anotherError}</p>}
-
-      <button onClick={handleCheckDbConnection} disabled={dbLoading}>
-        {dbLoading ? 'Checking…' : 'Check DB Connection'}
-      </button>
-      {dbConnected !== null && (
-        <p className={dbConnected ? 'response' : 'error'}>
-          {dbConnected ? 'Database connected' : 'Database not connected'}
-        </p>
-      )}
-      {dbError && <p className="error">{dbError}</p>}
+    <div className="app">
+      <header className="app-header">
+        <h1>Vernissage</h1>
+      </header>
+      <main className="app-main">
+        <ExhibitionsPage />
+      </main>
     </div>
   );
 }

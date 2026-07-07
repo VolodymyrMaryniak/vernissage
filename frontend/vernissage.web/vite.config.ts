@@ -1,9 +1,8 @@
-import { defineConfig, type UserConfig } from 'vite'
-import type { InlineConfig } from 'vitest/node'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-const config: UserConfig & { test: InlineConfig } = {
+export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
@@ -18,6 +17,4 @@ const config: UserConfig & { test: InlineConfig } = {
     globals: true,
     setupFiles: './src/setupTests.ts',
   },
-}
-
-export default defineConfig(config)
+})
