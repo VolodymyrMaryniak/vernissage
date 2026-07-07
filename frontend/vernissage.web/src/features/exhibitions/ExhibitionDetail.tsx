@@ -1,12 +1,11 @@
 import type { ExhibitionDetail } from '../../types/exhibition';
 import { FIELD_SECTIONS } from './fields';
-import MediaManager from './MediaManager';
+import MediaGallery from './MediaGallery';
 
 interface Props {
   exhibition: ExhibitionDetail;
   onBack: () => void;
   onEdit: () => void;
-  onMediaChanged: () => void;
 }
 
 function formatDate(value: string | null): string | null {
@@ -40,12 +39,7 @@ const META_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
   { key: 'galleryLocation', label: 'Gallery / venue' },
 ];
 
-export default function ExhibitionDetailView({
-  exhibition,
-  onBack,
-  onEdit,
-  onMediaChanged,
-}: Props) {
+export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Props) {
   const dates = formatDateRange(exhibition.startDate, exhibition.endDate);
   const meta = META_FIELDS.map(({ key, label }) => ({
     label,
@@ -112,11 +106,7 @@ export default function ExhibitionDetailView({
       })}
 
       <section className="card view-section">
-        <MediaManager
-          exhibitionId={exhibition.id}
-          media={exhibition.media}
-          onChanged={onMediaChanged}
-        />
+        <MediaGallery exhibitionId={exhibition.id} media={exhibition.media} />
       </section>
 
       <p className="view-footnote">

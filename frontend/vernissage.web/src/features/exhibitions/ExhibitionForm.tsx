@@ -6,6 +6,9 @@ interface Props {
   initial?: ExhibitionDetail;
   submitting: boolean;
   error: string | null;
+  // When true (default) the action bar is pinned to the bottom of the viewport.
+  // The edit page disables it so trailing content (media manager) can follow.
+  actionsSticky?: boolean;
   onSubmit: (payload: ExhibitionWrite) => void;
   onCancel: () => void;
 }
@@ -43,7 +46,14 @@ function completeness(form: ExhibitionWrite): { filled: number; total: number } 
   return { filled, total: optional.length };
 }
 
-export default function ExhibitionForm({ initial, submitting, error, onSubmit, onCancel }: Props) {
+export default function ExhibitionForm({
+  initial,
+  submitting,
+  error,
+  actionsSticky = true,
+  onSubmit,
+  onCancel,
+}: Props) {
   const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial));
 
   const update = (key: keyof ExhibitionWrite, value: string) => {
@@ -182,7 +192,7 @@ export default function ExhibitionForm({ initial, submitting, error, onSubmit, o
 
       {error && <p className="banner banner-error">{error}</p>}
 
-      <div className="form-actions">
+      <div className={actionsSticky ? 'form-actions' : 'form-actions form-actions--inline'}>
         <div className="form-actions-inner">
           <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
             Cancel
