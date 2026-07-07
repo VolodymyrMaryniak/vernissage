@@ -71,6 +71,11 @@ dist-ssr/
 .vscode/
 *.code-workspace
 
+# ──────────────── Claude Code ────────────────
+# Per-developer local settings stay out of the repo; the shared
+# launch.json (and a shared settings.json, if added) stay tracked.
+.claude/settings.local.json
+
 # ──────────────── macOS / misc ────────────────
 .DS_Store
 Thumbs.db

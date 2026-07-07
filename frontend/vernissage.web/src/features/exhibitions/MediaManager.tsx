@@ -63,11 +63,15 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
   };
 
   return (
-    <section className="media-manager">
-      <h3>Media & documents</h3>
+    <div className="media-manager">
+      <h3 className="view-section-title">
+        Media &amp; documents
+        {media.length > 0 && <span className="count-badge">{media.length}</span>}
+      </h3>
 
       <form className="media-upload" onSubmit={handleUpload}>
         <select
+          className="media-field"
           value={category}
           onChange={(e) => setCategory(Number(e.target.value) as MediaCategory)}
         >
@@ -80,36 +84,47 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
         <input
           key={fileInputKey}
           type="file"
+          className="media-field media-file"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
         <input
           type="text"
+          className="media-field"
           placeholder="Caption / angle (optional)"
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
         />
-        <button type="submit" disabled={busy || !file}>
+        <button type="submit" className="btn btn-primary btn-sm" disabled={busy || !file}>
           {busy ? 'Uploading…' : 'Upload'}
         </button>
       </form>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className="banner banner-error">{error}</p>}
 
       {media.length === 0 ? (
-        <p className="muted">No media uploaded yet.</p>
+        <p className="muted media-empty">No media uploaded yet.</p>
       ) : (
         <ul className="media-list">
           {media.map((m) => (
-            <li key={m.id}>
+            <li key={m.id} className="media-item">
               <span className="media-cat">{MEDIA_CATEGORY_LABELS[m.category]}</span>
-              <a href={mediaDownloadUrl(exhibitionId, m.id)} target="_blank" rel="noreferrer">
-                {m.fileName}
-              </a>
-              {m.caption && <span className="muted"> — {m.caption}</span>}
-              <span className="muted"> ({formatSize(m.fileSize)})</span>
+              <div className="media-body">
+                <a
+                  className="media-name"
+                  href={mediaDownloadUrl(exhibitionId, m.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {m.fileName}
+                </a>
+                <span className="media-sub">
+                  {m.caption && <span>{m.caption} · </span>}
+                  {formatSize(m.fileSize)}
+                </span>
+              </div>
               <button
                 type="button"
-                className="link-danger"
+                className="btn btn-danger-ghost btn-sm"
                 onClick={() => handleDelete(m.id)}
                 disabled={busy}
               >
@@ -119,6 +134,6 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

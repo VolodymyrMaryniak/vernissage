@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import type { ExhibitionDetail, ExhibitionWrite } from '../../types/exhibition';
+import { FIELD_SECTIONS } from './fields';
 
 interface Props {
   initial?: ExhibitionDetail;
@@ -8,29 +9,6 @@ interface Props {
   onSubmit: (payload: ExhibitionWrite) => void;
   onCancel: () => void;
 }
-
-type TextField = {
-  key: keyof ExhibitionWrite;
-  label: string;
-  multiline?: boolean;
-};
-
-// Long-form text areas (order roughly follows the exhibition brief).
-const TEXT_FIELDS: TextField[] = [
-  { key: 'location', label: 'Location' },
-  { key: 'curator', label: 'Curator' },
-  { key: 'galleryLocation', label: 'Gallery / Location' },
-  { key: 'explication', label: 'Explication', multiline: true },
-  { key: 'investigationMaterial', label: 'Investigation material', multiline: true },
-  { key: 'team', label: 'Team', multiline: true },
-  { key: 'artworksList', label: 'List of artworks', multiline: true },
-  { key: 'preOpeningDetails', label: 'Pre-opening details', multiline: true },
-  { key: 'openingDetails', label: 'Opening details', multiline: true },
-  { key: 'eventsDetails', label: 'Events within expo details', multiline: true },
-  { key: 'notes', label: 'Notes', multiline: true },
-  { key: 'referencedLiterature', label: 'Referenced literature & research', multiline: true },
-  { key: 'aim', label: 'Aim', multiline: true },
-];
 
 function emptyForm(initial?: ExhibitionDetail): ExhibitionWrite {
   return {
@@ -53,6 +31,18 @@ function emptyForm(initial?: ExhibitionDetail): ExhibitionWrite {
   };
 }
 
+// Count how many optional fields have been filled in, so the user gets a sense
+// of how complete the record is.
+function completeness(form: ExhibitionWrite): { filled: number; total: number } {
+  const keys = Object.keys(form) as (keyof ExhibitionWrite)[];
+  const optional = keys.filter((k) => k !== 'name');
+  const filled = optional.filter((k) => {
+    const v = form[k];
+    return v !== null && v !== '';
+  }).length;
+  return { filled, total: optional.length };
+}
+
 export default function ExhibitionForm({ initial, submitting, error, onSubmit, onCancel }: Props) {
   const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial));
 
@@ -60,74 +50,147 @@ export default function ExhibitionForm({ initial, submitting, error, onSubmit, o
     setForm((prev) => ({ ...prev, [key]: value === '' ? null : value }));
   };
 
+  const { filled, total } = useMemo(() => completeness(form), [form]);
+  const nameEmpty = form.name.trim() === '';
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (nameEmpty) return;
     onSubmit({ ...form, name: form.name.trim() });
   };
 
   return (
-    <form className="exhibition-form" onSubmit={handleSubmit}>
-      <h2>{initial ? 'Edit exhibition' : 'New exhibition'}</h2>
+    <form className="ex-form" onSubmit={handleSubmit}>
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">{initial ? 'Editing' : 'New record'}</p>
+          <h2>{initial ? initial.name || 'Edit exhibition' : 'Create an exhibition'}</h2>
+          <p className="page-sub">
+            {filled} of {total} optional fields completed
+          </p>
+        </div>
+      </header>
 
-      <label className="field">
-        <span>Name *</span>
-        <input
-          type="text"
-          required
-          maxLength={300}
-          value={form.name}
-          onChange={(e) => update('name', e.target.value)}
-        />
-      </label>
+      {/* Basics --------------------------------------------------------- */}
+      <section className="card form-section">
+        <div className="section-head">
+          <h3>Basics</h3>
+          <p>The essentials that identify this exhibition.</p>
+        </div>
 
-      <div className="field-row">
         <label className="field">
-          <span>Start date</span>
+          <span className="field-label">
+            Name <span className="req">required</span>
+          </span>
           <input
-            type="date"
-            value={form.startDate ?? ''}
-            onChange={(e) => update('startDate', e.target.value)}
+            type="text"
+            required
+            maxLength={300}
+            placeholder="e.g. Light & Shadow: A Retrospective"
+            value={form.name}
+            onChange={(e) => update('name', e.target.value)}
+            autoFocus
           />
         </label>
-        <label className="field">
-          <span>End date</span>
-          <input
-            type="date"
-            value={form.endDate ?? ''}
-            onChange={(e) => update('endDate', e.target.value)}
-          />
-        </label>
-      </div>
 
-      {TEXT_FIELDS.map((f) => (
-        <label className="field" key={f.key}>
-          <span>{f.label}</span>
-          {f.multiline ? (
-            <textarea
-              rows={3}
-              value={(form[f.key] as string | null) ?? ''}
-              onChange={(e) => update(f.key, e.target.value)}
+        <div className="field-grid">
+          <label className="field">
+            <span className="field-label">Start date</span>
+            <input
+              type="date"
+              value={form.startDate ?? ''}
+              onChange={(e) => update('startDate', e.target.value)}
             />
-          ) : (
+          </label>
+          <label className="field">
+            <span className="field-label">End date</span>
+            <input
+              type="date"
+              value={form.endDate ?? ''}
+              min={form.startDate ?? undefined}
+              onChange={(e) => update('endDate', e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="field-grid">
+          <label className="field">
+            <span className="field-label">Curator</span>
             <input
               type="text"
               maxLength={500}
-              value={(form[f.key] as string | null) ?? ''}
-              onChange={(e) => update(f.key, e.target.value)}
+              placeholder="Who curated the show?"
+              value={form.curator ?? ''}
+              onChange={(e) => update('curator', e.target.value)}
             />
-          )}
+          </label>
+          <label className="field">
+            <span className="field-label">Location</span>
+            <input
+              type="text"
+              maxLength={500}
+              placeholder="City, country"
+              value={form.location ?? ''}
+              onChange={(e) => update('location', e.target.value)}
+            />
+          </label>
+        </div>
+
+        <label className="field">
+          <span className="field-label">Gallery / venue</span>
+          <input
+            type="text"
+            maxLength={500}
+            placeholder="Where is it being held?"
+            value={form.galleryLocation ?? ''}
+            onChange={(e) => update('galleryLocation', e.target.value)}
+          />
         </label>
+      </section>
+
+      {/* Grouped long-form sections ------------------------------------ */}
+      {FIELD_SECTIONS.map((section) => (
+        <section className="card form-section" key={section.id}>
+          <div className="section-head">
+            <h3>{section.title}</h3>
+            <p>{section.description}</p>
+          </div>
+
+          {section.fields.map((f) => (
+            <label className="field" key={f.key}>
+              <span className="field-label">{f.label}</span>
+              {f.multiline ? (
+                <textarea
+                  rows={4}
+                  placeholder={f.placeholder}
+                  value={(form[f.key] as string | null) ?? ''}
+                  onChange={(e) => update(f.key, e.target.value)}
+                />
+              ) : (
+                <input
+                  type="text"
+                  maxLength={500}
+                  placeholder={f.placeholder}
+                  value={(form[f.key] as string | null) ?? ''}
+                  onChange={(e) => update(f.key, e.target.value)}
+                />
+              )}
+            </label>
+          ))}
+        </section>
       ))}
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className="banner banner-error">{error}</p>}
 
       <div className="form-actions">
-        <button type="submit" disabled={submitting || form.name.trim() === ''}>
-          {submitting ? 'Saving…' : 'Save'}
-        </button>
-        <button type="button" className="secondary" onClick={onCancel} disabled={submitting}>
-          Cancel
-        </button>
+        <div className="form-actions-inner">
+          <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={submitting || nameEmpty}>
+            {submitting ? 'Saving…' : initial ? 'Save changes' : 'Create exhibition'}
+          </button>
+        </div>
       </div>
     </form>
   );
