@@ -542,6 +542,24 @@
   gap: 10px;
 }
 
+/* In-flow variant: used on the edit page where a media manager follows the
+   form, so the action bar must not be pinned over the trailing content. */
+.form-actions--inline {
+  position: static;
+  z-index: auto;
+  margin: 4px 0 0;
+  padding: 16px 0 0;
+  background: none;
+  backdrop-filter: none;
+}
+
+/* Edit page stacks the form and the media manager. */
+.ex-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 /* ================================================================
    VIEW PAGE
    ================================================================ */
@@ -675,8 +693,130 @@
 /* ================================================================
    MEDIA
    ================================================================ */
-.media-manager {
+.media-manager,
+.media-gallery {
   display: block;
+}
+
+/* ---- Read-only gallery (view page) ---------------------------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.gallery-item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gallery-thumb {
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.gallery-thumb:hover img {
+  transform: scale(1.05);
+}
+
+.gallery-cap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gallery-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-strong);
+}
+
+.gallery-caption-text {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+/* ---- File / document download list ---------------------------- */
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.file-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.file-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.file-name {
+  font-weight: 550;
+  color: var(--ink);
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-sub {
+  font-size: 0.8rem;
+  color: var(--ink-mute);
+}
+
+.media-cat-inline {
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.file-audio {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 340px;
+  height: 36px;
+}
+
+.file-download {
+  flex-shrink: 0;
+  text-decoration: none;
 }
 
 .media-upload {
