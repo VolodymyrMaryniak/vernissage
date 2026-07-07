@@ -43,3 +43,7 @@ quote_type = single
 # EF Core migrations are tool-generated; don't hold them to the analyzer/style rules.
 [**/Migrations/**.cs]
 generated_code = true
+
+# Test methods use the Method_Scenario naming convention; allow the underscores.
+[**/Vernissage.Api.Tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
