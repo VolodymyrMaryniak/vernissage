@@ -13,6 +13,12 @@ public class TestController(AppDbContext dbContext) : ControllerBase
         return Ok(new { message = "Hello from Vernissage API" });
     }
 
+    [HttpGet("another")]
+    public IActionResult Another()
+    {
+        return Ok(new { message = "Hello again from Vernissage API" });
+    }
+
     [HttpGet("db-check")]
     public async Task<IActionResult> DbCheck()
     {
