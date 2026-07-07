@@ -1,4 +1,5 @@
 import type { ExhibitionDetail } from '../../types/exhibition';
+import { FIELD_SECTIONS } from './fields';
 import MediaManager from './MediaManager';
 
 interface Props {
@@ -8,26 +9,35 @@ interface Props {
   onMediaChanged: () => void;
 }
 
-function formatDateRange(start: string | null, end: string | null): string | null {
-  if (!start && !end) return null;
-  if (start && end) return `${start} → ${end}`;
-  return start ?? end;
+function formatDate(value: string | null): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
-const TEXT_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
-  { key: 'location', label: 'Location' },
+function formatDateRange(start: string | null, end: string | null): string | null {
+  const s = formatDate(start);
+  const e = formatDate(end);
+  if (s && e) return `${s} – ${e}`;
+  return s ?? e;
+}
+
+function formatTimestamp(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// "Basics" fields shown as a metadata grid at the top rather than as prose.
+const META_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
   { key: 'curator', label: 'Curator' },
-  { key: 'galleryLocation', label: 'Gallery / Location' },
-  { key: 'explication', label: 'Explication' },
-  { key: 'investigationMaterial', label: 'Investigation material' },
-  { key: 'team', label: 'Team' },
-  { key: 'artworksList', label: 'List of artworks' },
-  { key: 'preOpeningDetails', label: 'Pre-opening details' },
-  { key: 'openingDetails', label: 'Opening details' },
-  { key: 'eventsDetails', label: 'Events within expo details' },
-  { key: 'notes', label: 'Notes' },
-  { key: 'referencedLiterature', label: 'Referenced literature & research' },
-  { key: 'aim', label: 'Aim' },
+  { key: 'location', label: 'Location' },
+  { key: 'galleryLocation', label: 'Gallery / venue' },
 ];
 
 export default function ExhibitionDetailView({
@@ -37,39 +47,82 @@ export default function ExhibitionDetailView({
   onMediaChanged,
 }: Props) {
   const dates = formatDateRange(exhibition.startDate, exhibition.endDate);
+  const meta = META_FIELDS.map(({ key, label }) => ({
+    label,
+    value: exhibition[key] as string | null,
+  })).filter((m) => m.value);
 
   return (
-    <div className="exhibition-detail">
-      <div className="detail-header">
-        <button type="button" className="secondary" onClick={onBack}>
-          ← Back
-        </button>
-        <button type="button" onClick={onEdit}>
-          Edit
-        </button>
-      </div>
+    <article className="ex-view">
+      <button type="button" className="btn btn-ghost btn-back" onClick={onBack}>
+        ← All exhibitions
+      </button>
 
-      <h2>{exhibition.name}</h2>
-      {dates && <p className="muted">{dates}</p>}
+      {/* Hero header --------------------------------------------------- */}
+      <header className="view-hero card">
+        <div className="view-hero-body">
+          <p className="eyebrow">Exhibition</p>
+          <h2>{exhibition.name}</h2>
+          {dates && (
+            <p className="view-dates">
+              <span className="dot" aria-hidden="true" />
+              {dates}
+            </p>
+          )}
 
-      <dl className="detail-fields">
-        {TEXT_FIELDS.map(({ key, label }) => {
-          const value = exhibition[key] as string | null;
-          if (!value) return null;
-          return (
-            <div className="detail-field" key={key}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          );
-        })}
-      </dl>
+          {meta.length > 0 && (
+            <dl className="meta-grid">
+              {meta.map((m) => (
+                <div className="meta-item" key={m.label}>
+                  <dt>{m.label}</dt>
+                  <dd>{m.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
 
-      <MediaManager
-        exhibitionId={exhibition.id}
-        media={exhibition.media}
-        onChanged={onMediaChanged}
-      />
-    </div>
+        <div className="view-hero-actions">
+          <button type="button" className="btn btn-primary" onClick={onEdit}>
+            Edit
+          </button>
+        </div>
+      </header>
+
+      {/* Content sections ---------------------------------------------- */}
+      {FIELD_SECTIONS.map((section) => {
+        const populated = section.fields
+          .map((f) => ({ label: f.label, value: exhibition[f.key] as string | null }))
+          .filter((f) => f.value);
+        if (populated.length === 0) return null;
+
+        return (
+          <section className="card view-section" key={section.id}>
+            <h3 className="view-section-title">{section.title}</h3>
+            <dl className="detail-fields">
+              {populated.map((f) => (
+                <div className="detail-field" key={f.label}>
+                  <dt>{f.label}</dt>
+                  <dd>{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        );
+      })}
+
+      <section className="card view-section">
+        <MediaManager
+          exhibitionId={exhibition.id}
+          media={exhibition.media}
+          onChanged={onMediaChanged}
+        />
+      </section>
+
+      <p className="view-footnote">
+        Created {formatTimestamp(exhibition.createdAtUtc)} · Last updated{' '}
+        {formatTimestamp(exhibition.updatedAtUtc)}
+      </p>
+    </article>
   );
 }

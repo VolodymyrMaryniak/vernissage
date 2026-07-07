@@ -5,7 +5,13 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Vernissage</h1>
+        <div className="app-header-inner">
+          <a className="brand" href="/">
+            <span className="brand-mark" aria-hidden="true">V</span>
+            <span className="brand-name">Vernissage</span>
+          </a>
+          <span className="brand-tag">Exhibition records</span>
+        </div>
       </header>
       <main className="app-main">
         <ExhibitionsPage />

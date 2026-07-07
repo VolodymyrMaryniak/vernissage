@@ -15,11 +15,12 @@ describe('App', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders the app heading and the exhibitions view', async () => {
+  it('renders the app brand and the exhibitions view', async () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: 'Vernissage' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '+ New exhibition' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /vernissage/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Exhibitions' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: '+ New exhibition' }).length).toBeGreaterThan(0);
 
     await waitFor(() =>
       expect(screen.getByText('No exhibitions yet. Create your first one.')).toBeInTheDocument(),
