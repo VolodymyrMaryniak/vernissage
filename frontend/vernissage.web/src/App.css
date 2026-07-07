@@ -43,4 +43,156 @@ button.secondary {
   color: #1a1a1a;
 }
 
-button.secondary:hover:no
+button.secondary:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.link,
+button.link-danger {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #1560c4;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+button.link-danger {
+  color: #c0392b;
+  margin-left: 8px;
+}
+
+.muted {
+  color: #777;
+}
+
+.error {
+  color: #c0392b;
+  margin-top: 12px;
+}
+
+/* List */
+.list-header,
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.list-table th,
+.list-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+/* Form */
+.exhibition-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field > span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.field input,
+.field textarea,
+.media-upload select,
+.media-upload input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.field-row {
+  display: flex;
+  gap: 16px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Detail */
+.detail-fields {
+  margin: 16px 0;
+}
+
+.detail-field {
+  margin-bottom: 12px;
+}
+
+.detail-field dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.detail-field dd {
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+}
+
+/* Media */
+.media-manager {
+  margin-top: 24px;
+  border-top: 1px solid #e2e2e2;
+  padding-top: 16px;
+}
+
+.media-upload {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.media-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.media-list li {
+  font-size: 0.9rem;
+}
+
+.media-cat {
+  display: inline-block;
+  min-width: 160px;
+  font-weight: 600;
+  color: #444;
+}
