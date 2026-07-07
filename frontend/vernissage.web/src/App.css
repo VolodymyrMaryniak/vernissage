@@ -151,6 +151,12 @@
   color: var(--ink-mute);
 }
 
+.state-message {
+  padding: 48px 4px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
 /* ---- Page heading row ----------------------------------------- */
 .page-head {
   display: flex;
