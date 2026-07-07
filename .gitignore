@@ -71,6 +71,12 @@ dist-ssr/
 .vscode/
 *.code-workspace
 
+# ──────────────── Claude Code ────────────────
+# Per-developer local settings and machine-specific dev-server config.
+# A shared .claude/settings.json (if added) stays tracked.
+.claude/settings.local.json
+.claude/launch.json
+
 # ──────────────── macOS / misc ────────────────
 .DS_Store
 Thumbs.db
