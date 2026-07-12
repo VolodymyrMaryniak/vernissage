@@ -6,6 +6,31 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- Build metadata surfaced by the /api/version endpoint. Resolved at build time and
+       baked into the assembly as [AssemblyMetadata] attributes read back at runtime. -->
+  <Target Name="AddBuildMetadata" BeforeTargets="GetAssemblyAttributes">
+    <PropertyGroup>
+      <BuildTimestampUtc Condition="'$(BuildTimestampUtc)' == ''">$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildTimestampUtc>
+      <!-- CI (GitHub Actions) exposes the built branch via GITHUB_REF_NAME, which MSBuild
+           surfaces as a property. Fall back to the local git branch, then to "unknown". -->
+      <SourceBranch Condition="'$(SourceBranch)' == ''">$(GITHUB_REF_NAME)</SourceBranch>
+    </PropertyGroup>
+    <Exec Condition="'$(SourceBranch)' == ''"
+          Command="git rev-parse --abbrev-ref HEAD"
+          ConsoleToMSBuild="true"
+          ContinueOnError="true"
+          StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="SourceBranch" />
+    </Exec>
+    <PropertyGroup>
+      <SourceBranch Condition="'$(SourceBranch)' == ''">unknown</SourceBranch>
+    </PropertyGroup>
+    <ItemGroup>
+      <AssemblyMetadata Include="BuildTimestampUtc" Value="$(BuildTimestampUtc)" />
+      <AssemblyMetadata Include="SourceBranch" Value="$(SourceBranch)" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
     <!-- Pin patched Microsoft.OpenApi (transitive via AspNetCore.OpenApi pulls 2.0.0,

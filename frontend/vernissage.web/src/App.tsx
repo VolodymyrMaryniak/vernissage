@@ -3,6 +3,7 @@ import ExhibitionsListPage from './features/exhibitions/ExhibitionsListPage';
 import ExhibitionCreatePage from './features/exhibitions/ExhibitionCreatePage';
 import ExhibitionDetailPage from './features/exhibitions/ExhibitionDetailPage';
 import ExhibitionEditPage from './features/exhibitions/ExhibitionEditPage';
+import AppVersion from './features/version/AppVersion';
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <AppVersion />
     </div>
   );
 }
