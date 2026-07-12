@@ -911,6 +911,64 @@
   color: var(--ink-mute);
 }
 
+/* ---- Version footer -------------------------------------------- */
+.app-version {
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.app-version-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.version-block {
+  min-width: 200px;
+}
+
+.version-title {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+}
+
+.version-list {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.version-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.version-row dt {
+  min-width: 64px;
+  color: var(--ink-mute);
+}
+
+.version-row dd {
+  margin: 0;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.version-loading,
+.version-error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-mute);
+}
+
 /* ---- Responsive ------------------------------------------------ */
 @media (max-width: 640px) {
   .app-main {
