@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - claude/app-version-endpoint-rm26p6
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
