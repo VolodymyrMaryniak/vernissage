@@ -715,11 +715,19 @@
 
 .gallery-thumb {
   display: block;
+  width: 100%;
+  padding: 0;
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--line);
   background: var(--surface-2);
+  cursor: pointer;
+}
+
+.gallery-thumb:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 
 .gallery-thumb img {
@@ -752,6 +760,110 @@
   font-size: 0.82rem;
   color: var(--ink-soft);
   line-height: 1.35;
+}
+
+/* ---- Lightbox (image preview overlay) ------------------------- */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(12px, 4vw, 48px);
+  background: rgba(10, 8, 16, 0.82);
+  backdrop-filter: blur(3px);
+}
+
+.lightbox-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: min(100%, 1100px);
+  max-height: 100%;
+}
+
+.lightbox-img {
+  min-height: 0;
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  background: #000;
+}
+
+.lightbox-cap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #f5f3fa;
+  text-align: center;
+}
+
+.lightbox-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #c9b6ff;
+}
+
+.lightbox-caption-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.lightbox-meta {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: rgba(245, 243, 250, 0.7);
+}
+
+.lightbox-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.lightbox-close,
+.lightbox-nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.lightbox-close:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: clamp(10px, 3vw, 22px);
+  right: clamp(10px, 3vw, 22px);
+  width: 40px;
+  height: 40px;
+  font-size: 1.6rem;
+}
+
+.lightbox-nav {
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
 }
 
 /* ---- File / document download list ---------------------------- */
