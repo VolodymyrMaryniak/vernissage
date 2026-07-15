@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { MEDIA_CATEGORY_LABELS, type ExhibitionMedia } from '../../types/exhibition';
 import { mediaDownloadUrl } from '../../api/exhibitionsApi';
+import Lightbox from './Lightbox';
 
 interface Props {
   exhibitionId: string;
@@ -21,6 +23,8 @@ const isAudio = (m: ExhibitionMedia) => m.contentType.startsWith('audio/');
 export default function MediaGallery({ exhibitionId, media }: Props) {
   const images = media.filter(isImage);
   const files = media.filter((m) => !isImage(m));
+  // Index of the image shown in the lightbox, or null when it's closed.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <div className="media-gallery">
@@ -33,19 +37,18 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
 
       {images.length > 0 && (
         <div className="gallery-grid">
-          {images.map((m) => {
+          {images.map((m, i) => {
             const url = mediaDownloadUrl(exhibitionId, m.id);
             return (
               <figure className="gallery-item" key={m.id}>
-                <a
+                <button
+                  type="button"
                   className="gallery-thumb"
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Open full size"
+                  onClick={() => setLightboxIndex(i)}
+                  title="Open preview"
                 >
                   <img src={url} alt={m.caption ?? m.fileName} loading="lazy" />
-                </a>
+                </button>
                 <figcaption className="gallery-cap">
                   <span className="gallery-cat">{MEDIA_CATEGORY_LABELS[m.category]}</span>
                   {m.caption && <span className="gallery-caption-text">{m.caption}</span>}
@@ -86,6 +89,16 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
             );
           })}
         </ul>
+      )}
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          exhibitionId={exhibitionId}
+          images={images}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </div>
   );
