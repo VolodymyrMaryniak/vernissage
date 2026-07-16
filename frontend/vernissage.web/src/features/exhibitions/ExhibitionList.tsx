@@ -1,12 +1,16 @@
-import { useMemo, useState } from 'react';
 import type { ExhibitionSummary } from '../../types/exhibition';
 
 interface Props {
   exhibitions: ExhibitionSummary[];
   loading: boolean;
   error: string | null;
+  /** True when server-side filters are active (affects the empty state copy). */
+  filtered: boolean;
+  /** Id of the logged-in user; null when anonymous. Gates delete buttons. */
+  currentUserId: string | null;
   onSelect: (id: string) => void;
-  onCreate: () => void;
+  /** Null hides the create CTA (anonymous visitors browse read-only). */
+  onCreate: (() => void) | null;
   onDelete: (id: string) => void;
 }
 
@@ -36,22 +40,12 @@ export default function ExhibitionList({
   exhibitions,
   loading,
   error,
+  filtered,
+  currentUserId,
   onSelect,
   onCreate,
   onDelete,
 }: Props) {
-  const [query, setQuery] = useState('');
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return exhibitions;
-    return exhibitions.filter((e) =>
-      [e.name, e.curator, e.location]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(q)),
-    );
-  }, [exhibitions, query]);
-
   return (
     <div className="ex-list">
       <header className="page-head">
@@ -64,22 +58,12 @@ export default function ExhibitionList({
               : `${exhibitions.length} record${exhibitions.length === 1 ? '' : 's'}`}
           </p>
         </div>
-        <button type="button" className="btn btn-primary" onClick={onCreate}>
-          + New exhibition
-        </button>
+        {onCreate && (
+          <button type="button" className="btn btn-primary" onClick={onCreate}>
+            + New exhibition
+          </button>
+        )}
       </header>
-
-      {exhibitions.length > 0 && (
-        <div className="list-toolbar">
-          <input
-            type="search"
-            className="search-input"
-            placeholder="Search by name, curator or location…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-      )}
 
       {loading && (
         <div className="card-grid" aria-hidden="true">
@@ -90,24 +74,26 @@ export default function ExhibitionList({
       )}
       {error && <p className="banner banner-error">{error}</p>}
 
-      {!loading && !error && exhibitions.length === 0 && (
+      {!loading && !error && exhibitions.length === 0 && filtered && (
+        <p className="muted no-results">No exhibitions match your filters.</p>
+      )}
+
+      {!loading && !error && exhibitions.length === 0 && !filtered && (
         <div className="empty-state card">
           <div className="empty-emoji" aria-hidden="true">🖼️</div>
-          <p className="empty-title">No exhibitions yet. Create your first one.</p>
+          <p className="empty-title">No exhibitions yet.</p>
           <p className="muted">Start documenting shows, artworks and events in one place.</p>
-          <button type="button" className="btn btn-primary" onClick={onCreate}>
-            + New exhibition
-          </button>
+          {onCreate && (
+            <button type="button" className="btn btn-primary" onClick={onCreate}>
+              + New exhibition
+            </button>
+          )}
         </div>
       )}
 
-      {!loading && !error && exhibitions.length > 0 && filtered.length === 0 && (
-        <p className="muted no-results">No exhibitions match “{query}”.</p>
-      )}
-
-      {filtered.length > 0 && (
+      {!loading && !error && exhibitions.length > 0 && (
         <div className="card-grid">
-          {filtered.map((e) => (
+          {exhibitions.map((e) => (
             <article
               key={e.id}
               className="card ex-card"
@@ -148,6 +134,12 @@ export default function ExhibitionList({
                     <dd>{e.location}</dd>
                   </div>
                 )}
+                {e.focus && (
+                  <div>
+                    <dt>Focus</dt>
+                    <dd>{e.focus}</dd>
+                  </div>
+                )}
               </dl>
 
               <div className="ex-card-actions">
@@ -161,16 +153,18 @@ export default function ExhibitionList({
                 >
                   View
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-danger-ghost btn-sm"
-                  onClick={(ev) => {
-                    ev.stopPropagation();
-                    onDelete(e.id);
-                  }}
-                >
-                  Delete
-                </button>
+                {currentUserId !== null && e.ownerId === currentUserId && (
+                  <button
+                    type="button"
+                    className="btn btn-danger-ghost btn-sm"
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      onDelete(e.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </article>
           ))}

@@ -37,13 +37,24 @@ export interface ExhibitionMedia {
   createdAtUtc: string;
 }
 
+/** Query filters for the public exhibitions list (dates as yyyy-MM-dd). */
+export interface ExhibitionFilters {
+  q?: string;
+  location?: string;
+  focus?: string;
+  from?: string;
+  to?: string;
+}
+
 export interface ExhibitionSummary {
   id: string;
   name: string;
   startDate: string | null;
   endDate: string | null;
   location: string | null;
+  focus: string | null;
   curator: string | null;
+  ownerId: string | null;
   mediaCount: number;
   createdAtUtc: string;
   updatedAtUtc: string;
@@ -55,7 +66,9 @@ export interface ExhibitionDetail {
   startDate: string | null;
   endDate: string | null;
   location: string | null;
+  focus: string | null;
   curator: string | null;
+  ownerId: string | null;
   galleryLocation: string | null;
   explication: string | null;
   investigationMaterial: string | null;
@@ -78,6 +91,7 @@ export interface ExhibitionWrite {
   startDate: string | null;
   endDate: string | null;
   location: string | null;
+  focus: string | null;
   curator: string | null;
   galleryLocation: string | null;
   explication: string | null;

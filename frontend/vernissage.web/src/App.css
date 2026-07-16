@@ -1104,3 +1104,58 @@
     flex-direction: column;
   }
 }
+
+/* ---- Auth & account ---- */
+
+.header-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-user {
+  font-weight: 600;
+  font-size: 0.9rem;
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-page {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  margin-top: 0.2rem;
+}
+
+/* ---- Search bar ---- */
+
+.search-bar {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-bar-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

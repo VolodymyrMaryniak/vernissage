@@ -19,6 +19,7 @@ function emptyForm(initial?: ExhibitionDetail): ExhibitionWrite {
     startDate: initial?.startDate ?? null,
     endDate: initial?.endDate ?? null,
     location: initial?.location ?? null,
+    focus: initial?.focus ?? null,
     curator: initial?.curator ?? null,
     galleryLocation: initial?.galleryLocation ?? null,
     explication: initial?.explication ?? null,
@@ -146,16 +147,28 @@ export default function ExhibitionForm({
           </label>
         </div>
 
-        <label className="field">
-          <span className="field-label">Gallery / venue</span>
-          <input
-            type="text"
-            maxLength={500}
-            placeholder="Where is it being held?"
-            value={form.galleryLocation ?? ''}
-            onChange={(e) => update('galleryLocation', e.target.value)}
-          />
-        </label>
+        <div className="field-grid">
+          <label className="field">
+            <span className="field-label">Gallery / venue</span>
+            <input
+              type="text"
+              maxLength={500}
+              placeholder="Where is it being held?"
+              value={form.galleryLocation ?? ''}
+              onChange={(e) => update('galleryLocation', e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">Focus / topic</span>
+            <input
+              type="text"
+              maxLength={200}
+              placeholder="e.g. Light art, Sculpture"
+              value={form.focus ?? ''}
+              onChange={(e) => update('focus', e.target.value)}
+            />
+          </label>
+        </div>
       </section>
 
       {/* Grouped long-form sections ------------------------------------ */}

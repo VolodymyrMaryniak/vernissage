@@ -5,7 +5,8 @@ import MediaGallery from './MediaGallery';
 interface Props {
   exhibition: ExhibitionDetail;
   onBack: () => void;
-  onEdit: () => void;
+  /** Null hides the edit action (viewer is not the owner). */
+  onEdit: (() => void) | null;
 }
 
 function formatDate(value: string | null): string | null {
@@ -37,6 +38,7 @@ const META_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
   { key: 'curator', label: 'Curator' },
   { key: 'location', label: 'Location' },
   { key: 'galleryLocation', label: 'Gallery / venue' },
+  { key: 'focus', label: 'Focus / topic' },
 ];
 
 export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Props) {
@@ -76,11 +78,13 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
           )}
         </div>
 
-        <div className="view-hero-actions">
-          <button type="button" className="btn btn-primary" onClick={onEdit}>
-            Edit
-          </button>
-        </div>
+        {onEdit && (
+          <div className="view-hero-actions">
+            <button type="button" className="btn btn-primary" onClick={onEdit}>
+              Edit
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Content sections ---------------------------------------------- */}
