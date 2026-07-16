@@ -44,6 +44,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .HasMaxLength(300);
 
             entity.Property(e => e.Location).HasMaxLength(500);
+            entity.Property(e => e.Focus).HasMaxLength(200);
             entity.Property(e => e.Curator).HasMaxLength(500);
             entity.Property(e => e.GalleryLocation).HasMaxLength(500);
 
@@ -58,6 +59,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             entity.Property(e => e.Notes);
             entity.Property(e => e.ReferencedLiterature);
             entity.Property(e => e.Aim);
+
+            entity.HasIndex(e => e.OwnerId);
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasMany(e => e.Media)
                 .WithOne(m => m.Exhibition)

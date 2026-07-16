@@ -21,6 +21,9 @@ public class Exhibition
     /// <summary>General location.</summary>
     public string? Location { get; set; }
 
+    /// <summary>Topic / focus of the exhibition (used for filtering and analytics).</summary>
+    public string? Focus { get; set; }
+
     /// <summary>Curator name(s).</summary>
     public string? Curator { get; set; }
 
@@ -58,8 +61,9 @@ public class Exhibition
     public string? Aim { get; set; }
 
     /// <summary>
-    /// Optional owning curator identifier. Reserved for future authorization;
-    /// not populated or enforced yet.
+    /// Owning user. Set from the authenticated caller on create and enforced on
+    /// all writes. Null for legacy records, which are read-only until claimed
+    /// (manual SQL update).
     /// </summary>
     public Guid? OwnerId { get; set; }
 

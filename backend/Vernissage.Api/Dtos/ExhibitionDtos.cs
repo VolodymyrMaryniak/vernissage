@@ -17,6 +17,9 @@ public class ExhibitionWriteDto
     [MaxLength(500)]
     public string? Location { get; set; }
 
+    [MaxLength(200)]
+    public string? Focus { get; set; }
+
     [MaxLength(500)]
     public string? Curator { get; set; }
 
@@ -44,6 +47,23 @@ public class ExhibitionWriteDto
     public string? Aim { get; set; }
 }
 
+/// <summary>Query parameters for filtering the public exhibitions list.</summary>
+public class ExhibitionQueryParams
+{
+    /// <summary>Free text matched against name and curator.</summary>
+    public string? Q { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? Focus { get; set; }
+
+    /// <summary>Only exhibitions ending on/after this date.</summary>
+    public DateOnly? From { get; set; }
+
+    /// <summary>Only exhibitions starting on/before this date.</summary>
+    public DateOnly? To { get; set; }
+}
+
 /// <summary>Summary view of an exhibition (used in list responses).</summary>
 public class ExhibitionSummaryDto
 {
@@ -52,7 +72,9 @@ public class ExhibitionSummaryDto
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Location { get; set; }
+    public string? Focus { get; set; }
     public string? Curator { get; set; }
+    public Guid? OwnerId { get; set; }
     public int MediaCount { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
@@ -66,7 +88,9 @@ public class ExhibitionDetailDto
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Location { get; set; }
+    public string? Focus { get; set; }
     public string? Curator { get; set; }
+    public Guid? OwnerId { get; set; }
     public string? GalleryLocation { get; set; }
     public string? Explication { get; set; }
     public string? InvestigationMaterial { get; set; }

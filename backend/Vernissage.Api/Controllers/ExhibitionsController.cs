@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vernissage.Api.Data;
 using Vernissage.Api.Dtos;
+using Vernissage.Api.Infrastructure;
 using Vernissage.Api.Models;
 
 namespace Vernissage.Api.Controllers;
@@ -14,10 +16,10 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     private const long MaxMediaBytes = 50 * 1024 * 1024; // 50 MB
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ExhibitionSummaryDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ExhibitionSummaryDto>>> GetAll(
+        [FromQuery] ExhibitionQueryParams query)
     {
-        var exhibitions = await dbContext.Exhibitions
-            .AsNoTracking()
+        var exhibitions = await ApplyFilters(dbContext.Exhibitions.AsNoTracking(), query)
             .OrderByDescending(e => e.CreatedAtUtc)
             .Select(e => new ExhibitionSummaryDto
             {
@@ -26,7 +28,9 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
                 StartDate = e.StartDate,
                 EndDate = e.EndDate,
                 Location = e.Location,
+                Focus = e.Focus,
                 Curator = e.Curator,
+                OwnerId = e.OwnerId,
                 MediaCount = e.Media.Count,
                 CreatedAtUtc = e.CreatedAtUtc,
                 UpdatedAtUtc = e.UpdatedAtUtc,
@@ -53,12 +57,20 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<ExhibitionDetailDto>> Create(ExhibitionWriteDto dto)
     {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
         var now = DateTimeOffset.UtcNow;
         var exhibition = new Exhibition
         {
             Id = Guid.NewGuid(),
+            OwnerId = userId,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
         };
@@ -72,19 +84,20 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize]
     public async Task<ActionResult<ExhibitionDetailDto>> Update(Guid id, ExhibitionWriteDto dto)
     {
         var exhibition = await dbContext.Exhibitions
             .Include(e => e.Media)
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (exhibition is null)
+        if (this.CheckOwnership(exhibition) is { } problem)
         {
-            return NotFound();
+            return problem;
         }
 
-        ApplyWrite(exhibition, dto);
-        exhibition.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        ApplyWrite(exhibition!, dto);
+        exhibition!.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await dbContext.SaveChangesAsync();
 
@@ -92,21 +105,23 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
         var exhibition = await dbContext.Exhibitions.FirstOrDefaultAsync(e => e.Id == id);
-        if (exhibition is null)
+        if (this.CheckOwnership(exhibition) is { } problem)
         {
-            return NotFound();
+            return problem;
         }
 
-        dbContext.Exhibitions.Remove(exhibition);
+        dbContext.Exhibitions.Remove(exhibition!);
         await dbContext.SaveChangesAsync();
 
         return NoContent();
     }
 
     [HttpPost("{id:guid}/media")]
+    [Authorize]
     [RequestSizeLimit(MaxMediaBytes + (1 * 1024 * 1024))]
     public async Task<ActionResult<ExhibitionMediaDto>> UploadMedia(
         Guid id,
@@ -114,10 +129,12 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         IFormFile file,
         [FromForm] string? caption)
     {
-        var exhibitionExists = await dbContext.Exhibitions.AnyAsync(e => e.Id == id);
-        if (!exhibitionExists)
+        var exhibition = await dbContext.Exhibitions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (this.CheckOwnership(exhibition) is { } problem)
         {
-            return NotFound();
+            return problem;
         }
 
         if (file is null || file.Length == 0)
@@ -178,8 +195,17 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     }
 
     [HttpDelete("{id:guid}/media/{mediaId:guid}")]
+    [Authorize]
     public async Task<IActionResult> DeleteMedia(Guid id, Guid mediaId)
     {
+        var exhibition = await dbContext.Exhibitions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (this.CheckOwnership(exhibition) is { } problem)
+        {
+            return problem;
+        }
+
         var media = await dbContext.ExhibitionMedia
             .FirstOrDefaultAsync(m => m.Id == mediaId && m.ExhibitionId == id);
 
@@ -194,12 +220,49 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         return NoContent();
     }
 
+    private static IQueryable<Exhibition> ApplyFilters(
+        IQueryable<Exhibition> source,
+        ExhibitionQueryParams query)
+    {
+        if (!string.IsNullOrWhiteSpace(query.Q))
+        {
+            var q = query.Q.Trim();
+            source = source.Where(e => e.Name.Contains(q) || (e.Curator != null && e.Curator.Contains(q)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Location))
+        {
+            var location = query.Location.Trim();
+            source = source.Where(e => e.Location != null && e.Location.Contains(location));
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Focus))
+        {
+            var focus = query.Focus.Trim();
+            source = source.Where(e => e.Focus != null && e.Focus.Contains(focus));
+        }
+
+        // Date overlap: undated rows are excluded only when a date filter is applied.
+        if (query.From is { } from)
+        {
+            source = source.Where(e => (e.EndDate ?? e.StartDate) >= from);
+        }
+
+        if (query.To is { } to)
+        {
+            source = source.Where(e => (e.StartDate ?? e.EndDate) <= to);
+        }
+
+        return source;
+    }
+
     private static void ApplyWrite(Exhibition exhibition, ExhibitionWriteDto dto)
     {
         exhibition.Name = dto.Name;
         exhibition.StartDate = dto.StartDate;
         exhibition.EndDate = dto.EndDate;
         exhibition.Location = dto.Location;
+        exhibition.Focus = dto.Focus;
         exhibition.Curator = dto.Curator;
         exhibition.GalleryLocation = dto.GalleryLocation;
         exhibition.Explication = dto.Explication;
@@ -221,7 +284,9 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         StartDate = e.StartDate,
         EndDate = e.EndDate,
         Location = e.Location,
+        Focus = e.Focus,
         Curator = e.Curator,
+        OwnerId = e.OwnerId,
         GalleryLocation = e.GalleryLocation,
         Explication = e.Explication,
         InvestigationMaterial = e.InvestigationMaterial,
