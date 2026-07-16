@@ -35,6 +35,20 @@ Runs on Windows. Two jobs:
 2. **deploy** — downloads the artifact, logs into Azure, and deploys to the
    `vernissage-api-dev` Web App (Production slot).
 
+### Runtime configuration / secrets
+
+The API needs a JWT signing key at runtime, supplied as the App Service
+application setting **`Jwt__SigningKey`** (≥ 32 bytes) on `vernissage-api-dev`
+(Azure Portal → the Web App → *Settings → Environment variables*). It is
+deliberately **not** committed — only a dev key in `appsettings.Development.json`
+lives in the repo. If the setting is missing the API fails fast on startup with
+an `InvalidOperationException` from `TokenService`. `Jwt:Issuer`/`Jwt:Audience`
+are non-secret and committed in `appsettings.json`.
+
+Migrations are applied automatically on startup (`Database.Migrate()`), so a
+deploy that carries new EF migrations updates the shared dev database on the
+next boot — there is no separate migration step.
+
 ### Azure authentication (OIDC — important)
 
 The deploy job authenticates with **`azure/login` using OIDC** (no stored
