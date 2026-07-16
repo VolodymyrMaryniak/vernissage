@@ -14,6 +14,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<ExhibitionMedia> ExhibitionMedia => Set<ExhibitionMedia>();
 
+    public DbSet<ExhibitionMetrics> ExhibitionMetrics => Set<ExhibitionMetrics>();
+
+    public DbSet<CostItem> CostItems => Set<CostItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -70,6 +74,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .WithOne(m => m.Exhibition)
                 .HasForeignKey(m => m.ExhibitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ExhibitionMetrics>(entity =>
+        {
+            entity.HasKey(m => m.ExhibitionId);
+
+            entity.Property(m => m.TotalRevenue).HasPrecision(18, 2);
+
+            entity.HasOne(m => m.Exhibition)
+                .WithOne()
+                .HasForeignKey<ExhibitionMetrics>(m => m.ExhibitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(m => m.CostItems)
+                .WithOne(c => c.Metrics)
+                .HasForeignKey(c => c.ExhibitionMetricsId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CostItem>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.Label)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(c => c.Amount).HasPrecision(18, 2);
         });
 
         modelBuilder.Entity<ExhibitionMedia>(entity =>
