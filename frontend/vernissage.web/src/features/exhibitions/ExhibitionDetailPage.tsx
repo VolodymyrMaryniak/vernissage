@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ExhibitionDetailView from './ExhibitionDetail';
 import { useExhibition } from './useExhibition';
 import { useAuth } from '../auth/useAuth';
+import MetricsSection from '../metrics/MetricsSection';
 
 export default function ExhibitionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,10 +17,13 @@ export default function ExhibitionDetailPage() {
   const isOwner = user !== null && exhibition.ownerId === user.id;
 
   return (
-    <ExhibitionDetailView
-      exhibition={exhibition}
-      onBack={() => navigate('/')}
-      onEdit={isOwner ? () => navigate(`/exhibitions/${exhibition.id}/edit`) : null}
-    />
+    <>
+      <ExhibitionDetailView
+        exhibition={exhibition}
+        onBack={() => navigate('/')}
+        onEdit={isOwner ? () => navigate(`/exhibitions/${exhibition.id}/edit`) : null}
+      />
+      {isOwner && <MetricsSection exhibitionId={exhibition.id} />}
+    </>
   );
 }
