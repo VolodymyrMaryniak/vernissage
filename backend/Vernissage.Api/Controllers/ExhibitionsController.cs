@@ -19,7 +19,9 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     public async Task<ActionResult<IEnumerable<ExhibitionSummaryDto>>> GetAll(
         [FromQuery] ExhibitionQueryParams query)
     {
-        var exhibitions = await ApplyFilters(dbContext.Exhibitions.AsNoTracking(), query)
+        var exhibitions = await dbContext.Exhibitions
+            .AsNoTracking()
+            .ApplyFilters(query)
             .OrderByDescending(e => e.CreatedAtUtc)
             .Select(e => new ExhibitionSummaryDto
             {
@@ -218,42 +220,6 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         await dbContext.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private static IQueryable<Exhibition> ApplyFilters(
-        IQueryable<Exhibition> source,
-        ExhibitionQueryParams query)
-    {
-        if (!string.IsNullOrWhiteSpace(query.Q))
-        {
-            var q = query.Q.Trim();
-            source = source.Where(e => e.Name.Contains(q) || (e.Curator != null && e.Curator.Contains(q)));
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.Location))
-        {
-            var location = query.Location.Trim();
-            source = source.Where(e => e.Location != null && e.Location.Contains(location));
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.Focus))
-        {
-            var focus = query.Focus.Trim();
-            source = source.Where(e => e.Focus != null && e.Focus.Contains(focus));
-        }
-
-        // Date overlap: undated rows are excluded only when a date filter is applied.
-        if (query.From is { } from)
-        {
-            source = source.Where(e => (e.EndDate ?? e.StartDate) >= from);
-        }
-
-        if (query.To is { } to)
-        {
-            source = source.Where(e => (e.StartDate ?? e.EndDate) <= to);
-        }
-
-        return source;
     }
 
     private static void ApplyWrite(Exhibition exhibition, ExhibitionWriteDto dto)
