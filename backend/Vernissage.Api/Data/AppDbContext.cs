@@ -1,9 +1,14 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Vernissage.Api.Models;
 
 namespace Vernissage.Api.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+// IdentityUserContext (not IdentityDbContext) on purpose: creator roles are a
+// flags column on the user, not ASP.NET Identity roles, so the AspNetRoles
+// tables are never needed.
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : IdentityUserContext<ApplicationUser, Guid>(options)
 {
     public DbSet<Exhibition> Exhibitions => Set<Exhibition>();
 
@@ -12,6 +17,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(u => u.GalleryName).HasMaxLength(300);
+            entity.Property(u => u.BusinessLocation).HasMaxLength(500);
+            entity.Property(u => u.Focus).HasMaxLength(200);
+            entity.Property(u => u.FirstName).HasMaxLength(200);
+            entity.Property(u => u.LastName).HasMaxLength(200);
+            entity.Property(u => u.SocialMedia).HasMaxLength(500);
+            entity.Property(u => u.PlaceOfWork).HasMaxLength(300);
+            entity.Property(u => u.AreasOfInterest).HasMaxLength(500);
+            entity.Property(u => u.Location).HasMaxLength(500);
+            entity.Property(u => u.Medium).HasMaxLength(300);
+            entity.Property(u => u.ProfilePhoto).HasColumnType("varbinary(max)");
+            entity.Property(u => u.ProfilePhotoContentType).HasMaxLength(200);
+            entity.Ignore(u => u.DisplayName);
+        });
 
         modelBuilder.Entity<Exhibition>(entity =>
         {
