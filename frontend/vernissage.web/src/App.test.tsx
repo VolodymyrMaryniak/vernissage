@@ -17,7 +17,8 @@ function renderAt(path: string) {
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
-    // The list route fetches on mount; stub it with an empty result.
+    // Some routes fetch on mount (archive list, version footer); stub with
+    // a benign empty response.
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })),
@@ -28,37 +29,46 @@ describe('App', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders the app brand and the exhibitions list at the root route', async () => {
+  it('renders the wordmark and the marketing home at the root route', () => {
     renderAt('/');
 
     expect(screen.getByRole('link', { name: /vernissage/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Exhibitions' })).toBeInTheDocument();
-
-    await waitFor(() => expect(screen.getByText('No exhibitions yet.')).toBeInTheDocument());
+    expect(
+      screen.getByRole('heading', { name: /document your art exhibition properly/i }),
+    ).toBeInTheDocument();
   });
 
-  it('hides the create CTA and offers login for anonymous visitors', async () => {
+  it('offers sign in and the document CTA for anonymous visitors', () => {
     renderAt('/');
 
-    expect(screen.queryByRole('button', { name: '+ New exhibition' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Log in' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Register' })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText('No exhibitions yet.')).toBeInTheDocument());
+    expect(screen.getAllByRole('link', { name: 'Sign in' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: 'Document a show' }).length).toBeGreaterThan(0);
   });
 
-  it('redirects anonymous users from /exhibitions/new to the login page', async () => {
-    renderAt('/exhibitions/new');
+  it('renders the archive index at /archive', async () => {
+    renderAt('/archive');
 
+    expect(screen.getByRole('heading', { name: /indexed/i })).toBeInTheDocument();
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument(),
+      expect(screen.getByText(/no exhibitions have been documented yet/i)).toBeInTheDocument(),
     );
   });
 
-  it('redirects unknown routes back to the list', async () => {
+  it('redirects anonymous users from /exhibitions/new to the sign-in page', async () => {
+    renderAt('/exhibitions/new');
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument(),
+    );
+  });
+
+  it('redirects unknown routes back to the home page', async () => {
     renderAt('/nonsense');
 
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: 'Exhibitions' })).toBeInTheDocument(),
+      expect(
+        screen.getByRole('heading', { name: /document your art exhibition properly/i }),
+      ).toBeInTheDocument(),
     );
   });
 });
