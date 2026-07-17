@@ -1,41 +1,38 @@
 import type {
   ExhibitionDetail,
+  ExhibitionFilters,
   ExhibitionMedia,
   ExhibitionSummary,
   ExhibitionWrite,
   MediaCategory,
 } from '../types/exhibition';
+import { API_BASE, apiFetch, parseJson } from './http';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 const RESOURCE = `${API_BASE}/api/exhibitions`;
 
-async function parseJson<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    let message = `Request failed: ${response.status}`;
-    try {
-      const body = await response.json();
-      if (body && typeof body.message === 'string') {
-        message = body.message;
-      }
-    } catch {
-      // ignore non-JSON error bodies
-    }
-    throw new Error(message);
-  }
-  return (await response.json()) as T;
+function buildQuery(filters?: ExhibitionFilters): string {
+  if (!filters) return '';
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.location) params.set('location', filters.location);
+  if (filters.focus) params.set('focus', filters.focus);
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
+  const query = params.toString();
+  return query ? `?${query}` : '';
 }
 
-export async function listExhibitions(): Promise<ExhibitionSummary[]> {
-  return parseJson<ExhibitionSummary[]>(await fetch(RESOURCE));
+export async function listExhibitions(filters?: ExhibitionFilters): Promise<ExhibitionSummary[]> {
+  return parseJson<ExhibitionSummary[]>(await apiFetch(`${RESOURCE}${buildQuery(filters)}`));
 }
 
 export async function getExhibition(id: string): Promise<ExhibitionDetail> {
-  return parseJson<ExhibitionDetail>(await fetch(`${RESOURCE}/${id}`));
+  return parseJson<ExhibitionDetail>(await apiFetch(`${RESOURCE}/${id}`));
 }
 
 export async function createExhibition(payload: ExhibitionWrite): Promise<ExhibitionDetail> {
   return parseJson<ExhibitionDetail>(
-    await fetch(RESOURCE, {
+    await apiFetch(RESOURCE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -48,7 +45,7 @@ export async function updateExhibition(
   payload: ExhibitionWrite,
 ): Promise<ExhibitionDetail> {
   return parseJson<ExhibitionDetail>(
-    await fetch(`${RESOURCE}/${id}`, {
+    await apiFetch(`${RESOURCE}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -57,7 +54,7 @@ export async function updateExhibition(
 }
 
 export async function deleteExhibition(id: string): Promise<void> {
-  const response = await fetch(`${RESOURCE}/${id}`, { method: 'DELETE' });
+  const response = await apiFetch(`${RESOURCE}/${id}`, { method: 'DELETE' });
   if (!response.ok) {
     throw new Error(`Request failed: ${response.status}`);
   }
@@ -77,7 +74,7 @@ export async function uploadMedia(
   }
 
   return parseJson<ExhibitionMedia>(
-    await fetch(`${RESOURCE}/${exhibitionId}/media`, {
+    await apiFetch(`${RESOURCE}/${exhibitionId}/media`, {
       method: 'POST',
       body: form,
     }),
@@ -85,7 +82,7 @@ export async function uploadMedia(
 }
 
 export async function deleteMedia(exhibitionId: string, mediaId: string): Promise<void> {
-  const response = await fetch(`${RESOURCE}/${exhibitionId}/media/${mediaId}`, {
+  const response = await apiFetch(`${RESOURCE}/${exhibitionId}/media/${mediaId}`, {
     method: 'DELETE',
   });
   if (!response.ok) {

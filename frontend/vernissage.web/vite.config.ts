@@ -26,7 +26,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://vernissage-api-dev-a7a4dqf2dacgfuhd.francecentral-01.azurewebsites.net',
+        // Override with VITE_DEV_PROXY_TARGET=http://localhost:5000 to develop
+        // against a locally running API (new endpoints may not be deployed yet).
+        target:
+          process.env.VITE_DEV_PROXY_TARGET ||
+          'https://vernissage-api-dev-a7a4dqf2dacgfuhd.francecentral-01.azurewebsites.net',
         changeOrigin: true,
       },
     },

@@ -1,17 +1,43 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Vernissage.Api.Models;
 
 namespace Vernissage.Api.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+// IdentityUserContext (not IdentityDbContext) on purpose: creator roles are a
+// flags column on the user, not ASP.NET Identity roles, so the AspNetRoles
+// tables are never needed.
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : IdentityUserContext<ApplicationUser, Guid>(options)
 {
     public DbSet<Exhibition> Exhibitions => Set<Exhibition>();
 
     public DbSet<ExhibitionMedia> ExhibitionMedia => Set<ExhibitionMedia>();
 
+    public DbSet<ExhibitionMetrics> ExhibitionMetrics => Set<ExhibitionMetrics>();
+
+    public DbSet<CostItem> CostItems => Set<CostItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(u => u.GalleryName).HasMaxLength(300);
+            entity.Property(u => u.BusinessLocation).HasMaxLength(500);
+            entity.Property(u => u.Focus).HasMaxLength(200);
+            entity.Property(u => u.FirstName).HasMaxLength(200);
+            entity.Property(u => u.LastName).HasMaxLength(200);
+            entity.Property(u => u.SocialMedia).HasMaxLength(500);
+            entity.Property(u => u.PlaceOfWork).HasMaxLength(300);
+            entity.Property(u => u.AreasOfInterest).HasMaxLength(500);
+            entity.Property(u => u.Location).HasMaxLength(500);
+            entity.Property(u => u.Medium).HasMaxLength(300);
+            entity.Property(u => u.ProfilePhoto).HasColumnType("varbinary(max)");
+            entity.Property(u => u.ProfilePhotoContentType).HasMaxLength(200);
+            entity.Ignore(u => u.DisplayName);
+        });
 
         modelBuilder.Entity<Exhibition>(entity =>
         {
@@ -22,6 +48,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasMaxLength(300);
 
             entity.Property(e => e.Location).HasMaxLength(500);
+            entity.Property(e => e.Focus).HasMaxLength(200);
             entity.Property(e => e.Curator).HasMaxLength(500);
             entity.Property(e => e.GalleryLocation).HasMaxLength(500);
 
@@ -37,10 +64,44 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.ReferencedLiterature);
             entity.Property(e => e.Aim);
 
+            entity.HasIndex(e => e.OwnerId);
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.HasMany(e => e.Media)
                 .WithOne(m => m.Exhibition)
                 .HasForeignKey(m => m.ExhibitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ExhibitionMetrics>(entity =>
+        {
+            entity.HasKey(m => m.ExhibitionId);
+
+            entity.Property(m => m.TotalRevenue).HasPrecision(18, 2);
+
+            entity.HasOne(m => m.Exhibition)
+                .WithOne()
+                .HasForeignKey<ExhibitionMetrics>(m => m.ExhibitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(m => m.CostItems)
+                .WithOne(c => c.Metrics)
+                .HasForeignKey(c => c.ExhibitionMetricsId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CostItem>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.Label)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(c => c.Amount).HasPrecision(18, 2);
         });
 
         modelBuilder.Entity<ExhibitionMedia>(entity =>

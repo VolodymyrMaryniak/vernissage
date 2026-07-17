@@ -41,6 +41,14 @@ In dev the frontend talks to the API via the Vite proxy (`vite.config.ts` proxie
 `/api` to the Azure dev API; `.env.development` leaves `VITE_API_BASE_URL` empty).
 `.env.production` points at the deployed API.
 
+New backend endpoints won't exist on the deployed dev API until this branch is
+merged, so to develop against a local API run it (`dotnet run` → `localhost:5000`)
+and point the proxy at it:
+
+```bash
+VITE_DEV_PROXY_TARGET=http://localhost:5000 npm run dev
+```
+
 ## CI
 
 `.github/workflows/ci.yml` runs on pushes to `develop` and PRs targeting `develop`:
@@ -61,6 +69,67 @@ Two independent Azure targets, each with its own workflow, both triggered on
 branch. Feature branches do **not** deploy. Full details, including how to add a
 new deploy branch and how the Azure OIDC trust works, are in
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+## Authentication & authorization
+
+ASP.NET Identity + JWT bearer, self-contained in the app's own SQL DB (no
+external IdP). `ApplicationUser : IdentityUser<Guid>` holds all profile fields as
+nullable columns; `AppDbContext` derives from `IdentityUserContext` (no
+AspNetRoles tables — creator roles are **not** authorization roles).
+
+- **Creator roles** are a `[Flags] CreatorRoles` column (`Gallery`/`Curator`/
+  `Artist`); one account can hold any combination. DTOs expose them as a string
+  array via `CreatorRolesMapper`.
+- **Endpoints:** `POST /api/auth/register`, `POST /api/auth/login` (both return
+  `{ token, user }`), `GET /api/auth/me`. Password policy is length-only (≥ 8).
+- **JWT signing key** comes from config `Jwt:SigningKey` and is **never
+  committed**: the dev key lives in `appsettings.Development.json`; production
+  reads the App Service setting `Jwt__SigningKey` (≥ 32 bytes). `TokenService`
+  throws on startup if it's missing.
+- **Ownership:** `Exhibition.OwnerId` is set from the JWT on create. Writes
+  (`PUT`/`DELETE`, media upload/delete, metrics) require the owner — non-owners
+  and ownerless legacy records get **403**, missing records **404** (see
+  `Infrastructure/OwnershipExtensions.cs`). All `GET`s stay anonymous, so the
+  public can browse/search read-only. Legacy `OwnerId == null` rows are
+  read-only until claimed via manual SQL.
+- **Frontend:** `AuthContext` stores the token in `localStorage`
+  (`vernissage.token`); `api/http.ts` injects the bearer header on every request;
+  `RequireAuth` guards create/edit/profile/analytics routes.
+
+## Private metrics & analytics
+
+- **`GET`/`PUT /api/exhibitions/{id}/metrics`** (owner-only): private outcome
+  metrics — visitors, satisfaction (1–10), artworks sold, revenue, and a
+  `CostItem` breakdown (framing, rent, brunch, …). Never included in public
+  exhibition DTOs. `GET` returns empty defaults before first save; `PUT` upserts
+  and fully replaces the cost items. `TotalCost` is computed, never stored.
+- **`GET /api/analytics/summary`** (owner-only) aggregates the caller's own
+  exhibitions' metrics with the same `q`/`location`/`focus`/`from`/`to` filters
+  as the public list. Gated by the `Features:AnalyticsEnabled` flag (default
+  true) — returns **404** when off. This is the "Pro, free during beta" feature.
+- **`GET /api/config`** (anonymous) exposes `{ analyticsEnabled }` so the
+  frontend can show/hide the analytics nav without a rebuild.
+
+## Configuration & secrets
+
+Neither the **SQL connection string** nor the **JWT signing key** is committed.
+
+- `ConnectionStrings:DefaultConnection` — local dev: `dotnet user-secrets` (from
+  `Vernissage.Api`) or the `ConnectionStrings__DefaultConnection` env var;
+  production: the App Service connection string / app setting
+  `ConnectionStrings__DefaultConnection`. `Program.cs` throws on startup if it's
+  missing. Tests are unaffected (they use the InMemory provider, not `Program.cs`).
+- `Jwt:SigningKey` — see the authentication section above.
+
+## Database migrations
+
+EF Core migrations are applied automatically at startup by
+`db.Database.Migrate()` in `Program.cs` (guarded by `IsRelational()`, so the
+InMemory provider used in tests is unaffected). There is no separate migration
+step in CI/CD — pushing to a deploy branch applies pending migrations on the
+next boot. Add migrations with `dotnet ef migrations add <Name>` from
+`Vernissage.Api`. Migrations to date are additive (new tables + nullable
+columns), safe over existing data.
 
 ## App version endpoint
 

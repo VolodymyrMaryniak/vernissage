@@ -1,6 +1,6 @@
 import type { BackendVersion } from '../types/version';
+import { API_BASE } from './http';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 const RESOURCE = `${API_BASE}/api/version`;
 
 export async function getBackendVersion(): Promise<BackendVersion> {
