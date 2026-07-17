@@ -110,6 +110,17 @@ AspNetRoles tables — creator roles are **not** authorization roles).
 - **`GET /api/config`** (anonymous) exposes `{ analyticsEnabled }` so the
   frontend can show/hide the analytics nav without a rebuild.
 
+## Configuration & secrets
+
+Neither the **SQL connection string** nor the **JWT signing key** is committed.
+
+- `ConnectionStrings:DefaultConnection` — local dev: `dotnet user-secrets` (from
+  `Vernissage.Api`) or the `ConnectionStrings__DefaultConnection` env var;
+  production: the App Service connection string / app setting
+  `ConnectionStrings__DefaultConnection`. `Program.cs` throws on startup if it's
+  missing. Tests are unaffected (they use the InMemory provider, not `Program.cs`).
+- `Jwt:SigningKey` — see the authentication section above.
+
 ## Database migrations
 
 EF Core migrations are applied automatically at startup by

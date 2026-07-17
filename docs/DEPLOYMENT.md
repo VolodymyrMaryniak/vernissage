@@ -37,6 +37,16 @@ Runs on Windows. Two jobs:
 
 ### Runtime configuration / secrets
 
+The API needs two runtime settings on `vernissage-api-dev`, neither committed to
+the repo:
+
+- **`ConnectionStrings__DefaultConnection`** — the SQL connection string (as an
+  App Service connection string or app setting). `Program.cs` throws on startup
+  if it's missing. **The password must be rotated if it was ever committed** —
+  the repo is public, so a leaked credential is compromised regardless of later
+  removal from `appsettings.json`.
+- **`Jwt__SigningKey`** — see below.
+
 The API needs a JWT signing key at runtime, supplied as the App Service
 application setting **`Jwt__SigningKey`** (≥ 32 bytes) on `vernissage-api-dev`
 (Azure Portal → the Web App → *Settings → Environment variables*). It is
