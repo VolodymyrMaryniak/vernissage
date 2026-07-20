@@ -13,6 +13,7 @@ backend/
   Vernissage.slnx        solution
 frontend/
   vernissage.web/        React 19 + TypeScript + Vite (react-router)
+infra/                   Bicep IaC for all Azure resources + deploy.ps1 (see infra/README.md)
 .github/workflows/       CI + two Azure deploy pipelines
 ```
 
@@ -63,12 +64,26 @@ Two independent Azure targets, each with its own workflow, both triggered on
 | Target | Workflow | Auth |
 | --- | --- | --- |
 | Backend API → Azure Web App `vernissage-api-dev` | `develop_vernissage-api-dev.yml` | OIDC (managed identity), deploy job scoped to GitHub environment `dev` |
-| Frontend → Azure Static Web Apps (`kind-island-0c4e5b50f`) | `azure-static-web-apps-kind-island-0c4e5b50f.yml` | Static API token (works from any branch) |
+| Frontend → Azure Static Web App `vernissage-web-dev` (`blue-water-0fe1e130f.7.azurestaticapps.net`) | `azure-static-web-apps-kind-island-0c4e5b50f.yml` | Static API token (works from any branch; `kind-island` in the filename/secret name is historical) |
 
 **To deploy:** merge/push to `develop` (deploys both), or push a `release/*`
 branch. Feature branches do **not** deploy. Full details, including how to add a
 new deploy branch and how the Azure OIDC trust works, are in
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+All Azure resources (RG `vernissage-dev-rg`, vernissage subscription) are Bicep
+in [`infra/`](infra/); `infra/deploy.ps1` re-creates everything and syncs the
+GitHub Actions secrets — see [`infra/README.md`](infra/README.md).
+
+## Logging & telemetry
+
+The API exports OpenTelemetry (requests, SQL dependencies, `ILogger` logs, live
+metrics) to Application Insights `vernissage-appinsights-dev` via
+`Azure.Monitor.OpenTelemetry.AspNetCore`. Registration in `Program.cs` is
+conditional on the `APPLICATIONINSIGHTS_CONNECTION_STRING` setting (set by the
+Bicep on the App Service) — absent locally and in tests, so telemetry is off
+there. Never enable the portal's codeless App Insights agent on the Web App; it
+conflicts with the in-process distro.
 
 ## Authentication & authorization
 
