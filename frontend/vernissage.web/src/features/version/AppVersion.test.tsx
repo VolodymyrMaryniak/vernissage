@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AppVersion from './AppVersion';
 
@@ -30,9 +30,14 @@ describe('AppVersion', () => {
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.getByText('Backend')).toBeInTheDocument();
 
-    // Backend info arrives from the /api/version fetch.
+    // Backend info arrives from the /api/version fetch. Scope the branch assertion
+    // to the Backend section: the frontend's own branch (__APP_BRANCH__) is also
+    // "develop" whenever CI builds on the develop branch, so an unscoped getByText
+    // would match two elements and throw.
     await waitFor(() => expect(screen.getByText('1.2.3')).toBeInTheDocument());
-    expect(screen.getByText('develop')).toBeInTheDocument();
+    const backendSection = screen.getByRole('heading', { name: 'Backend' }).closest('section');
+    expect(backendSection).not.toBeNull();
+    expect(within(backendSection as HTMLElement).getByText('develop')).toBeInTheDocument();
   });
 
   it('shows an unavailable message when the backend version cannot be loaded', async () => {
