@@ -24,6 +24,21 @@ auth) and both trigger on **push to `develop` or `release/*`**.
 Both deploy targets point at the shared **dev** environment, so a `release/*`
 push overwrites whatever `develop` last shipped there.
 
+## Infrastructure (Bicep)
+
+All Azure resources live in resource group **`vernissage-dev-rg`** in the
+**vernissage_subscription** and are defined as Bicep under [`infra/`](../infra/) —
+see [`infra/README.md`](../infra/README.md) for the resource list, the deploy
+script (`infra/deploy.ps1`), and the full teardown/re-create runbook. The script
+also provisions the runtime settings below and keeps the GitHub Actions secrets
+in sync, so a from-scratch re-create needs no manual portal work.
+
+Observability: the API exports OpenTelemetry (requests, SQL dependencies,
+`ILogger` logs) to **Application Insights `vernissage-appinsights-dev`** (Log
+Analytics workspace `vernissage-logs-dev`, capped at 0.1 GB/day). The exporter
+activates only where the `APPLICATIONINSIGHTS_CONNECTION_STRING` app setting is
+present — locally and in tests it is absent, so telemetry is off.
+
 ## Backend API — `develop_vernissage-api-dev.yml`
 
 Runs on Windows. Two jobs:
@@ -66,7 +81,7 @@ password). GitHub mints a short-lived token; Azure accepts it only if a matching
 **federated identity credential (FIC)** exists on the identity behind the
 `AZUREAPPSERVICE_CLIENTID_*` / `TENANTID_*` / `SUBSCRIPTIONID_*` secrets.
 
-That identity is a **user-assigned managed identity**: `vernissage-api-d-id-9452`
+That identity is a **user-assigned managed identity**: `vernissage-github-deploy-dev`
 (Azure Portal → *Managed Identities* → the identity → *Settings → Federated
 credentials*).
 
@@ -107,7 +122,7 @@ Which branches may use the environment is controlled in
 
 - **`AADSTS700213: No matching federated identity record found for ... subject
   'repo:.../<something>'`** — the token's subject has no matching FIC. Check the
-  FIC subject on `vernissage-api-d-id-9452`. With `environment: dev` on the job
+  FIC subject on `vernissage-github-deploy-dev`. With `environment: dev` on the job
   the subject must be `repo:VolodymyrMaryniak/vernissage:environment:dev`; if the
   job has no `environment:`, the subject is `...:ref:refs/heads/<branch>` instead.
 - **Deploy job pauses waiting for approval** — the `dev` environment has required
@@ -121,6 +136,11 @@ and uploads it to the Static Web App.
 
 - **Auth:** a static token secret (`AZURE_STATIC_WEB_APPS_API_TOKEN_*`), **not
   OIDC** — so it deploys from any branch without federated-credential setup.
+- **Target:** the Static Web App **`vernissage-web-dev`**, served at
+  `https://blue-water-0fe1e130f.7.azurestaticapps.net`. The `kind-island-0c4e5b50f`
+  nickname in the workflow filename and secret name is historical (a previous SWA
+  resource); renaming either would break nothing but isn't worth the churn — the
+  secret name is just an identifier and its **value** holds the current SWA's token.
 - **PR previews:** on pull requests it creates a temporary preview environment;
   `close_pull_request_job` tears it down when the PR closes.
 - Passes `env: VITE_APP_BRANCH: ${{ github.ref_name }}` so the version footer can

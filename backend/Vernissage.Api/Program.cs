@@ -1,4 +1,5 @@
 using System.Text;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,14 @@ using Vernissage.Api.Models;
 using Vernissage.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// OpenTelemetry (requests, SQL dependencies, ILogger logs) exported to Application
+// Insights. Only active where the connection string is configured (the App Service);
+// local dev and tests run without telemetry.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -55,7 +64,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("LocalFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://kind-island-0c4e5b50f.7.azurestaticapps.net")
+        policy.WithOrigins("http://localhost:5173", "https://blue-water-0fe1e130f.7.azurestaticapps.net")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
