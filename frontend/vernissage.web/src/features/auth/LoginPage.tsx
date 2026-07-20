@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from './useAuth';
 
 export default function LoginPage() {
@@ -8,6 +9,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? '/';
+
+  useDocumentMeta({
+    title: 'Sign in',
+    description: 'Sign in to your Vernissage workspace.',
+  });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,47 +35,53 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-page">
-      <header className="page-head">
-        <div>
-          <p className="eyebrow">Account</p>
-          <h2>Log in</h2>
-        </div>
-      </header>
+    <div className="container auth-shell">
+      <div className="auth-card">
+        <p className="eyebrow">Workspace</p>
+        <h1>Sign in</h1>
+        <p className="auth-sub">Pick up where you left off documenting your shows.</p>
 
-      <form className="card auth-form" onSubmit={handleSubmit}>
-        {error && <p className="banner banner-error">{error}</p>}
-
-        <label className="field">
-          <span className="field-label">Email</span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-
-        <label className="field">
-          <span className="field-label">Password</span>
-          <input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? 'Logging in…' : 'Log in'}
+        {/* Google OAuth is not wired up yet — shown but disabled. */}
+        <button type="button" className="btn-google" disabled title="Coming soon">
+          Continue with Google
         </button>
 
-        <p className="muted">
-          No account yet? <Link to="/register">Register</Link>
+        <div className="auth-divider">or</div>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {error && <p className="banner banner-error">{error}</p>}
+
+          <label className="field">
+            <span className="field-label">Email</span>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+
+          <label className="field">
+            <span className="field-label">Password</span>
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+
+          <button type="submit" className="cta btn-block" disabled={submitting}>
+            {submitting ? 'Logging in…' : 'Log in'}
+          </button>
+        </form>
+
+        <p className="auth-foot">
+          No workspace yet? <Link to="/register">Open one</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

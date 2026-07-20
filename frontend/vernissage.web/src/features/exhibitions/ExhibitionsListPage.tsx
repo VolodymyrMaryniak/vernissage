@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import type { ExhibitionFilters, ExhibitionSummary } from '../../types/exhibition';
 import { deleteExhibition, listExhibitions } from '../../api/exhibitionsApi';
+import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from '../auth/useAuth';
 import ExhibitionList from './ExhibitionList';
 import ExhibitionSearchBar from './ExhibitionSearchBar';
 
 export default function ExhibitionsListPage() {
-  const navigate = useNavigate();
   const { user } = useAuth();
+  useDocumentMeta({
+    title: 'Archive',
+    description:
+      'Browse the Vernissage archive — documented exhibitions with catalogues, installation views and citable pages, open to researchers and students.',
+  });
 
   const [summaries, setSummaries] = useState<ExhibitionSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,18 +49,35 @@ export default function ExhibitionsListPage() {
   };
 
   return (
-    <>
+    <div className="container">
+      <header className="archive-head">
+        <p className="eyebrow">The archive</p>
+        <h1 className="headline">
+          Every documented show, <em>indexed</em>.
+        </h1>
+        <p className="lede">
+          A working index of exhibitions — searchable by title, curator, city and date.
+          {user ? '' : ' Browsing is open to everyone.'}
+        </p>
+        {user && (
+          <div>
+            <Link className="cta" to="/exhibitions/new">
+              Document a show
+            </Link>
+          </div>
+        )}
+      </header>
+
       <ExhibitionSearchBar onSearch={setFilters} />
+
       <ExhibitionList
         exhibitions={summaries}
         loading={loading}
         error={error}
         filtered={hasFilters}
         currentUserId={user?.id ?? null}
-        onSelect={(id) => navigate(`/exhibitions/${id}`)}
-        onCreate={user ? () => navigate('/exhibitions/new') : null}
         onDelete={handleDelete}
       />
-    </>
+    </div>
   );
 }

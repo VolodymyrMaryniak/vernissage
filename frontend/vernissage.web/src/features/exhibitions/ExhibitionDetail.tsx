@@ -1,4 +1,6 @@
 import type { ExhibitionDetail } from '../../types/exhibition';
+import { MediaCategory } from '../../types/exhibition';
+import { mediaDownloadUrl } from '../../api/exhibitionsApi';
 import { FIELD_SECTIONS } from './fields';
 import MediaGallery from './MediaGallery';
 
@@ -33,90 +35,127 @@ function formatTimestamp(value: string): string {
   return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-// "Basics" fields shown as a metadata grid at the top rather than as prose.
-const META_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
+// The first image in the collection becomes the editorial cover.
+function coverUrl(exhibition: ExhibitionDetail): string | null {
+  const image =
+    exhibition.media.find((m) => m.category === MediaCategory.ArtworkImage) ??
+    exhibition.media.find((m) => m.contentType.startsWith('image/'));
+  return image ? mediaDownloadUrl(exhibition.id, image.id) : null;
+}
+
+// Aside metadata blocks.
+const ASIDE_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
   { key: 'curator', label: 'Curator' },
-  { key: 'location', label: 'Location' },
   { key: 'galleryLocation', label: 'Gallery / venue' },
+  { key: 'location', label: 'City' },
   { key: 'focus', label: 'Focus / topic' },
 ];
 
 export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Props) {
   const dates = formatDateRange(exhibition.startDate, exhibition.endDate);
-  const meta = META_FIELDS.map(({ key, label }) => ({
+  const cover = coverUrl(exhibition);
+
+  const metaStrip = [exhibition.galleryLocation, exhibition.location, dates].filter(
+    Boolean,
+  ) as string[];
+
+  const aside = ASIDE_FIELDS.map(({ key, label }) => ({
     label,
     value: exhibition[key] as string | null,
   })).filter((m) => m.value);
 
   return (
-    <article className="ex-view">
-      <button type="button" className="btn btn-ghost btn-back" onClick={onBack}>
-        ← All exhibitions
-      </button>
-
-      {/* Hero header --------------------------------------------------- */}
-      <header className="view-hero card">
-        <div className="view-hero-body">
+    <article>
+      {/* Editorial hero -------------------------------------------------- */}
+      <header className="exhibition-hero">
+        <div className="exhibition-cover">{cover && <img src={cover} alt={exhibition.name} />}</div>
+        <div className="container exhibition-headings">
+          <button type="button" className="link-quiet" onClick={onBack}>
+            ← Back to the archive
+          </button>
           <p className="eyebrow">Exhibition</p>
-          <h2>{exhibition.name}</h2>
-          {dates && (
-            <p className="view-dates">
-              <span className="dot" aria-hidden="true" />
-              {dates}
+          {metaStrip.length > 0 && (
+            <p className="mono-meta">
+              {metaStrip.map((part, i) => (
+                <span key={i} style={{ display: 'contents' }}>
+                  {i > 0 && <span className="sep">·</span>}
+                  <span>{part}</span>
+                </span>
+              ))}
             </p>
           )}
-
-          {meta.length > 0 && (
-            <dl className="meta-grid">
-              {meta.map((m) => (
-                <div className="meta-item" key={m.label}>
-                  <dt>{m.label}</dt>
-                  <dd>{m.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <h1 className="title">{exhibition.name}</h1>
+          {exhibition.curator && <p className="artist">{exhibition.curator}</p>}
         </div>
-
-        {onEdit && (
-          <div className="view-hero-actions">
-            <button type="button" className="btn btn-primary" onClick={onEdit}>
-              Edit
-            </button>
-          </div>
-        )}
       </header>
 
-      {/* Content sections ---------------------------------------------- */}
-      {FIELD_SECTIONS.map((section) => {
-        const populated = section.fields
-          .map((f) => ({ label: f.label, value: exhibition[f.key] as string | null }))
-          .filter((f) => f.value);
-        if (populated.length === 0) return null;
+      {/* Body + aside ---------------------------------------------------- */}
+      <div className="container exhibition-cols">
+        <div>
+          {FIELD_SECTIONS.map((section) => {
+            const populated = section.fields
+              .map((f) => ({ label: f.label, value: exhibition[f.key] as string | null }))
+              .filter((f) => f.value);
+            if (populated.length === 0) return null;
 
-        return (
-          <section className="card view-section" key={section.id}>
-            <h3 className="view-section-title">{section.title}</h3>
-            <dl className="detail-fields">
-              {populated.map((f) => (
-                <div className="detail-field" key={f.label}>
-                  <dt>{f.label}</dt>
-                  <dd>{f.value}</dd>
-                </div>
-              ))}
-            </dl>
+            return (
+              <section className="exhibition-body-section" key={section.id}>
+                <p className="eyebrow">{section.title}</p>
+                {populated.map((f) => (
+                  <div className="detail-field" key={f.label} style={{ marginBottom: '1.25rem' }}>
+                    <dt
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '10px',
+                        letterSpacing: '0.14em',
+                        textTransform: 'uppercase',
+                        color: 'var(--ink-mute)',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {f.label}
+                    </dt>
+                    <dd className="section-prose" style={{ margin: 0 }}>
+                      {f.value}
+                    </dd>
+                  </div>
+                ))}
+              </section>
+            );
+          })}
+
+          <section className="exhibition-body-section">
+            <p className="eyebrow">Installation views &amp; media</p>
+            <MediaGallery exhibitionId={exhibition.id} media={exhibition.media} />
           </section>
-        );
-      })}
 
-      <section className="card view-section">
-        <MediaGallery exhibitionId={exhibition.id} media={exhibition.media} />
-      </section>
+          <p className="mono-meta" style={{ marginTop: '32px' }}>
+            <span>Created {formatTimestamp(exhibition.createdAtUtc)}</span>
+            <span className="sep">·</span>
+            <span>Updated {formatTimestamp(exhibition.updatedAtUtc)}</span>
+          </p>
+        </div>
 
-      <p className="view-footnote">
-        Created {formatTimestamp(exhibition.createdAtUtc)} · Last updated{' '}
-        {formatTimestamp(exhibition.updatedAtUtc)}
-      </p>
+        <aside className="exhibition-aside">
+          {dates && (
+            <div className="aside-block">
+              <dt>Dates</dt>
+              <dd>{dates}</dd>
+            </div>
+          )}
+          {aside.map((m) => (
+            <div className="aside-block" key={m.label}>
+              <dt>{m.label}</dt>
+              <dd>{m.value}</dd>
+            </div>
+          ))}
+          {onEdit && (
+            <button type="button" className="cta" onClick={onEdit}>
+              Edit this entry
+            </button>
+          )}
+        </aside>
+      </div>
     </article>
   );
 }

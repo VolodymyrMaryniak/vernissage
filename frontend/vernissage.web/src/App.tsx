@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { getAppConfig } from './api/analyticsApi';
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import SiteHeader from './components/SiteHeader';
+import SiteFooter from './components/SiteFooter';
+import HomePage from './features/marketing/HomePage';
+import HowItWorksPage from './features/marketing/HowItWorksPage';
+import CuratorsPage from './features/marketing/CuratorsPage';
+import GalleriesPage from './features/marketing/GalleriesPage';
 import AnalyticsPage from './features/analytics/AnalyticsPage';
 import ProfilePage from './features/profile/ProfilePage';
 import ExhibitionsListPage from './features/exhibitions/ExhibitionsListPage';
@@ -10,94 +15,34 @@ import ExhibitionEditPage from './features/exhibitions/ExhibitionEditPage';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import RequireAuth from './features/auth/RequireAuth';
-import { useAuth } from './features/auth/useAuth';
 import AppVersion from './features/version/AppVersion';
 import './App.css';
 
-function HeaderNav({ analyticsEnabled }: { analyticsEnabled: boolean }) {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  if (!user) {
-    return (
-      <nav className="header-nav">
-        <Link className="btn btn-ghost btn-sm" to="/login">
-          Log in
-        </Link>
-        <Link className="btn btn-primary btn-sm" to="/register">
-          Register
-        </Link>
-      </nav>
-    );
-  }
-
-  return (
-    <nav className="header-nav">
-      {analyticsEnabled && (
-        <Link className="btn btn-ghost btn-sm" to="/analytics">
-          Analytics
-        </Link>
-      )}
-      <Link className="btn btn-ghost btn-sm" to="/profile">
-        Profile
-      </Link>
-      <span className="header-user" title={user.email}>
-        {user.displayName || user.email}
-      </span>
-      <button
-        type="button"
-        className="btn btn-ghost btn-sm"
-        onClick={() => {
-          logout();
-          navigate('/');
-        }}
-      >
-        Log out
-      </button>
-    </nav>
-  );
+/** Narrow centred wrapper for the functional workspace pages. */
+function Shell({ children }: { children: ReactNode }) {
+  return <div className="shell shell--narrow">{children}</div>;
 }
 
 function App() {
-  // Analytics is a flagged feature; default off until /api/config confirms it.
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    void getAppConfig()
-      .then((config) => {
-        if (!cancelled) setAnalyticsEnabled(config.analyticsEnabled);
-      })
-      .catch(() => {
-        // Config fetch failing just leaves analytics hidden.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="app-header-inner">
-          <Link className="brand" to="/">
-            <span className="brand-mark" aria-hidden="true">V</span>
-            <span className="brand-name">Vernissage</span>
-          </Link>
-          <span className="brand-tag">Exhibition records</span>
-          <HeaderNav analyticsEnabled={analyticsEnabled} />
-        </div>
-      </header>
+      <SiteHeader />
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<ExhibitionsListPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<HowItWorksPage />} />
+          <Route path="/curators" element={<CuratorsPage />} />
+          <Route path="/galleries" element={<GalleriesPage />} />
+          <Route path="/archive" element={<ExhibitionsListPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/exhibitions/new"
             element={
               <RequireAuth>
-                <ExhibitionCreatePage />
+                <Shell>
+                  <ExhibitionCreatePage />
+                </Shell>
               </RequireAuth>
             }
           />
@@ -106,7 +51,9 @@ function App() {
             path="/exhibitions/:id/edit"
             element={
               <RequireAuth>
-                <ExhibitionEditPage />
+                <Shell>
+                  <ExhibitionEditPage />
+                </Shell>
               </RequireAuth>
             }
           />
@@ -114,7 +61,9 @@ function App() {
             path="/profile"
             element={
               <RequireAuth>
-                <ProfilePage />
+                <Shell>
+                  <ProfilePage />
+                </Shell>
               </RequireAuth>
             }
           />
@@ -122,13 +71,16 @@ function App() {
             path="/analytics"
             element={
               <RequireAuth>
-                <AnalyticsPage />
+                <Shell>
+                  <AnalyticsPage />
+                </Shell>
               </RequireAuth>
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <SiteFooter />
       <AppVersion />
     </div>
   );

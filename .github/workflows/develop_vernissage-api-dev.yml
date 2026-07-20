@@ -57,6 +57,32 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C285DC947FC94D1EB4061C1F1D9B2ACE }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_98CCD31C9584421FB43CB7BFA60B43F7 }}
 
+      - name: Configure App Service settings (idempotent; skips if secrets unset)
+        shell: bash
+        env:
+          SQL_CONNECTION_STRING: ${{ secrets.SQL_CONNECTION_STRING }}
+          JWT_SIGNING_KEY: ${{ secrets.JWT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          settings=()
+          if [ -n "${SQL_CONNECTION_STRING:-}" ]; then
+            settings+=("ConnectionStrings__DefaultConnection=$SQL_CONNECTION_STRING")
+          fi
+          if [ -n "${JWT_SIGNING_KEY:-}" ]; then
+            settings+=("Jwt__SigningKey=$JWT_SIGNING_KEY")
+          fi
+          if [ "${#settings[@]}" -eq 0 ]; then
+            echo "No app-setting secrets provided; skipping app settings update."
+            exit 0
+          fi
+          rg=$(az webapp list --query "[?name=='vernissage-api-dev'].resourceGroup | [0]" -o tsv)
+          if [ -z "$rg" ]; then
+            echo "Could not resolve resource group for vernissage-api-dev" >&2
+            exit 1
+          fi
+          az webapp config appsettings set --name vernissage-api-dev --resource-group "$rg" --settings "${settings[@]}" --output none
+          echo "Applied ${#settings[@]} app setting(s) to vernissage-api-dev."
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3

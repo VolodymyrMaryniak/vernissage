@@ -3,10 +3,11 @@ import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CREATOR_ROLES } from '../../types/auth';
 import type { CreatorRole } from '../../types/auth';
+import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from './useAuth';
 
 const ROLE_HINTS: Record<CreatorRole, string> = {
-  Gallery: 'A gallery or exhibition space (B2B)',
+  Gallery: 'A gallery or exhibition space',
   Curator: 'An independent art curator',
   Artist: 'An artist showing their own work',
 };
@@ -14,6 +15,11 @@ const ROLE_HINTS: Record<CreatorRole, string> = {
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useDocumentMeta({
+    title: 'Open a workspace',
+    description: 'Create a Vernissage workspace to document and archive your exhibitions.',
+  });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,66 +52,70 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-page">
-      <header className="page-head">
-        <div>
-          <p className="eyebrow">Account</p>
-          <h2>Create an account</h2>
-          <p className="page-sub">Free during beta — including analytics.</p>
-        </div>
-      </header>
+    <div className="container auth-shell">
+      <div className="auth-card">
+        <p className="eyebrow">Workspace</p>
+        <h1>Open a workspace</h1>
+        <p className="auth-sub">Free during beta — including analytics.</p>
 
-      <form className="card auth-form" onSubmit={handleSubmit}>
-        {error && <p className="banner banner-error">{error}</p>}
-
-        <label className="field">
-          <span className="field-label">Email</span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-
-        <label className="field">
-          <span className="field-label">Password (min. 8 characters)</span>
-          <input
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-
-        <fieldset className="field">
-          <legend className="field-label">I am a… (choose all that apply)</legend>
-          {CREATOR_ROLES.map((role) => (
-            <label key={role} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={roles.includes(role)}
-                onChange={() => toggleRole(role)}
-              />
-              <span>
-                <strong>{role}</strong>
-                <span className="muted"> — {ROLE_HINTS[role]}</span>
-              </span>
-            </label>
-          ))}
-        </fieldset>
-
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? 'Creating account…' : 'Register'}
+        <button type="button" className="btn-google" disabled title="Coming soon">
+          Continue with Google
         </button>
 
-        <p className="muted">
-          Already have an account? <Link to="/login">Log in</Link>
+        <div className="auth-divider">or</div>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {error && <p className="banner banner-error">{error}</p>}
+
+          <label className="field">
+            <span className="field-label">Email</span>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+
+          <label className="field">
+            <span className="field-label">Password (min. 8 characters)</span>
+            <input
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+
+          <fieldset className="field">
+            <legend className="field-label">I am a… (choose all that apply)</legend>
+            {CREATOR_ROLES.map((role) => (
+              <label key={role} className="checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={roles.includes(role)}
+                  onChange={() => toggleRole(role)}
+                />
+                <span>
+                  <strong>{role}</strong>
+                  <span className="muted"> — {ROLE_HINTS[role]}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+
+          <button type="submit" className="cta btn-block" disabled={submitting}>
+            {submitting ? 'Creating account…' : 'Register'}
+          </button>
+        </form>
+
+        <p className="auth-foot">
+          Already have a workspace? <Link to="/login">Sign in</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
