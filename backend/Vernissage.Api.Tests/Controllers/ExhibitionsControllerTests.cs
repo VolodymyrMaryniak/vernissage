@@ -46,6 +46,14 @@ public class ExhibitionsControllerTests
         return (ExhibitionDetailDto)((CreatedAtActionResult)(await controller.Create(dto)).Result!).Value!;
     }
 
+    /// <summary>Unwraps a successful paged list response.</summary>
+    private static PagedResultDto<ExhibitionSummaryDto> Page(
+        ActionResult<PagedResultDto<ExhibitionSummaryDto>> result)
+    {
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        return Assert.IsType<PagedResultDto<ExhibitionSummaryDto>>(ok.Value);
+    }
+
     [Fact]
     public async Task Create_PersistsExhibition_AndSetsOwner()
     {
@@ -95,11 +103,12 @@ public class ExhibitionsControllerTests
         await CreateSample(OwnerController(db));
         var anonymous = new ExhibitionsController(db).WithAnonymousUser();
 
-        var result = await anonymous.GetAll(new ExhibitionQueryParams());
+        var page = Page(await anonymous.GetAll(new ExhibitionQueryParams()));
 
-        var ok = Assert.IsType<OkObjectResult>(result.Result);
-        var items = Assert.IsAssignableFrom<IEnumerable<ExhibitionSummaryDto>>(ok.Value);
-        Assert.Single(items);
+        Assert.Single(page.Items);
+        Assert.Equal(1, page.Total);
+        Assert.Equal(ExhibitionQueryParams.DefaultPage, page.Page);
+        Assert.Equal(ExhibitionQueryParams.DefaultPageSize, page.PageSize);
     }
 
     [Theory]
@@ -116,16 +125,15 @@ public class ExhibitionsControllerTests
         var controller = OwnerController(db);
         await CreateSample(controller);
 
-        var result = await controller.GetAll(new ExhibitionQueryParams
+        var page = Page(await controller.GetAll(new ExhibitionQueryParams
         {
             Q = q,
             Location = location,
             Focus = focus,
-        });
+        }));
 
-        var ok = Assert.IsType<OkObjectResult>(result.Result);
-        var items = Assert.IsAssignableFrom<IEnumerable<ExhibitionSummaryDto>>(ok.Value);
-        Assert.Equal(expected ? 1 : 0, items.Count());
+        Assert.Equal(expected ? 1 : 0, page.Items.Count);
+        Assert.Equal(expected ? 1 : 0, page.Total);
     }
 
     [Fact]
@@ -149,9 +157,76 @@ public class ExhibitionsControllerTests
             From = new DateOnly(2026, 7, 1),
         });
 
-        Assert.Single(((IEnumerable<ExhibitionSummaryDto>)((OkObjectResult)overlapping.Result!).Value!));
-        Assert.Empty(((IEnumerable<ExhibitionSummaryDto>)((OkObjectResult)before.Result!).Value!));
-        Assert.Empty(((IEnumerable<ExhibitionSummaryDto>)((OkObjectResult)after.Result!).Value!));
+        Assert.Single(Page(overlapping).Items);
+        Assert.Empty(Page(before).Items);
+        Assert.Empty(Page(after).Items);
+    }
+
+    [Fact]
+    public async Task GetAll_PagesResults_AndReportsUnpagedTotal()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+        for (var i = 0; i < 5; i++)
+        {
+            await CreateSample(controller, dto => dto.Name = $"Show {i}");
+        }
+
+        var first = Page(await controller.GetAll(new ExhibitionQueryParams { PageSize = 2 }));
+        var second = Page(await controller.GetAll(new ExhibitionQueryParams { Page = 2, PageSize = 2 }));
+        var last = Page(await controller.GetAll(new ExhibitionQueryParams { Page = 3, PageSize = 2 }));
+
+        Assert.Equal(5, first.Total);
+        Assert.Equal(5, second.Total);
+        Assert.Equal(2, first.Items.Count);
+        Assert.Equal(2, second.Items.Count);
+        Assert.Single(last.Items);
+        // Pages must not overlap.
+        Assert.Empty(first.Items.Select(i => i.Id).Intersect(second.Items.Select(i => i.Id)));
+    }
+
+    [Theory]
+    [InlineData(0, ExhibitionQueryParams.DefaultPageSize)]
+    [InlineData(-5, ExhibitionQueryParams.DefaultPageSize)]
+    [InlineData(500, ExhibitionQueryParams.MaxPageSize)]
+    [InlineData(10, 10)]
+    public async Task GetAll_ClampsPageSize(int requested, int expected)
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+        await CreateSample(controller);
+
+        var page = Page(await controller.GetAll(new ExhibitionQueryParams { PageSize = requested }));
+
+        Assert.Equal(expected, page.PageSize);
+    }
+
+    [Fact]
+    public async Task GetAll_WithMine_ReturnsOnlyCallersExhibitions()
+    {
+        await using var db = CreateInMemoryDbContext();
+        await CreateSample(OwnerController(db), dto => dto.Name = "Mine");
+        await CreateSample(
+            new ExhibitionsController(db).WithUser(OtherUserId),
+            dto => dto.Name = "Theirs");
+
+        var all = Page(await OwnerController(db).GetAll(new ExhibitionQueryParams()));
+        var mine = Page(await OwnerController(db).GetAll(new ExhibitionQueryParams { Mine = true }));
+
+        Assert.Equal(2, all.Total);
+        Assert.Equal(1, mine.Total);
+        Assert.Equal("Mine", Assert.Single(mine.Items).Name);
+    }
+
+    [Fact]
+    public async Task GetAll_WithMine_ReturnsUnauthorized_WhenAnonymous()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var anonymous = new ExhibitionsController(db).WithAnonymousUser();
+
+        var result = await anonymous.GetAll(new ExhibitionQueryParams { Mine = true });
+
+        Assert.IsType<UnauthorizedResult>(result.Result);
     }
 
     [Fact]

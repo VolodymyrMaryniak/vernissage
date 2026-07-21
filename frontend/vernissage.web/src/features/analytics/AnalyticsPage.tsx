@@ -3,12 +3,17 @@ import type { FormEvent } from 'react';
 import { getAnalyticsSummary } from '../../api/analyticsApi';
 import type { AnalyticsSummary } from '../../types/analytics';
 import type { ExhibitionFilters } from '../../types/exhibition';
+import { useAppConfig } from '../config/useAppConfig';
+import { useDocumentMeta } from '../../lib/useDocumentMeta';
 
 function formatMoney(value: number): string {
   return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default function AnalyticsPage() {
+  useDocumentMeta({ title: 'Analytics' });
+  const { analyticsEnabled, loading: configLoading } = useAppConfig();
+
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,9 +36,11 @@ export default function AnalyticsPage() {
   }, []);
 
   useEffect(() => {
+    // The API 404s when the feature is off; don't ask for data we can't have.
+    if (!analyticsEnabled) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load({});
-  }, [load]);
+  }, [load, analyticsEnabled]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -59,6 +66,21 @@ export default function AnalyticsPage() {
         },
       ]
     : [];
+
+  // Reachable by direct URL even with no nav link, so say why it's empty.
+  if (!configLoading && !analyticsEnabled) {
+    return (
+      <div className="analytics-page">
+        <header className="page-head">
+          <div>
+            <p className="eyebrow">Insights</p>
+            <h2>Analytics</h2>
+          </div>
+        </header>
+        <p className="muted">Analytics is currently unavailable.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="analytics-page">

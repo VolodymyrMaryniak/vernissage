@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import {
   deleteProfilePhoto,
   fetchProfilePhotoUrl,
@@ -11,6 +12,7 @@ import { CREATOR_ROLES } from '../../types/auth';
 import type { CreatorRole } from '../../types/auth';
 import type { Profile, ProfileWrite } from '../../types/profile';
 import { useAuth } from '../auth/useAuth';
+import { useAppConfig } from '../config/useAppConfig';
 
 function toWrite(profile: Profile): ProfileWrite {
   return {
@@ -28,6 +30,9 @@ function toWrite(profile: Profile): ProfileWrite {
     medium: profile.medium,
   };
 }
+
+// Mirrors ProfileController.MaxPhotoBytes.
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 interface TextFieldDef {
   key: keyof Omit<ProfileWrite, 'roles' | 'foundingYear'>;
@@ -52,6 +57,7 @@ const PERSON_FIELDS: TextFieldDef[] = [
 
 export default function ProfilePage() {
   const { refreshUser } = useAuth();
+  const { analyticsEnabled } = useAppConfig();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState<ProfileWrite | null>(null);
@@ -140,6 +146,16 @@ export default function ProfilePage() {
     event.target.value = '';
     if (!file) return;
     setError(null);
+    // Checked server-side too (ProfileController.MaxPhotoBytes); failing here
+    // avoids a pointless upload and gives a clearer message.
+    if (file.size > MAX_PHOTO_BYTES) {
+      setError('Photo must be 5 MB or smaller.');
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      setError('Profile photo must be an image.');
+      return;
+    }
     try {
       const updated = await uploadProfilePhoto(file);
       setProfile(updated);
@@ -168,6 +184,16 @@ export default function ProfilePage() {
           <h2>My profile</h2>
           <p className="page-sub">{profile.email}</p>
         </div>
+        <nav className="workspace-links">
+          <Link className="btn btn-ghost btn-sm" to="/archive">
+            My exhibitions
+          </Link>
+          {analyticsEnabled && (
+            <Link className="btn btn-ghost btn-sm" to="/analytics">
+              Analytics
+            </Link>
+          )}
+        </nav>
       </header>
 
       {error && <p className="banner banner-error">{error}</p>}

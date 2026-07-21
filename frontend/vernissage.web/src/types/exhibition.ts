@@ -44,6 +44,20 @@ export interface ExhibitionFilters {
   focus?: string;
   from?: string;
   to?: string;
+  /** Restrict to the signed-in user's own exhibitions (requires a token). */
+  mine?: boolean;
+  /** 1-based page number. */
+  page?: number;
+  pageSize?: number;
+}
+
+/** Mirrors Vernissage.Api.Dtos.PagedResultDto<T>. */
+export interface PagedResult<T> {
+  items: T[];
+  /** Total matches across all pages. */
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface ExhibitionSummary {

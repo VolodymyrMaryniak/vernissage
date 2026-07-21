@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/useAuth';
+import { useAppConfig } from '../features/config/useAppConfig';
 
 const NAV_LINKS = [
   { to: '/about', label: 'How it works' },
@@ -10,6 +11,7 @@ const NAV_LINKS = [
 
 export default function SiteHeader() {
   const { user, logout } = useAuth();
+  const { analyticsEnabled } = useAppConfig();
   const navigate = useNavigate();
 
   return (
@@ -36,6 +38,11 @@ export default function SiteHeader() {
           <div className="site-header-actions">
             {user ? (
               <>
+                {analyticsEnabled && (
+                  <Link className="link-quiet" to="/analytics">
+                    Analytics
+                  </Link>
+                )}
                 <button
                   type="button"
                   className="link-quiet"

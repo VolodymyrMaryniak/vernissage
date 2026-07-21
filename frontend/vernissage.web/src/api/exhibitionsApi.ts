@@ -5,6 +5,7 @@ import type {
   ExhibitionSummary,
   ExhibitionWrite,
   MediaCategory,
+  PagedResult,
 } from '../types/exhibition';
 import { API_BASE, apiFetch, parseJson } from './http';
 
@@ -18,12 +19,19 @@ function buildQuery(filters?: ExhibitionFilters): string {
   if (filters.focus) params.set('focus', filters.focus);
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
+  if (filters.mine) params.set('mine', 'true');
+  if (filters.page) params.set('page', String(filters.page));
+  if (filters.pageSize) params.set('pageSize', String(filters.pageSize));
   const query = params.toString();
   return query ? `?${query}` : '';
 }
 
-export async function listExhibitions(filters?: ExhibitionFilters): Promise<ExhibitionSummary[]> {
-  return parseJson<ExhibitionSummary[]>(await apiFetch(`${RESOURCE}${buildQuery(filters)}`));
+export async function listExhibitions(
+  filters?: ExhibitionFilters,
+): Promise<PagedResult<ExhibitionSummary>> {
+  return parseJson<PagedResult<ExhibitionSummary>>(
+    await apiFetch(`${RESOURCE}${buildQuery(filters)}`),
+  );
 }
 
 export async function getExhibition(id: string): Promise<ExhibitionDetail> {

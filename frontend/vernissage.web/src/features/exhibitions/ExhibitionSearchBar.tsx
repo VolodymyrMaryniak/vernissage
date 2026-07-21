@@ -4,15 +4,18 @@ import type { ExhibitionFilters } from '../../types/exhibition';
 
 interface Props {
   onSearch: (filters: ExhibitionFilters) => void;
+  /** Shows the "only my exhibitions" toggle; pass true only when signed in. */
+  showMine?: boolean;
 }
 
 /** Server-side search/filter controls for the public exhibitions list. */
-export default function ExhibitionSearchBar({ onSearch }: Props) {
+export default function ExhibitionSearchBar({ onSearch, showMine = false }: Props) {
   const [q, setQ] = useState('');
   const [location, setLocation] = useState('');
   const [focus, setFocus] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [mine, setMine] = useState(false);
 
   const buildFilters = (): ExhibitionFilters => ({
     q: q.trim() || undefined,
@@ -20,6 +23,7 @@ export default function ExhibitionSearchBar({ onSearch }: Props) {
     focus: focus.trim() || undefined,
     from: from || undefined,
     to: to || undefined,
+    mine: mine || undefined,
   });
 
   const handleSubmit = (event: FormEvent) => {
@@ -33,7 +37,15 @@ export default function ExhibitionSearchBar({ onSearch }: Props) {
     setFocus('');
     setFrom('');
     setTo('');
+    setMine(false);
     onSearch({});
+  };
+
+  // The toggle applies straight away rather than waiting for "Search" — it
+  // reads as a view switch, not another field to fill in.
+  const handleMineChange = (checked: boolean) => {
+    setMine(checked);
+    onSearch({ ...buildFilters(), mine: checked || undefined });
   };
 
   return (
@@ -77,6 +89,16 @@ export default function ExhibitionSearchBar({ onSearch }: Props) {
         </label>
       </div>
       <div className="search-bar-actions">
+        {showMine && (
+          <label className="search-toggle">
+            <input
+              type="checkbox"
+              checked={mine}
+              onChange={(e) => handleMineChange(e.target.checked)}
+            />
+            <span>Only my exhibitions</span>
+          </label>
+        )}
         <button type="submit" className="btn btn-primary btn-sm">
           Search
         </button>

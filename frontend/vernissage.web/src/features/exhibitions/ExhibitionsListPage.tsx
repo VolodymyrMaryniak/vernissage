@@ -7,6 +7,8 @@ import { useAuth } from '../auth/useAuth';
 import ExhibitionList from './ExhibitionList';
 import ExhibitionSearchBar from './ExhibitionSearchBar';
 
+const PAGE_SIZE = 20;
+
 export default function ExhibitionsListPage() {
   const { user } = useAuth();
   useDocumentMeta({
@@ -16,27 +18,38 @@ export default function ExhibitionsListPage() {
   });
 
   const [summaries, setSummaries] = useState<ExhibitionSummary[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ExhibitionFilters>({});
+  const [page, setPage] = useState(1);
   const hasFilters = Object.values(filters).some(Boolean);
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setSummaries(await listExhibitions(filters));
+      const result = await listExhibitions({ ...filters, page, pageSize: PAGE_SIZE });
+      setSummaries(result.items);
+      setTotal(result.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load exhibitions');
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, page]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+
+  // A new search always starts from the first page of its results.
+  const handleSearch = (next: ExhibitionFilters) => {
+    setFilters(next);
+    setPage(1);
+  };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this exhibition and all its media?')) return;
@@ -68,7 +81,7 @@ export default function ExhibitionsListPage() {
         )}
       </header>
 
-      <ExhibitionSearchBar onSearch={setFilters} />
+      <ExhibitionSearchBar onSearch={handleSearch} showMine={user !== null} />
 
       <ExhibitionList
         exhibitions={summaries}
@@ -76,8 +89,33 @@ export default function ExhibitionsListPage() {
         error={error}
         filtered={hasFilters}
         currentUserId={user?.id ?? null}
+        indexOffset={(page - 1) * PAGE_SIZE}
         onDelete={handleDelete}
       />
+
+      {!loading && !error && total > PAGE_SIZE && (
+        <nav className="pager" aria-label="Pagination">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            ← Previous
+          </button>
+          <span className="pager-status mono-meta">
+            Page {page} of {pageCount} · {total} entries
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            disabled={page >= pageCount}
+            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+          >
+            Next →
+          </button>
+        </nav>
+      )}
     </div>
   );
 }

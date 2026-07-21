@@ -1,7 +1,6 @@
 import type { ExhibitionDetail } from '../../types/exhibition';
-import { MediaCategory } from '../../types/exhibition';
-import { mediaDownloadUrl } from '../../api/exhibitionsApi';
 import { FIELD_SECTIONS } from './fields';
+import { coverUrl } from './cover';
 import MediaGallery from './MediaGallery';
 
 interface Props {
@@ -35,14 +34,6 @@ function formatTimestamp(value: string): string {
   return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-// The first image in the collection becomes the editorial cover.
-function coverUrl(exhibition: ExhibitionDetail): string | null {
-  const image =
-    exhibition.media.find((m) => m.category === MediaCategory.ArtworkImage) ??
-    exhibition.media.find((m) => m.contentType.startsWith('image/'));
-  return image ? mediaDownloadUrl(exhibition.id, image.id) : null;
-}
-
 // Aside metadata blocks.
 const ASIDE_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
   { key: 'curator', label: 'Curator' },
@@ -53,7 +44,7 @@ const ASIDE_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
 
 export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Props) {
   const dates = formatDateRange(exhibition.startDate, exhibition.endDate);
-  const cover = coverUrl(exhibition);
+  const cover = coverUrl(exhibition.id, exhibition.media);
 
   const metaStrip = [exhibition.galleryLocation, exhibition.location, dates].filter(
     Boolean,

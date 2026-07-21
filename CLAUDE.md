@@ -154,10 +154,12 @@ target in `Vernissage.Api.csproj` (branch resolves from `-p:SourceBranch` /
 `GITHUB_REF_NAME`, with a local `git` fallback) and read back via
 `[AssemblyMetadata]` in `Controllers/VersionController.cs`.
 
-The UI footer (`src/features/version/AppVersion.tsx`) shows the frontend's own
-build branch/time — injected by Vite `define` as `__APP_BRANCH__` /
-`__APP_BUILD_TIME__` (see `vite.config.ts`) — next to the backend info from the
-endpoint.
+The **unlisted `/version` page** (`src/features/version/VersionPage.tsx`) shows
+the frontend's own build branch/time — injected by Vite `define` as
+`__APP_BRANCH__` / `__APP_BUILD_TIME__` (see `vite.config.ts`) — next to the
+backend info from the endpoint. It is deliberately not linked from the header,
+footer or anywhere else, and sets `robots: noindex`; keep it that way. It used
+to render as a footer on every page.
 
 ## Gotchas / conventions
 

@@ -15,7 +15,7 @@ import ExhibitionEditPage from './features/exhibitions/ExhibitionEditPage';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import RequireAuth from './features/auth/RequireAuth';
-import AppVersion from './features/version/AppVersion';
+import VersionPage from './features/version/VersionPage';
 import './App.css';
 
 /** Narrow centred wrapper for the functional workspace pages. */
@@ -77,11 +77,19 @@ function App() {
               </RequireAuth>
             }
           />
+          {/* Unlisted on purpose: nothing links here, and the page sets noindex. */}
+          <Route
+            path="/version"
+            element={
+              <Shell>
+                <VersionPage />
+              </Shell>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <SiteFooter />
-      <AppVersion />
     </div>
   );
 }

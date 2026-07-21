@@ -5,35 +5,36 @@ const SETUP_STEPS = [
   {
     index: '01',
     title: 'Set up your gallery workspace',
-    body: 'Invite the team, assign roles — gallery, curator, artist — so everyone works from one shared account.',
+    body: 'Open a gallery account and describe the space — name, location, focus and founding year.',
   },
   {
     index: '02',
     title: 'Document each show in the program',
-    body: 'Every exhibition lands in a shared catalogue, with a shared Drive at the gallery level for masters, HDRs, and press.',
+    body: 'Every exhibition lands in one catalogue, with installation views, plans, audio and documents attached to the entry.',
   },
   {
     index: '03',
     title: 'Publish a program-wide archive',
-    body: 'Each show is citable under one gallery — a permanent, versioned record of everything you have shown.',
+    body: 'Each show gets a public page, searchable alongside everything else you have shown.',
   },
 ];
 
 const FEATURES = [
   {
     index: '01',
-    title: 'Roles & permissions',
-    body: 'Gallery, curator, and artist roles sit on one account, so the right people can catalogue, edit, and publish without sharing logins.',
+    title: 'Creator roles',
+    body: 'Gallery, curator and artist roles sit on one account in any combination, and the profile adapts to whichever apply.',
   },
   {
     index: '02',
     title: 'Shared Drive at the gallery level',
-    body: 'One Drive for the whole program, with a folder per show — installation views, works-masters, and press stay organised across every exhibition.',
+    body: 'Planned: one Drive for the whole program, with a folder per show, so installation views, works-masters and press stay organised across every exhibition.',
+    planned: true,
   },
   {
     index: '03',
-    title: 'A program-wide, versioned archive',
-    body: 'Every show is indexed under the gallery, versioned as it changes, and citable as a permanent record for researchers and press.',
+    title: 'A program-wide archive',
+    body: 'Every show is indexed under the gallery and open to researchers and press. Team accounts and per-revision citation are planned.',
   },
 ];
 
@@ -41,7 +42,7 @@ export default function GalleriesPage() {
   useDocumentMeta({
     title: 'For galleries',
     description:
-      'A team workspace with roles and a shared Drive, gathering every show your gallery makes into one program-wide, citable archive.',
+      'A workspace for galleries, gathering every show your gallery makes into one program-wide, public archive.',
   });
 
   return (
@@ -55,9 +56,9 @@ export default function GalleriesPage() {
             One archive for the whole <em>program</em>.
           </h1>
           <p className="lede">
-            A shared team workspace with roles for gallery, curators, and artists — every show
-            catalogued into one shared Drive and gathered into a program-wide archive that stays
-            citable long after the walls come down.
+            A workspace built around how galleries actually work — every show catalogued in full
+            and gathered into a program-wide archive that stays readable long after the walls
+            come down.
           </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
@@ -97,14 +98,17 @@ export default function GalleriesPage() {
           <div className="section-head">
             <p className="eyebrow">Built for a team</p>
             <h2 className="headline">
-              Shared roles, one Drive, a versioned <em>archive</em>.
+              One catalogue, one <em>archive</em>.
             </h2>
           </div>
           <div className="cell-grid cell-grid--3">
             {FEATURES.map((feature) => (
               <div className="cell" key={feature.index}>
                 <span className="cell-index">{feature.index}</span>
-                <h3>{feature.title}</h3>
+                <h3>
+                  {feature.title}
+                  {feature.planned && <span className="chip-mono chip-planned">Planned</span>}
+                </h3>
                 <p>{feature.body}</p>
               </div>
             ))}
@@ -121,8 +125,8 @@ export default function GalleriesPage() {
           </div>
           <div>
             <p className="prose">
-              Gather every show your gallery makes into one shared, versioned archive — catalogued
-              by the team, synced to a shared Drive, and kept open and citable for good.
+              Gather every show your gallery makes into one archive — catalogued in full, kept
+              open, and readable for good.
             </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">

@@ -16,13 +16,37 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
     private const long MaxMediaBytes = 50 * 1024 * 1024; // 50 MB
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ExhibitionSummaryDto>>> GetAll(
+    public async Task<ActionResult<PagedResultDto<ExhibitionSummaryDto>>> GetAll(
         [FromQuery] ExhibitionQueryParams query)
     {
-        var exhibitions = await dbContext.Exhibitions
+        var filtered = dbContext.Exhibitions
             .AsNoTracking()
-            .ApplyFilters(query)
+            .ApplyFilters(query);
+
+        // "Mine" is the one filter that needs the caller's identity; the rest of
+        // the endpoint stays anonymous so the public can browse.
+        if (query.Mine)
+        {
+            var callerId = User.GetUserId();
+            if (callerId is null)
+            {
+                return Unauthorized();
+            }
+
+            filtered = filtered.Where(e => e.OwnerId == callerId);
+        }
+
+        var total = await filtered.CountAsync();
+        var page = query.EffectivePage;
+        var pageSize = query.EffectivePageSize;
+
+        var exhibitions = await filtered
+            // Id breaks ties so paging stays deterministic for rows created in
+            // the same instant (e.g. seeded data).
             .OrderByDescending(e => e.CreatedAtUtc)
+            .ThenBy(e => e.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(e => new ExhibitionSummaryDto
             {
                 Id = e.Id,
@@ -39,7 +63,13 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(exhibitions);
+        return Ok(new PagedResultDto<ExhibitionSummaryDto>
+        {
+            Items = exhibitions,
+            Total = total,
+            Page = page,
+            PageSize = pageSize,
+        });
     }
 
     [HttpGet("{id:guid}")]

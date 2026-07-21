@@ -9,6 +9,8 @@ interface Props {
   filtered: boolean;
   /** Id of the logged-in user; null when anonymous. Gates delete buttons. */
   currentUserId: string | null;
+  /** Rows already shown on previous pages, so numbering continues. */
+  indexOffset?: number;
   onDelete: (id: string) => void;
 }
 
@@ -34,6 +36,7 @@ export default function ExhibitionList({
   error,
   filtered,
   currentUserId,
+  indexOffset = 0,
   onDelete,
 }: Props) {
   if (loading) {
@@ -62,7 +65,9 @@ export default function ExhibitionList({
         return (
           <div className="index-entry" key={e.id}>
             <Link className="index-row" to={`/exhibitions/${e.id}`}>
-              <span className="index-row-index">{String(i + 1).padStart(2, '0')}</span>
+              <span className="index-row-index">
+                {String(indexOffset + i + 1).padStart(2, '0')}
+              </span>
               <span className="index-thumb" aria-hidden="true">
                 {initials(e.name)}
               </span>

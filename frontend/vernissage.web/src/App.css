@@ -202,6 +202,12 @@
   margin-bottom: 22px;
 }
 
+.workspace-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* ---- Cards ----------------------------------------------------- */
 .card {
   background: var(--surface);
@@ -1063,22 +1069,15 @@
   color: var(--ink-mute);
 }
 
-/* ---- Version footer -------------------------------------------- */
-.app-version {
-  border-top: 1px solid var(--line);
-  background: var(--surface-2);
-}
-
-.app-version-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px 24px 28px;
+/* ---- Build info page ------------------------------------------- */
+.version-blocks {
   display: flex;
   flex-wrap: wrap;
-  gap: 32px;
+  gap: 24px;
 }
 
 .version-block {
+  flex: 1 1 240px;
   min-width: 200px;
 }
 
@@ -1236,8 +1235,34 @@ fieldset.field > legend {
 
 .search-bar-actions {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   margin-top: 0.75rem;
+}
+
+.search-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: auto;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+/* ---- Pagination ---- */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 2rem 0 3rem;
+}
+
+.pager-status {
+  color: var(--ink-mute);
 }
 
 /* ---- Metrics ---- */
@@ -1549,6 +1574,15 @@ fieldset.field > legend {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   padding: 5px 10px;
+}
+
+/* Marks a feature described on the marketing pages that isn't built yet. */
+.chip-planned {
+  margin-left: 8px;
+  font-size: 9px;
+  padding: 2px 6px;
+  color: var(--ink-mute);
+  vertical-align: middle;
 }
 
 .pill-mono {
