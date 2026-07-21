@@ -62,16 +62,20 @@ export default function HowItWorksPage() {
       <section className="section section--band">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Step 02</p>
+            <p className="eyebrow">
+              Step 02 <span className="chip-mono chip-planned">Planned</span>
+            </p>
             <h2 className="headline">
               Sync to <em>Drive</em>.
             </h2>
           </div>
           <p className="prose">
-            Opening an exhibition provisions a structured Google Drive folder at
+            Opening an exhibition will provision a structured Google Drive folder at
             <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code>, with subfolders waiting
             for each kind of material — masters, HDRs, press, and essays. Nothing has to be
             invented on the fly; the shape of the folder is decided before the first upload lands.
+            The integration isn&apos;t built yet: today files attach directly to the entry, filed
+            by category.
           </p>
           <p className="prose">
             This is where documentation usually falls apart, and where the pipeline holds it
@@ -86,16 +90,19 @@ export default function HowItWorksPage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Step 03</p>
+            <p className="eyebrow">
+              Step 03 <span className="chip-mono chip-planned">Planned</span>
+            </p>
             <h2 className="headline">
               Capture in <em>VR</em>.
             </h2>
           </div>
           <p className="prose">
-            A photograph records a wall; a walkthrough records a room. Attach a Matterport or 360°
-            capture and it embeds directly beside the catalogue, so the space itself becomes part
+            A photograph records a wall; a walkthrough records a room. A Matterport or 360°
+            capture will embed directly beside the catalogue, so the space itself becomes part
             of the record — the sightlines, the sequence, the scale a visitor actually moved
-            through.
+            through. For now the capture file can be attached to an entry, but playback here is
+            still to come.
           </p>
           <p className="prose">
             Long after the walls come down, the show does not have to close. The walkthrough sits
@@ -115,14 +122,14 @@ export default function HowItWorksPage() {
             </h2>
           </div>
           <p className="prose">
-            When the record is complete it publishes to a permanent Vernissage URL — versioned, so
-            a citation always resolves to the state of the page at the moment it was referenced.
-            Nothing overwrites the past; each revision is kept, and each is addressable.
+            When the record is complete it publishes to its own Vernissage URL, open to anyone
+            without an account. Per-revision citation — where a reference resolves to the page as
+            it stood when it was quoted — is planned, not yet built.
           </p>
           <p className="prose">
-            The published page is indexed and researcher-ready: a stable, quotable reference for a
-            show that would otherwise survive only in scattered photographs and memory. This is the
-            point of the whole pipeline — an exhibition that can be cited like any other source.
+            The published page is a stable, quotable reference for a show that would otherwise
+            survive only in scattered photographs and memory. This is the point of the whole
+            pipeline — an exhibition that can be cited like any other source.
           </p>
         </div>
       </section>

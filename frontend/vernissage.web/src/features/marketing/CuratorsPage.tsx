@@ -15,7 +15,7 @@ const STEPS = [
   {
     index: '03',
     title: 'Publish to the archive',
-    body: 'A permanent, versioned, citable page that stands as the record long after the walls come down.',
+    body: 'A public page that stands as the record long after the walls come down.',
   },
 ];
 

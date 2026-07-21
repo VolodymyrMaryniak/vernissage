@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { BackendVersion, FrontendVersion } from '../../types/version';
 import { getBackendVersion } from '../../api/versionApi';
+import { useDocumentMeta } from '../../lib/useDocumentMeta';
 
 const frontend: FrontendVersion = {
   branch: __APP_BRANCH__,
@@ -13,7 +14,14 @@ function formatTimestamp(value: string | null | undefined): string {
   return Number.isNaN(parsed.getTime()) ? 'unknown' : parsed.toLocaleString();
 }
 
-export default function AppVersion() {
+/**
+ * Build information for both halves of the app. Deliberately unlisted: no nav
+ * or footer links point here, and the page asks not to be indexed — it exists
+ * for whoever needs to check what is actually deployed.
+ */
+export default function VersionPage() {
+  useDocumentMeta({ title: 'Build info', noIndex: true });
+
   const [backend, setBackend] = useState<BackendVersion | null>(null);
   const [backendError, setBackendError] = useState<string | null>(null);
 
@@ -34,9 +42,17 @@ export default function AppVersion() {
   }, []);
 
   return (
-    <footer className="app-version">
-      <div className="app-version-inner">
-        <section className="version-block">
+    <div className="version-page">
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">Deployment</p>
+          <h2>Build info</h2>
+          <p className="page-sub">What is currently deployed on each side of the app.</p>
+        </div>
+      </header>
+
+      <div className="version-blocks">
+        <section className="card version-block">
           <h3 className="version-title">Frontend</h3>
           <dl className="version-list">
             <div className="version-row">
@@ -50,7 +66,7 @@ export default function AppVersion() {
           </dl>
         </section>
 
-        <section className="version-block">
+        <section className="card version-block">
           <h3 className="version-title">Backend</h3>
           {backendError ? (
             <p className="version-error">Unavailable ({backendError})</p>
@@ -74,6 +90,6 @@ export default function AppVersion() {
           )}
         </section>
       </div>
-    </footer>
+    </div>
   );
 }

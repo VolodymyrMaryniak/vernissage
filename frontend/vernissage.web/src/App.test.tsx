@@ -1,28 +1,18 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { AuthProvider } from './features/auth/AuthContext';
+import { pagedResponse, renderWithProviders, stubFetch } from './testUtils';
 
 function renderAt(path: string) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  );
+  return renderWithProviders(<App />, { route: path });
 }
 
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
-    // Some routes fetch on mount (archive list, version footer); stub with
-    // a benign empty response.
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })),
-    );
+    // Several routes fetch on mount (home, archive list, build info); answer
+    // the list endpoint with an empty page and everything else with {}.
+    stubFetch([{ url: '/api/exhibitions', body: pagedResponse([]) }]);
   });
 
   afterEach(() => {
@@ -60,6 +50,17 @@ describe('App', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument(),
     );
+  });
+
+  it('serves build info at the unlisted /version route', async () => {
+    renderAt('/version');
+
+    expect(screen.getByRole('heading', { name: 'Build info' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Frontend' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Backend' })).toBeInTheDocument();
+    // Deliberately unlisted: no link in the header or footer points at it.
+    expect(screen.queryByRole('link', { name: /build info|version/i })).not.toBeInTheDocument();
+    await waitFor(() => expect(document.querySelector('meta[name="robots"]')).not.toBeNull());
   });
 
   it('redirects unknown routes back to the home page', async () => {

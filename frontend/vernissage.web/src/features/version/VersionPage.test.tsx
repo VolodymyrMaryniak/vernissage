@@ -1,8 +1,8 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import AppVersion from './AppVersion';
+import VersionPage from './VersionPage';
 
-describe('AppVersion', () => {
+describe('VersionPage', () => {
   beforeEach(() => {
     vi.stubGlobal(
       'fetch',
@@ -24,7 +24,7 @@ describe('AppVersion', () => {
   });
 
   it('shows frontend build info and the backend version once loaded', async () => {
-    render(<AppVersion />);
+    render(<VersionPage />);
 
     // Frontend info is available synchronously from the injected build constants.
     expect(screen.getByText('Frontend')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('AppVersion', () => {
       vi.fn(async () => new Response('error', { status: 500 })),
     );
 
-    render(<AppVersion />);
+    render(<VersionPage />);
 
     await waitFor(() => expect(screen.getByText(/Unavailable/)).toBeInTheDocument());
   });

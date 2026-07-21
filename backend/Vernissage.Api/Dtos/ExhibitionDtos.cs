@@ -62,6 +62,46 @@ public class ExhibitionQueryParams
 
     /// <summary>Only exhibitions starting on/before this date.</summary>
     public DateOnly? To { get; set; }
+
+    /// <summary>
+    /// Restrict the list to the authenticated caller's own exhibitions.
+    /// Ignored by analytics, which is always owner-scoped.
+    /// </summary>
+    public bool Mine { get; set; }
+
+    /// <summary>1-based page number; values below 1 are treated as the first page.</summary>
+    public int Page { get; set; } = DefaultPage;
+
+    /// <summary>Requested page size, clamped to <see cref="MaxPageSize"/>.</summary>
+    public int PageSize { get; set; } = DefaultPageSize;
+
+    public const int DefaultPage = 1;
+    public const int DefaultPageSize = 20;
+    public const int MaxPageSize = 100;
+
+    /// <summary>Page number sanitised for use in a query (never below 1).</summary>
+    public int EffectivePage => Page < 1 ? DefaultPage : Page;
+
+    /// <summary>Page size sanitised for use in a query (1..<see cref="MaxPageSize"/>).</summary>
+    public int EffectivePageSize => PageSize switch
+    {
+        < 1 => DefaultPageSize,
+        > MaxPageSize => MaxPageSize,
+        _ => PageSize,
+    };
+}
+
+/// <summary>One page of results plus the total number of matches.</summary>
+public class PagedResultDto<T>
+{
+    public IReadOnlyList<T> Items { get; set; } = [];
+
+    /// <summary>Total matching rows across all pages.</summary>
+    public int Total { get; set; }
+
+    public int Page { get; set; }
+
+    public int PageSize { get; set; }
 }
 
 /// <summary>Summary view of an exhibition (used in list responses).</summary>

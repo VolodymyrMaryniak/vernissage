@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderWithProviders, stubFetch } from '../../testUtils';
 import AnalyticsPage from './AnalyticsPage';
 
 const SUMMARY = {
@@ -15,15 +16,7 @@ const SUMMARY = {
 describe('AnalyticsPage', () => {
   beforeEach(() => {
     localStorage.setItem('vernissage.token', 'jwt');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () =>
-        new Response(JSON.stringify(SUMMARY), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      ),
-    );
+    stubFetch([{ url: '/api/analytics/summary', body: SUMMARY }]);
   });
 
   afterEach(() => {
@@ -32,10 +25,27 @@ describe('AnalyticsPage', () => {
   });
 
   it('renders aggregated stat tiles', async () => {
-    render(<AnalyticsPage />);
+    renderWithProviders(<AnalyticsPage />);
 
     await waitFor(() => expect(screen.getByText('450')).toBeInTheDocument());
     expect(screen.getByText('7.5 / 10')).toBeInTheDocument();
     expect(screen.getByText('Total revenue')).toBeInTheDocument();
+  });
+
+  it('reports the feature as unavailable when the flag is off', async () => {
+    const fetchMock = stubFetch([
+      { url: '/api/analytics/summary', body: SUMMARY },
+      { url: '/api/config', body: { analyticsEnabled: false } },
+    ]);
+
+    renderWithProviders(<AnalyticsPage />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Analytics is currently unavailable.')).toBeInTheDocument(),
+    );
+    // The gated endpoint is never called.
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).includes('/api/analytics')),
+    ).toBe(false);
   });
 });

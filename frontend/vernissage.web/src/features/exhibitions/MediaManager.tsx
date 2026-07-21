@@ -16,6 +16,10 @@ const CATEGORY_OPTIONS = Object.values(MediaCategory).filter(
   (v): v is MediaCategory => typeof v === 'number',
 );
 
+// Mirrors ExhibitionsController.MaxMediaBytes — keep the two in step. Checking
+// here saves uploading megabytes only to be rejected by the API.
+const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
+
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -34,6 +38,10 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
   const handleUpload = async (e: FormEvent) => {
     e.preventDefault();
     if (!file) return;
+    if (file.size > MAX_MEDIA_BYTES) {
+      setError(`"${file.name}" is ${formatSize(file.size)} — the limit is 50 MB.`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -85,6 +93,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
           key={fileInputKey}
           type="file"
           className="media-field media-file"
+          data-testid="media-file-input"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
         <input

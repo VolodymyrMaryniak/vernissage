@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Vernissage.Api.Dtos;
 
 namespace Vernissage.Api.Controllers;
 
@@ -8,8 +9,8 @@ namespace Vernissage.Api.Controllers;
 public class ConfigController(IConfiguration configuration) : ControllerBase
 {
     [HttpGet]
-    public IActionResult Get() => Ok(new
+    public ActionResult<AppConfigDto> Get() => Ok(new AppConfigDto
     {
-        analyticsEnabled = configuration.GetValue("Features:AnalyticsEnabled", true),
+        AnalyticsEnabled = configuration.GetValue("Features:AnalyticsEnabled", true),
     });
 }

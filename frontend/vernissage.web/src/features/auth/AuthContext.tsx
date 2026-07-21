@@ -2,7 +2,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as authApi from '../../api/authApi';
-import { getToken, setToken } from '../../api/http';
+import { UNAUTHORIZED_EVENT, getToken, setToken } from '../../api/http';
 import type { CreatorRole, User } from '../../types/auth';
 
 export interface AuthContextValue {
@@ -41,6 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Any API call that hits a 401 with a stored token clears it and raises this
+  // event; drop the user so the route guards redirect to the sign-in page.
+  useEffect(() => {
+    const handle = () => setUser(null);
+    window.addEventListener(UNAUTHORIZED_EVENT, handle);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handle);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

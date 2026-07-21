@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
-import {
-  ARCHIVED_COUNT,
-  FEATURED_EXHIBITION,
-  RECENT_EXHIBITIONS,
-} from './mockExhibitions';
+import { listExhibitions } from '../../api/exhibitionsApi';
+import type { ExhibitionSummary } from '../../types/exhibition';
+
+// How many entries the "latest" strip pulls (1 featured + the rest listed).
+const LATEST_COUNT = 5;
 
 const PIPELINE = [
   {
@@ -14,18 +15,19 @@ const PIPELINE = [
   },
   {
     index: '02',
-    title: 'Sync to Drive',
-    body: 'Every show gets a Google Drive folder for masters, HDRs, and press.',
+    title: 'Attach the material',
+    body: 'Installation views, plans, audio and documents, filed by category on the entry.',
   },
   {
     index: '03',
-    title: 'Capture in VR',
-    body: 'Upload a Matterport / 360° walkthrough. Visitors step back inside.',
+    title: 'Sync to Drive',
+    body: 'Planned: a structured Google Drive folder per show for masters, HDRs and press.',
+    planned: true,
   },
   {
     index: '04',
-    title: 'Publish & cite',
-    body: 'Permanent Vernissage URL, versioned, indexed, researcher-ready.',
+    title: 'Publish & share',
+    body: 'A public entry anyone can read, search and link to.',
   },
 ];
 
@@ -36,12 +38,56 @@ const DRIVE_FILES = [
   { path: '/essays', files: '3 files', size: '12 MB' },
 ];
 
+function formatYear(entry: ExhibitionSummary): string | null {
+  const source = entry.startDate ?? entry.endDate;
+  if (!source) return null;
+  const parsed = new Date(source);
+  return Number.isNaN(parsed.getTime()) ? null : String(parsed.getFullYear());
+}
+
+function formatDateRange(entry: ExhibitionSummary): string | null {
+  const format = (value: string | null) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime())
+      ? value
+      : parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  const start = format(entry.startDate);
+  const end = format(entry.endDate);
+  if (start && end) return `${start} – ${end}`;
+  return start ?? end;
+}
+
 export default function HomePage() {
   useDocumentMeta({
     title: 'Document your art exhibition properly',
     description:
-      'Vernissage is a structured workspace and public archive for art exhibitions — catalogue works, sync installation photography to Google Drive, capture VR walkthroughs, and publish a citable page.',
+      'Vernissage is a structured workspace and public archive for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
   });
+
+  const [latest, setLatest] = useState<ExhibitionSummary[]>([]);
+  const [archivedCount, setArchivedCount] = useState<number | null>(null);
+
+  // The archive drives the counts and the entries shown below; a failure just
+  // leaves the marketing sections out rather than breaking the landing page.
+  useEffect(() => {
+    let cancelled = false;
+    void listExhibitions({ page: 1, pageSize: LATEST_COUNT })
+      .then((result) => {
+        if (cancelled) return;
+        setLatest(result.items);
+        setArchivedCount(result.total);
+      })
+      .catch(() => {
+        // Non-fatal: keep the hero and CTAs.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const [featured, ...rest] = latest;
 
   return (
     <>
@@ -52,16 +98,17 @@ export default function HomePage() {
           <div className="hero-meta">
             <span className="chip-mono">v.001</span>
             <span className="hero-meta-text">
-              Workspace for curators &amp; galleries · {ARCHIVED_COUNT} exhibitions archived
+              Workspace for curators &amp; galleries
+              {archivedCount !== null && ` · ${archivedCount} exhibitions archived`}
             </span>
           </div>
           <h1 className="display">
             Document your art exhibition <em>properly</em>.
           </h1>
           <p className="lede">
-            A structured workspace for cataloguing works, syncing installation photography to
-            Google Drive, capturing VR walkthroughs, and publishing a permanent, citable page
-            for every show you make.
+            A structured workspace for cataloguing works, filing installation photography, plans
+            and audio, and publishing an entry anyone can read — for every show you make. Drive
+            sync and VR walkthroughs are on the way.
           </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
@@ -90,7 +137,7 @@ export default function HomePage() {
             <Link className="role-card" to="/galleries">
               <span className="role-card-index">02</span>
               <h3>I&apos;m a gallery</h3>
-              <p>Team workspace, roles, shared Drive, program-wide archive.</p>
+              <p>A program-wide archive, with every show catalogued in one place.</p>
               <span className="role-card-arrow" aria-hidden="true">
                 →
               </span>
@@ -112,7 +159,10 @@ export default function HomePage() {
             {PIPELINE.map((step) => (
               <div className="cell" key={step.index}>
                 <span className="cell-index">{step.index}</span>
-                <h3>{step.title}</h3>
+                <h3>
+                  {step.title}
+                  {step.planned && <span className="chip-mono chip-planned">Planned</span>}
+                </h3>
                 <p>{step.body}</p>
               </div>
             ))}
@@ -128,16 +178,14 @@ export default function HomePage() {
             <article className="plaque integration">
               <div className="integration-head">
                 <span className="chip-mono">Google Drive</span>
-                <span className="status">
-                  <span className="dot-live" aria-hidden="true" />
-                  Connected
-                </span>
+                <span className="status">Planned</span>
               </div>
               <h3>Documenting a show means creating a home for its files.</h3>
               <p>
-                Opening an exhibition provisions a structured Drive folder at
-                <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code> with subfolders for
-                every kind of material — so masters, HDRs and press never scatter.
+                We plan to provision a structured Drive folder at
+                <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code> when you open an
+                exhibition, with subfolders for every kind of material — so masters, HDRs and
+                press never scatter. Until then, files attach directly to the entry.
               </p>
               <ul className="file-mono-list">
                 {DRIVE_FILES.map((f) => (
@@ -155,12 +203,13 @@ export default function HomePage() {
             <article className="plaque integration">
               <div className="integration-head">
                 <span className="chip-mono">VR walkthroughs</span>
-                <span className="status">Matterport · 360°</span>
+                <span className="status">Planned · Matterport · 360°</span>
               </div>
               <h3>The show doesn&apos;t have to close.</h3>
               <p>
-                Attach a Matterport or 360° capture and it embeds alongside the catalogue.
-                Long after the walls come down, visitors can step back inside the room.
+                A Matterport or 360° capture will embed alongside the catalogue, so long after
+                the walls come down visitors can step back inside the room. Today the capture
+                files can be attached to an entry, but not yet played back here.
               </p>
               <div className="vr-viewport">
                 <div className="wash-aurora" aria-hidden="true" />
@@ -178,65 +227,78 @@ export default function HomePage() {
       </section>
 
       {/* ---- On view in the archive ----------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <p className="eyebrow">On view in the archive</p>
-          <div className="featured">
-            <Link className="featured-frame" to="/archive" aria-label="Browse the archive">
-              <span className="featured-placeholder wash-aurora" aria-hidden="true">
-                <span className="mono-meta">Installation view</span>
-              </span>
-            </Link>
-            <div className="featured-body">
-              <p className="mono-meta">
-                <span>{FEATURED_EXHIBITION.gallery}</span>
-                <span className="sep">·</span>
-                <span>{FEATURED_EXHIBITION.city}</span>
-              </p>
-              <h2 className="title">{FEATURED_EXHIBITION.title}</h2>
-              <p className="artist">{FEATURED_EXHIBITION.artist}</p>
-              <p className="excerpt">{FEATURED_EXHIBITION.excerpt}</p>
-              <p className="mono-meta">
-                <span>{FEATURED_EXHIBITION.dateRange}</span>
-                <span className="sep">·</span>
-                <span>{FEATURED_EXHIBITION.works} works</span>
-                <span className="sep">·</span>
-                <span>{FEATURED_EXHIBITION.medium}</span>
-              </p>
+      {featured && (
+        <section className="section section--band">
+          <div className="container">
+            <p className="eyebrow">On view in the archive</p>
+            <div className="featured">
+              <Link
+                className="featured-frame"
+                to={`/exhibitions/${featured.id}`}
+                aria-label={`Open ${featured.name}`}
+              >
+                {/* Summaries carry no media, so the frame stays a placeholder. */}
+                <span className="featured-placeholder wash-aurora" aria-hidden="true">
+                  <span className="mono-meta">Installation view</span>
+                </span>
+              </Link>
+              <div className="featured-body">
+                {(featured.location ?? featured.focus) && (
+                  <p className="mono-meta">
+                    {[featured.location, featured.focus].filter(Boolean).map((part, i) => (
+                      <span key={i} style={{ display: 'contents' }}>
+                        {i > 0 && <span className="sep">·</span>}
+                        <span>{part}</span>
+                      </span>
+                    ))}
+                  </p>
+                )}
+                <h2 className="title">
+                  <Link to={`/exhibitions/${featured.id}`}>{featured.name}</Link>
+                </h2>
+                {featured.curator && <p className="artist">{featured.curator}</p>}
+                <p className="mono-meta">
+                  {formatDateRange(featured) && <span>{formatDateRange(featured)}</span>}
+                  {formatDateRange(featured) && featured.mediaCount > 0 && (
+                    <span className="sep">·</span>
+                  )}
+                  {featured.mediaCount > 0 && <span>{featured.mediaCount} files</span>}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ---- Recently documented -------------------------------- */}
-      <section className="section">
-        <div className="container">
-          <p className="eyebrow">Latest entries</p>
-          <h2 className="headline">Recently documented shows.</h2>
-          <div className="index-list">
-            {RECENT_EXHIBITIONS.map((e, i) => (
-              <div className="index-entry" key={e.slug}>
-                <Link className="index-row" to="/archive">
-                  <span className="index-row-index">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="index-thumb wash-vernissage" aria-hidden="true" />
-                  <span className="index-row-main">
-                    <span className="index-row-title">
-                      {e.title}
-                      <span className="artist"> — {e.artist}</span>
+      {rest.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <p className="eyebrow">Latest entries</p>
+            <h2 className="headline">Recently documented shows.</h2>
+            <div className="index-list">
+              {rest.map((e, i) => (
+                <div className="index-entry" key={e.id}>
+                  <Link className="index-row" to={`/exhibitions/${e.id}`}>
+                    <span className="index-row-index">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="index-thumb wash-vernissage" aria-hidden="true" />
+                    <span className="index-row-main">
+                      <span className="index-row-title">
+                        {e.name}
+                        {e.curator && <span className="artist"> — {e.curator}</span>}
+                      </span>
                     </span>
-                  </span>
-                  <span className="index-row-meta">
-                    <span>{e.gallery}</span>
-                    <span>
-                      {e.year} · {e.city}
+                    <span className="index-row-meta">
+                      {e.location && <span>{e.location}</span>}
+                      {formatYear(e) && <span>{formatYear(e)}</span>}
                     </span>
-                  </span>
-                </Link>
-              </div>
-            ))}
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ---- CTA band ------------------------------------------- */}
       <section className="cta-band">

@@ -38,10 +38,26 @@ export async function parseJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
+/**
+ * Fired when the API rejects the stored token, so the session can be dropped
+ * from anywhere without the API layer depending on React state.
+ */
+export const UNAUTHORIZED_EVENT = 'vernissage:unauthorized';
+
 /** fetch with the auth header attached (harmless on anonymous endpoints). */
-export function apiFetch(url: string, init: RequestInit = {}): Promise<Response> {
-  return fetch(url, {
+export async function apiFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const response = await fetch(url, {
     ...init,
     headers: { ...authHeaders(), ...(init.headers ?? {}) },
   });
+
+  // An expired or revoked token: clear it once, centrally, and let the auth
+  // context log out — otherwise every page surfaces its own confusing error.
+  // Only meaningful when we actually sent a token (a failed login has none).
+  if (response.status === 401 && getToken()) {
+    setToken(null);
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+  }
+
+  return response;
 }

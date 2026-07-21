@@ -1,7 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from '../auth/AuthContext';
+import { renderWithProviders, stubFetch } from '../../testUtils';
 import ProfilePage from './ProfilePage';
 
 const PROFILE = {
@@ -26,18 +25,7 @@ const PROFILE = {
 describe('ProfilePage', () => {
   beforeEach(() => {
     localStorage.setItem('vernissage.token', 'jwt');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => {
-        if (url.includes('/api/profile')) {
-          return new Response(JSON.stringify(PROFILE), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        }
-        return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }),
-    );
+    stubFetch([{ url: '/api/profile', body: PROFILE }]);
   });
 
   afterEach(() => {
@@ -46,18 +34,35 @@ describe('ProfilePage', () => {
   });
 
   it('renders artist-specific fields for an artist profile', async () => {
-    render(
-      <MemoryRouter>
-        <AuthProvider>
-          <ProfilePage />
-        </AuthProvider>
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ProfilePage />);
 
     await waitFor(() => expect(screen.getByText('My profile')).toBeInTheDocument());
     expect(screen.getByText('About you')).toBeInTheDocument();
     expect(screen.getByLabelText('Medium')).toHaveValue('Painting');
     // Gallery-only section should not render for a non-gallery account.
     expect(screen.queryByText('Year of founding')).not.toBeInTheDocument();
+  });
+
+  it('links to analytics when the feature is enabled', async () => {
+    renderWithProviders(<ProfilePage />);
+
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: 'Analytics' })).toHaveAttribute(
+        'href',
+        '/analytics',
+      ),
+    );
+  });
+
+  it('hides the analytics link when the feature is off', async () => {
+    stubFetch([
+      { url: '/api/profile', body: PROFILE },
+      { url: '/api/config', body: { analyticsEnabled: false } },
+    ]);
+
+    renderWithProviders(<ProfilePage />);
+
+    await waitFor(() => expect(screen.getByText('My profile')).toBeInTheDocument());
+    expect(screen.queryByRole('link', { name: 'Analytics' })).not.toBeInTheDocument();
   });
 });
