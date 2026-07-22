@@ -146,6 +146,28 @@ next boot. Add migrations with `dotnet ef migrations add <Name>` from
 `Vernissage.Api`. Migrations to date are additive (new tables + nullable
 columns), safe over existing data.
 
+## Dev data seeding
+
+`Data/DevDataSeeder.cs` populates a handful of realistic **Artist** accounts and
+their exhibition records (with private metrics + cost breakdowns) for local
+development and demos. It is **opt-in** and off by default — `Program.cs` runs it
+after migrations only when the `Seed:DevData` flag is truthy:
+
+```bash
+cd Vernissage.Api && dotnet run --Seed:DevData=true   # or env var Seed__DevData=true
+```
+
+It is **idempotent** (keyed on the seed accounts' emails, so re-running is a
+no-op) and additive, so it's safe to point at an existing dev DB. Every seeded
+account logs in with the password `DevDataSeeder.SeedPassword`. Covered by
+`Vernissage.Api.Tests/Data/DevDataSeederTests.cs`.
+
+The **deployed dev environment enables it**: `Seed__DevData=true` is set both in
+the Bicep app settings (`infra/resources.bicep`) and in the API deploy workflow's
+app-settings step (`develop_vernissage-api-dev.yml`), so a push to `develop`
+seeds the shared dev DB on the next boot (idempotent, so redeploys don't
+duplicate). This is dev-only — never set the flag on a production environment.
+
 ## App version endpoint
 
 `GET /api/version` returns `{ version, branch, buildTimeUtc }`. The branch and
