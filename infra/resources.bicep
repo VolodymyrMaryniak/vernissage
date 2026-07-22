@@ -162,6 +162,14 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
           value: string(httpLoggingRetentionDays)
         }
+        {
+          // Runs the opt-in DevDataSeeder on startup so the shared dev DB is
+          // populated with demo artists + exhibition records. Idempotent, so
+          // restarts/redeploys don't duplicate. Dev-only — never set this on a
+          // production environment.
+          name: 'Seed__DevData'
+          value: 'true'
+        }
       ]
     }
   }
