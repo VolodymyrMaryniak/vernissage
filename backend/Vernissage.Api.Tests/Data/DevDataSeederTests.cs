@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Vernissage.Api.Data;
 using Vernissage.Api.Models;
 using Vernissage.Api.Tests.TestHelpers;
+using Xunit;
 
 namespace Vernissage.Api.Tests.Data;
 
