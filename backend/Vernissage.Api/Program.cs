@@ -81,6 +81,15 @@ using (var scope = app.Services.CreateScope())
     {
         db.Database.Migrate();
     }
+
+    // Opt-in dev/demo seed of realistic artists + exhibition records. Off by
+    // default; enable locally with `--Seed:DevData=true` (or env var
+    // `Seed__DevData=true`). Idempotent, so re-running is safe.
+    if (builder.Configuration.GetValue<bool>("Seed:DevData"))
+    {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        await DevDataSeeder.SeedAsync(db, userManager);
+    }
 }
 
 if (app.Environment.IsDevelopment())
