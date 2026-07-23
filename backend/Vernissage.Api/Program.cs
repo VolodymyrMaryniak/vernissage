@@ -28,7 +28,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
         "connection string (production) or dotnet user-secrets (local dev).");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+        // The dev Azure SQL DB is serverless with auto-pause; a paused/cold DB
+        // surfaces transient connection errors while it resumes (~tens of
+        // seconds). Retry so startup migrations and requests wait for the
+        // resume instead of the app failing to start (HTTP 500.30).
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 8,
+            maxRetryDelay: TimeSpan.FromSeconds(15),
+            errorNumbersToAdd: null)));
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
@@ -77,9 +85,33 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     if (db.Database.IsRelational())
     {
-        db.Database.Migrate();
+        // The dev Azure SQL DB is serverless with auto-pause: at boot it may be
+        // paused or mid-resume and reject the first connections, which would
+        // otherwise crash startup (HTTP 500.30). Retry the initial migration so
+        // the app waits for the DB to wake instead of failing to start.
+        const int maxAttempts = 6;
+        var retryDelay = TimeSpan.FromSeconds(10);
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                db.Database.Migrate();
+                break;
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                startupLogger.LogWarning(
+                    ex,
+                    "Database not ready on startup (attempt {Attempt}/{MaxAttempts}); retrying in {Delay}s.",
+                    attempt,
+                    maxAttempts,
+                    retryDelay.TotalSeconds);
+                Thread.Sleep(retryDelay);
+            }
+        }
     }
 
     // Opt-in dev/demo seed of realistic artists + exhibition records. Off by
@@ -87,8 +119,16 @@ using (var scope = app.Services.CreateScope())
     // `Seed__DevData=true`). Idempotent, so re-running is safe.
     if (builder.Configuration.GetValue<bool>("Seed:DevData"))
     {
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        await DevDataSeeder.SeedAsync(db, userManager);
+        try
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            await DevDataSeeder.SeedAsync(db, userManager);
+        }
+        catch (Exception ex)
+        {
+            // Dev/demo seeding must never take down the API. Log and continue.
+            startupLogger.LogError(ex, "Dev data seeding failed; continuing startup without seed data.");
+        }
     }
 }
 
