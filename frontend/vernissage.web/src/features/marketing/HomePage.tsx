@@ -108,10 +108,6 @@ export default function HomePage() {
           <p className="hero-slogan">
             A show is alive for six weeks. <em>Its record is forever.</em>
           </p>
-          <p className="lede">
-            A structured workspace to catalogue works, file photography and audio, and publish an
-            entry anyone can read.
-          </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show

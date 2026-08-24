@@ -1,37 +1,49 @@
-import { useId } from 'react';
-
 interface Props {
   className?: string;
-  /** Pixel height; width scales with the mark's aspect ratio. */
+  /** Pixel height; the mark is square. */
   size?: number;
 }
 
 /**
- * The Vernissage mark — the same folded "V" glyph used as the favicon, drawn
- * with a bright violet→magenta gradient so the header, footer and browser tab
- * share one identity. Decorative: labelled by the adjacent wordmark text.
+ * The Vernissage mark — a document with a folded corner and lines of text,
+ * standing for the act of documenting a show into a lasting record. Drawn in a
+ * single colour via `currentColor` so it inherits the green brand wherever it
+ * sits (header, footer). Decorative: labelled by the adjacent wordmark text.
  */
 export default function Logo({ className, size = 28 }: Props) {
-  const gradientId = useId();
   return (
     <svg
       className={className}
-      viewBox="0 0 48 46"
+      viewBox="0 0 32 32"
       height={size}
-      width={(size * 48) / 46}
+      width={size}
+      fill="none"
       aria-hidden="true"
       focusable="false"
     >
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="55%" stopColor="#a21ff0" />
-          <stop offset="100%" stopColor="#e0399a" />
-        </linearGradient>
-      </defs>
+      {/* Page body with a folded top-right corner */}
       <path
-        fill={`url(#${gradientId})`}
-        d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"
+        d="M10 3H19L24.5 8.5V26.5A1.5 1.5 0 0 1 23 28H10A1.5 1.5 0 0 1 8.5 26.5V4.5A1.5 1.5 0 0 1 10 3Z"
+        fill="currentColor"
+        fillOpacity="0.16"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      {/* The fold crease */}
+      <path
+        d="M19 3V7A1.5 1.5 0 0 0 20.5 8.5H24.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Lines of text on the record */}
+      <path
+        d="M12 13.5H20.5M12 17.5H20.5M12 21.5H17"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
       />
     </svg>
   );
