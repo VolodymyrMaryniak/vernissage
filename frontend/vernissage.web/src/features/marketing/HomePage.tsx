@@ -105,10 +105,12 @@ export default function HomePage() {
           <h1 className="display">
             Document your art exhibition <em>properly</em>.
           </h1>
+          <p className="hero-slogan">
+            A show is alive for six weeks. <em>Its record is forever.</em>
+          </p>
           <p className="lede">
-            A structured workspace for cataloguing works, filing installation photography, plans
-            and audio, and publishing an entry anyone can read — for every show you make. Drive
-            sync and VR walkthroughs are on the way.
+            A structured workspace to catalogue works, file photography and audio, and publish an
+            entry anyone can read.
           </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
@@ -180,12 +182,10 @@ export default function HomePage() {
                 <span className="chip-mono">Google Drive</span>
                 <span className="status">Planned</span>
               </div>
-              <h3>Documenting a show means creating a home for its files.</h3>
+              <h3>Every show gets a home for its files.</h3>
               <p>
-                We plan to provision a structured Drive folder at
-                <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code> when you open an
-                exhibition, with subfolders for every kind of material — so masters, HDRs and
-                press never scatter. Until then, files attach directly to the entry.
+                A structured Drive folder per exhibition, so masters, HDRs and press never
+                scatter. Until then, files attach directly to the entry.
               </p>
               <ul className="file-mono-list">
                 {DRIVE_FILES.map((f) => (
@@ -207,9 +207,8 @@ export default function HomePage() {
               </div>
               <h3>The show doesn&apos;t have to close.</h3>
               <p>
-                A Matterport or 360° capture will embed alongside the catalogue, so long after
-                the walls come down visitors can step back inside the room. Today the capture
-                files can be attached to an entry, but not yet played back here.
+                A Matterport or 360° capture embeds alongside the catalogue — step back inside
+                the room long after the walls come down.
               </p>
               <div className="vr-viewport">
                 <div className="wash-aurora" aria-hidden="true" />
@@ -309,8 +308,7 @@ export default function HomePage() {
           </div>
           <div>
             <p className="prose">
-              Vernissage exists to record exhibitions properly and keep that record open. Start
-              documenting your own, or read what others have already catalogued.
+              Start documenting your own, or read what others have catalogued.
             </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">

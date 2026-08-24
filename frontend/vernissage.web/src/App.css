@@ -4,52 +4,60 @@
    ================================================================ */
 
 .app {
-  /* ---- Vernissage palette (paper base, near-black ink, ambient washes) ---- */
-  --paper: oklch(0.995 0.003 90);
-  --ink-base: oklch(0.16 0.01 270);
-  --blossom: oklch(0.86 0.09 5);
-  --blossom-soft: oklch(0.94 0.045 5);
-  --sage: oklch(0.88 0.07 150);
-  --sage-soft: oklch(0.95 0.035 150);
+  /* ---- Vernissage palette (paper base, violet brand, vivid washes) -------- */
+  --paper: oklch(0.995 0.004 320);
+  --ink-base: oklch(0.18 0.03 300);
+  /* Vivid accent hues — the washes and highlights across the app */
+  --blossom: oklch(0.72 0.19 350);
+  --blossom-soft: oklch(0.93 0.07 350);
+  --sage: oklch(0.78 0.15 165);
+  --sage-soft: oklch(0.93 0.06 165);
+  --sun: oklch(0.84 0.16 80);
+  --sun-soft: oklch(0.94 0.07 80);
+  --sky: oklch(0.72 0.16 245);
+  --sky-soft: oklch(0.93 0.06 245);
 
   /* Semantic tokens (names preserved so existing components restyle in place) */
   --bg: var(--paper);
   --surface: oklch(1 0 0);
-  --surface-2: oklch(0.985 0.004 90);
-  --card: oklch(0.985 0.006 60);
+  --surface-2: oklch(0.98 0.008 320);
+  --card: oklch(0.975 0.012 320);
   --ink: var(--ink-base);
-  --ink-soft: oklch(0.30 0.012 270);
-  --ink-mute: oklch(0.46 0.015 270);
-  --line: oklch(0.91 0.01 80);
-  --line-strong: oklch(0.85 0.012 80);
-  /* "brand" now maps to ink — emphasis is solid, colour lives only in washes */
-  --brand: var(--ink-base);
-  --brand-strong: oklch(0.1 0.01 270);
-  --brand-soft: var(--blossom-soft);
-  --danger: oklch(0.52 0.19 25);
-  --danger-soft: oklch(0.95 0.03 25);
-  --ok: oklch(0.6 0.13 150);
+  --ink-soft: oklch(0.34 0.03 300);
+  --ink-mute: oklch(0.5 0.03 300);
+  --line: oklch(0.9 0.015 320);
+  --line-strong: oklch(0.83 0.02 320);
+  /* "brand" is a vivid violet — emphasis, links and calls to action wear it */
+  --brand: oklch(0.56 0.24 300);
+  --brand-strong: oklch(0.47 0.26 300);
+  --brand-soft: oklch(0.94 0.06 300);
+  --danger: oklch(0.55 0.2 25);
+  --danger-soft: oklch(0.95 0.04 25);
+  --ok: oklch(0.6 0.15 165);
 
-  --radius: 0.25rem;
-  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-sm: 0.375rem;
   --radius-pill: 999px;
 
-  /* Hairline "plate" shadows — only featured cards use the deep one */
-  --shadow-sm: 0 1px 0 var(--line);
-  --shadow-md: 0 1px 0 var(--line);
-  --shadow-lg: 0 1px 0 var(--line), 0 30px 60px -40px oklch(0.16 0.01 270 / 0.18);
+  /* Soft plate shadows, tinted toward the brand so cards feel lit, not grey */
+  --shadow-sm: 0 1px 2px oklch(0.5 0.2 300 / 0.06);
+  --shadow-md: 0 4px 16px -6px oklch(0.5 0.2 300 / 0.14);
+  --shadow-lg: 0 2px 8px -4px oklch(0.5 0.2 300 / 0.12),
+    0 30px 60px -40px oklch(0.5 0.2 300 / 0.35);
 
   --gradient-vernissage: linear-gradient(
     120deg,
     var(--blossom-soft) 0%,
-    oklch(0.97 0.025 60) 40%,
+    var(--sky-soft) 45%,
     var(--sage-soft) 100%
   );
+  --gradient-brand: linear-gradient(135deg, var(--brand) 0%, var(--blossom) 100%);
   --gradient-hairline: linear-gradient(
     90deg,
     transparent,
-    var(--blossom) 35%,
-    var(--sage) 65%,
+    var(--blossom) 25%,
+    var(--brand) 50%,
+    var(--sage) 75%,
     transparent
   );
 
@@ -182,8 +190,8 @@
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-size: 11px;
-  font-weight: 500;
-  color: var(--ink-mute);
+  font-weight: 600;
+  color: var(--brand);
   margin: 0;
 }
 
@@ -260,14 +268,16 @@
 }
 
 .btn-primary {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--gradient-brand);
+  color: #fff;
   border-radius: var(--radius-pill);
   padding-inline: 18px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--ink) 85%, transparent);
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-ghost {
@@ -1385,7 +1395,12 @@ fieldset.field > legend {
 }
 
 .section--band {
-  background: var(--card);
+  background: linear-gradient(
+    120deg,
+    var(--blossom-soft) 0%,
+    var(--sky-soft) 55%,
+    var(--sage-soft) 100%
+  );
   border-top: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
   border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
 }
@@ -1535,20 +1550,26 @@ fieldset.field > legend {
   justify-content: center;
   gap: 8px;
   border-radius: var(--radius-pill);
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
+  background: var(--gradient-brand);
+  color: #fff;
+  border: 1px solid transparent;
   padding: 12px 24px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  box-shadow: var(--shadow-md);
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
   white-space: nowrap;
 }
 
 .cta:hover {
-  background: color-mix(in oklab, var(--ink) 85%, transparent);
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.cta:active {
+  transform: translateY(1px);
 }
 
 .cta--secondary {
@@ -1659,10 +1680,21 @@ fieldset.field > legend {
 
 .wordmark {
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 9px;
   text-decoration: none;
   color: var(--ink);
+}
+
+.wordmark-logo {
+  flex: none;
+  display: block;
+  filter: drop-shadow(0 2px 5px oklch(0.56 0.24 300 / 0.28));
+  transition: transform 0.2s ease;
+}
+
+.wordmark:hover .wordmark-logo {
+  transform: rotate(-6deg) scale(1.05);
 }
 
 .wordmark-name {
@@ -1673,11 +1705,13 @@ fieldset.field > legend {
 }
 
 .wordmark-sup {
+  align-self: flex-start;
+  margin-top: 2px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--ink-mute);
-  transform: translateY(-0.6em);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand);
 }
 
 .site-nav {
@@ -1920,6 +1954,7 @@ fieldset.field > legend {
   border-top: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   font-family: var(--font-mono);
@@ -1927,6 +1962,12 @@ fieldset.field > legend {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-mute);
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 @media (min-width: 720px) {
@@ -1973,6 +2014,25 @@ fieldset.field > legend {
   font-size: clamp(3rem, 9vw, 6.5rem);
 }
 
+/* Brand slogan — a bright serif line sitting just under the headline */
+.hero-slogan {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  line-height: 1.2;
+  color: var(--ink-soft);
+  margin: -8px 0 0;
+  max-width: 40ch;
+  text-wrap: balance;
+}
+
+.hero-slogan em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2002,7 +2062,9 @@ fieldset.field > legend {
 }
 
 .role-card:hover {
-  border-color: var(--ink);
+  border-color: var(--brand);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .role-card-index {

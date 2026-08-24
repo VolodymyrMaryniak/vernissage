@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/useAuth';
 import { useAppConfig } from '../features/config/useAppConfig';
+import Logo from './Logo';
 
 const NAV_LINKS = [
   { to: '/about', label: 'How it works' },
@@ -33,8 +34,9 @@ export default function SiteHeader() {
       <header className="site-header">
         <div className="container site-header-inner">
           <Link className="wordmark" to="/">
+            <Logo className="wordmark-logo" size={30} />
             <span className="wordmark-name">Vernissage</span>
-            <span className="wordmark-sup">·archive</span>
+            <span className="wordmark-sup">archive</span>
           </Link>
 
           <button

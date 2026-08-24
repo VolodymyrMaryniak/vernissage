@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 export default function SiteFooter() {
   const year = new Date().getFullYear();
@@ -45,15 +46,16 @@ export default function SiteFooter() {
           <div className="footer-col">
             <h4>About the project</h4>
             <p>
-              Vernissage is a non-commercial archive. It exists to record exhibitions
-              properly — catalogued, versioned and citable — and to keep that record open
-              to researchers, students and the people who made the work.
+              A non-commercial archive that records exhibitions properly — catalogued,
+              versioned and citable — and keeps that record open.
             </p>
           </div>
         </div>
 
         <div className="footer-bar">
-          <span>© {year} Vernissage Archive</span>
+          <span className="footer-brand">
+            <Logo size={22} />© {year} Vernissage Archive
+          </span>
           <span>v.001 — opened summer 2026</span>
         </div>
       </div>
