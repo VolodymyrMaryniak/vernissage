@@ -73,6 +73,16 @@
   box-sizing: border-box;
 }
 
+/* Consistent keyboard-focus ring for links and buttons that don't define
+   their own. Only shows for keyboard users (:focus-visible), never on click.
+   Inputs are excluded — they keep their existing box-shadow focus styles. */
+.app a:focus-visible,
+.app button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* ---- Header ---------------------------------------------------- */
 .app-header {
   position: sticky;
@@ -1640,6 +1650,7 @@ fieldset.field > legend {
 }
 
 .site-header-inner {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1694,6 +1705,110 @@ fieldset.field > legend {
   gap: 12px;
 }
 
+/* Below the nav breakpoint, the nav + actions collapse into a dropdown panel
+   behind the toggle. These rules are scoped to max-width so they never leak
+   onto desktop, where the wrapper is `display: contents` (its DOM node still
+   matches descendant selectors even though its box is gone). */
+@media (max-width: 899.98px) {
+  .site-header-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin: 0;
+    padding: 12px 24px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .site-header-menu[data-open='true'] {
+    display: flex;
+  }
+
+  .site-header-menu .site-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-inline: 0;
+  }
+
+  .site-header-menu .site-nav a {
+    padding: 10px 4px;
+    font-size: 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
+  }
+
+  .site-header-menu .site-header-actions {
+    margin-left: 0;
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .site-header-menu .site-header-actions .cta,
+  .site-header-menu .site-header-actions .pill-mono {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* Hamburger / close toggle — mobile only */
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.nav-toggle:hover {
+  background: var(--surface-2);
+}
+
+.nav-toggle-icon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 18px;
+  height: 13px;
+}
+
+.nav-toggle-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-toggle-icon.is-open span:nth-child(1) {
+  transform: translateY(5.5px) rotate(45deg);
+}
+
+.nav-toggle-icon.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle-icon.is-open span:nth-child(3) {
+  transform: translateY(-5.5px) rotate(-45deg);
+}
+
 .link-quiet {
   font-size: 0.9rem;
   color: var(--ink-mute);
@@ -1720,6 +1835,15 @@ fieldset.field > legend {
 }
 
 @media (min-width: 900px) {
+  .nav-toggle {
+    display: none;
+  }
+
+  /* Wrapper dissolves so nav + actions sit directly in the bar as before. */
+  .site-header-menu {
+    display: contents;
+  }
+
   .site-nav {
     display: flex;
   }
