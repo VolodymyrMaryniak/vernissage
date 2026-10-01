@@ -1,5 +1,35 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Icon, { type IconName } from '../../components/Icon';
+
+const STEPS: { index: string; icon: IconName; title: string; body: string; planned?: boolean }[] = [
+  {
+    index: '01',
+    icon: 'catalogue',
+    title: 'Set up the show',
+    body: 'Dates, artists and works in structured fields — searchable from day one.',
+  },
+  {
+    index: '02',
+    icon: 'folder',
+    title: 'Sync to Drive',
+    body: 'A Drive folder per show for masters, press and essays. Files attach to the entry for now.',
+    planned: true,
+  },
+  {
+    index: '03',
+    icon: 'vr',
+    title: 'Capture in VR',
+    body: 'A Matterport or 360° walkthrough beside the catalogue, so the room outlives the show.',
+    planned: true,
+  },
+  {
+    index: '04',
+    icon: 'globe',
+    title: 'Publish & cite',
+    body: 'A public page anyone can read and link to — no account needed.',
+  },
+];
 
 export default function HowItWorksPage() {
   useDocumentMeta({
@@ -18,11 +48,7 @@ export default function HowItWorksPage() {
           <h1 className="display">
             From opening night to a <em>citable</em> page.
           </h1>
-          <p className="lede">
-            Vernissage is a working pipeline, not a template. It carries a show from the night the
-            doors open — through its files, its rooms, and its record — to a permanent page a
-            researcher can point to. Four steps, in order, each building on the last.
-          </p>
+          <p className="lede">Four steps from a new show to a permanent public record.</p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
@@ -34,103 +60,26 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ---- Step 01 -------------------------------------------- */}
+      {/* ---- Steps --------------------------------------------- */}
       <section className="section">
         <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">Step 01</p>
-            <h2 className="headline">
-              Set up the <em>show</em>.
-            </h2>
-          </div>
-          <p className="prose">
-            You begin with a catalogue, not a blank document. Title, opening and closing dates, the
-            artists, and every work on view — each entered against a proper schema so it stays
-            consistent from the first entry to the thousandth. Dates are dates, artists are records,
-            works carry their medium and dimensions.
-          </p>
-          <p className="prose">
-            Structure at this stage is what makes everything downstream possible. Because the show
-            is described in fields rather than prose, it can later be searched, filtered, and cited
-            without anyone having to reread it. The catalogue is the spine the rest of the pipeline
-            hangs on.
-          </p>
-        </div>
-      </section>
-
-      {/* ---- Step 02 -------------------------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">
-              Step 02 <span className="chip-mono chip-planned">Planned</span>
-            </p>
-            <h2 className="headline">
-              Sync to <em>Drive</em>.
-            </h2>
-          </div>
-          <p className="prose">
-            Opening an exhibition will provision a structured Google Drive folder at
-            <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code>, with subfolders waiting
-            for each kind of material — masters, HDRs, press, and essays. Nothing has to be
-            invented on the fly; the shape of the folder is decided before the first upload lands.
-            The integration isn&apos;t built yet: today files attach directly to the entry, filed
-            by category.
-          </p>
-          <p className="prose">
-            This is where documentation usually falls apart, and where the pipeline holds it
-            together. Installation masters stay separate from press scans, HDR brackets stay out of
-            the essays, and every file sits under the one show it belongs to. Months later the
-            folder still reads cleanly, because it was never allowed to scatter in the first place.
-          </p>
-        </div>
-      </section>
-
-      {/* ---- Step 03 -------------------------------------------- */}
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">
-              Step 03 <span className="chip-mono chip-planned">Planned</span>
-            </p>
-            <h2 className="headline">
-              Capture in <em>VR</em>.
-            </h2>
-          </div>
-          <p className="prose">
-            A photograph records a wall; a walkthrough records a room. A Matterport or 360°
-            capture will embed directly beside the catalogue, so the space itself becomes part
-            of the record — the sightlines, the sequence, the scale a visitor actually moved
-            through. For now the capture file can be attached to an entry, but playback here is
-            still to come.
-          </p>
-          <p className="prose">
-            Long after the walls come down, the show does not have to close. The walkthrough sits
-            alongside the works and the files as one continuous document of the exhibition, letting
-            anyone step back inside the room years after it was dismantled.
-          </p>
-        </div>
-      </section>
-
-      {/* ---- Step 04 -------------------------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">Step 04</p>
-            <h2 className="headline">
-              Publish &amp; <em>cite</em>.
-            </h2>
-          </div>
-          <p className="prose">
-            When the record is complete it publishes to its own Vernissage URL, open to anyone
-            without an account. Per-revision citation — where a reference resolves to the page as
-            it stood when it was quoted — is planned, not yet built.
-          </p>
-          <p className="prose">
-            The published page is a stable, quotable reference for a show that would otherwise
-            survive only in scattered photographs and memory. This is the point of the whole
-            pipeline — an exhibition that can be cited like any other source.
-          </p>
+          <ol className="step-list">
+            {STEPS.map((step) => (
+              <li className="step" key={step.index}>
+                <span className="step-icon">
+                  <Icon name={step.icon} className="icon--lg" />
+                </span>
+                <div className="step-body">
+                  <p className="eyebrow">
+                    Step {step.index}
+                    {step.planned && <span className="chip-mono chip-planned">Planned</span>}
+                  </p>
+                  <h2 className="headline">{step.title}</h2>
+                  <p>{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -142,10 +91,6 @@ export default function HowItWorksPage() {
             <h2 className="headline">A record worth keeping open.</h2>
           </div>
           <div>
-            <p className="prose">
-              Vernissage exists to document exhibitions properly and keep that record public. Start
-              cataloguing your own, or read what others have already published.
-            </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
                 Document a show

@@ -50,7 +50,7 @@ export default function ExhibitionSearchBar({ onSearch, showMine = false }: Prop
 
   return (
     <form className="search-bar card" onSubmit={handleSubmit} role="search">
-      <div className="field-grid">
+      <div className="field-grid field-grid--search">
         <label className="field">
           <span className="field-label">Search</span>
           <input

@@ -1,41 +1,25 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Icon, { type IconName } from '../../components/Icon';
 
-const SETUP_STEPS = [
-  {
-    index: '01',
-    title: 'Set up your gallery workspace',
-    body: 'Open a gallery account and describe the space — name, location, focus and founding year.',
-  },
-  {
-    index: '02',
-    title: 'Document each show in the program',
-    body: 'Every exhibition lands in one catalogue, with installation views, plans, audio and documents attached to the entry.',
-  },
-  {
-    index: '03',
-    title: 'Publish a program-wide archive',
-    body: 'Each show gets a public page, searchable alongside everything else you have shown.',
-  },
+type Cell = { index: string; icon: IconName; title: string; body: string; planned?: boolean };
+
+const SETUP_STEPS: Cell[] = [
+  { index: '01', icon: 'building', title: 'Set up your gallery', body: 'Name, location, focus.' },
+  { index: '02', icon: 'catalogue', title: 'Document each show', body: 'Photos, plans, audio, documents.' },
+  { index: '03', icon: 'archive', title: 'Publish the archive', body: 'Every show, searchable.' },
 ];
 
-const FEATURES = [
-  {
-    index: '01',
-    title: 'Creator roles',
-    body: 'Gallery, curator and artist roles sit on one account in any combination, and the profile adapts to whichever apply.',
-  },
+const FEATURES: Cell[] = [
+  { index: '01', icon: 'users', title: 'Creator roles', body: 'Gallery, curator and artist on one account.' },
   {
     index: '02',
-    title: 'Shared Drive at the gallery level',
-    body: 'Planned: one Drive for the whole program, with a folder per show, so installation views, works-masters and press stay organised across every exhibition.',
+    icon: 'folder',
+    title: 'Shared Drive',
+    body: 'One Drive, a folder per show.',
     planned: true,
   },
-  {
-    index: '03',
-    title: 'A program-wide archive',
-    body: 'Every show is indexed under the gallery and open to researchers and press. Team accounts and per-revision citation are planned.',
-  },
+  { index: '03', icon: 'globe', title: 'Open to researchers', body: 'Indexed under your gallery.' },
 ];
 
 export default function GalleriesPage() {
@@ -55,11 +39,7 @@ export default function GalleriesPage() {
           <h1 className="display">
             One archive for the whole <em>program</em>.
           </h1>
-          <p className="lede">
-            A workspace built around how galleries actually work — every show catalogued in full
-            and gathered into a program-wide archive that stays readable long after the walls
-            come down.
-          </p>
+          <p className="lede">Every show you make, catalogued and kept in one public archive.</p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
@@ -83,6 +63,9 @@ export default function GalleriesPage() {
           <div className="cell-grid cell-grid--3">
             {SETUP_STEPS.map((step) => (
               <div className="cell" key={step.index}>
+                <span className="cell-icon">
+                  <Icon name={step.icon} />
+                </span>
                 <span className="cell-index">{step.index}</span>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>
@@ -104,6 +87,9 @@ export default function GalleriesPage() {
           <div className="cell-grid cell-grid--3">
             {FEATURES.map((feature) => (
               <div className="cell" key={feature.index}>
+                <span className="cell-icon">
+                  <Icon name={feature.icon} />
+                </span>
                 <span className="cell-index">{feature.index}</span>
                 <h3>
                   {feature.title}
@@ -124,10 +110,6 @@ export default function GalleriesPage() {
             <h2 className="headline">One program, properly recorded.</h2>
           </div>
           <div>
-            <p className="prose">
-              Gather every show your gallery makes into one archive — catalogued in full, kept
-              open, and readable for good.
-            </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
                 Document a show

@@ -3,32 +3,22 @@ import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { listExhibitions } from '../../api/exhibitionsApi';
 import type { ExhibitionSummary } from '../../types/exhibition';
+import Icon, { type IconName } from '../../components/Icon';
 
 // How many entries the "latest" strip pulls (1 featured + the rest listed).
 const LATEST_COUNT = 5;
 
-const PIPELINE = [
-  {
-    index: '01',
-    title: 'Set up the show',
-    body: 'Title, dates, artists, works — a proper catalogue schema, not a blank document.',
-  },
-  {
-    index: '02',
-    title: 'Attach the material',
-    body: 'Installation views, plans, audio and documents, filed by category on the entry.',
-  },
+const PIPELINE: { index: string; icon: IconName; title: string; body: string; planned?: boolean }[] = [
+  { index: '01', icon: 'catalogue', title: 'Set up the show', body: 'Dates, artists, works.' },
+  { index: '02', icon: 'image', title: 'Attach the material', body: 'Photos, plans, audio.' },
   {
     index: '03',
+    icon: 'folder',
     title: 'Sync to Drive',
-    body: 'Planned: a structured Google Drive folder per show for masters, HDRs and press.',
+    body: 'A folder per show.',
     planned: true,
   },
-  {
-    index: '04',
-    title: 'Publish & share',
-    body: 'A public entry anyone can read, search and link to.',
-  },
+  { index: '04', icon: 'globe', title: 'Publish & share', body: 'A public, linkable page.' },
 ];
 
 const DRIVE_FILES = [
@@ -105,11 +95,7 @@ export default function HomePage() {
           <h1 className="display">
             Document your art exhibition <em>properly</em>.
           </h1>
-          <p className="lede">
-            A structured workspace for cataloguing works, filing installation photography, plans
-            and audio, and publishing an entry anyone can read — for every show you make. Drive
-            sync and VR walkthroughs are on the way.
-          </p>
+          <p className="lede">Catalogue the works, file the photos, publish the record.</p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
@@ -127,17 +113,17 @@ export default function HomePage() {
           <p className="eyebrow">Start here</p>
           <div className="role-grid">
             <Link className="role-card" to="/curators">
-              <span className="role-card-index">01</span>
+              <Icon name="user" className="icon--lg" />
               <h3>I&apos;m an independent curator</h3>
-              <p>Solo workspace, portable archive, no gallery required.</p>
+              <p>Your own portable archive.</p>
               <span className="role-card-arrow" aria-hidden="true">
                 →
               </span>
             </Link>
             <Link className="role-card" to="/galleries">
-              <span className="role-card-index">02</span>
+              <Icon name="building" className="icon--lg" />
               <h3>I&apos;m a gallery</h3>
-              <p>A program-wide archive, with every show catalogued in one place.</p>
+              <p>Every show in one place.</p>
               <span className="role-card-arrow" aria-hidden="true">
                 →
               </span>
@@ -152,12 +138,15 @@ export default function HomePage() {
           <div className="section-head">
             <p className="eyebrow">How it works</p>
             <h2 className="headline">
-              A four-step pipeline, from opening night to <em>citation</em>.
+              Opening night to <em>citation</em>.
             </h2>
           </div>
           <div className="cell-grid cell-grid--4">
             {PIPELINE.map((step) => (
               <div className="cell" key={step.index}>
+                <span className="cell-icon">
+                  <Icon name={step.icon} />
+                </span>
                 <span className="cell-index">{step.index}</span>
                 <h3>
                   {step.title}
@@ -180,12 +169,9 @@ export default function HomePage() {
                 <span className="chip-mono">Google Drive</span>
                 <span className="status">Planned</span>
               </div>
-              <h3>Documenting a show means creating a home for its files.</h3>
+              <h3>A home for every file.</h3>
               <p>
-                We plan to provision a structured Drive folder at
-                <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code> when you open an
-                exhibition, with subfolders for every kind of material — so masters, HDRs and
-                press never scatter. Until then, files attach directly to the entry.
+                <code>/Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code>
               </p>
               <ul className="file-mono-list">
                 {DRIVE_FILES.map((f) => (
@@ -206,11 +192,6 @@ export default function HomePage() {
                 <span className="status">Planned · Matterport · 360°</span>
               </div>
               <h3>The show doesn&apos;t have to close.</h3>
-              <p>
-                A Matterport or 360° capture will embed alongside the catalogue, so long after
-                the walls come down visitors can step back inside the room. Today the capture
-                files can be attached to an entry, but not yet played back here.
-              </p>
               <div className="vr-viewport">
                 <div className="wash-aurora" aria-hidden="true" />
                 <button type="button" className="pill-mono" disabled>
@@ -308,10 +289,6 @@ export default function HomePage() {
             <h2 className="headline">A working archive, not a portfolio site.</h2>
           </div>
           <div>
-            <p className="prose">
-              Vernissage exists to record exhibitions properly and keep that record open. Start
-              documenting your own, or read what others have already catalogued.
-            </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
                 Start documenting

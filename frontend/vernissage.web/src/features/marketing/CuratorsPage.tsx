@@ -1,22 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Icon, { type IconName } from '../../components/Icon';
 
-const STEPS = [
-  {
-    index: '01',
-    title: 'Open a workspace',
-    body: 'Solo, portable, no gallery required. Your archive travels with you from show to show.',
-  },
-  {
-    index: '02',
-    title: 'Document the exhibition',
-    body: 'Catalogue works, dates, installation views and the accompanying essay in one place.',
-  },
-  {
-    index: '03',
-    title: 'Publish to the archive',
-    body: 'A public page that stands as the record long after the walls come down.',
-  },
+const STEPS: { index: string; icon: IconName; title: string; body: string }[] = [
+  { index: '01', icon: 'user', title: 'Open a workspace', body: 'Solo and portable.' },
+  { index: '02', icon: 'catalogue', title: 'Document the show', body: 'Works, dates, photos, essay.' },
+  { index: '03', icon: 'globe', title: 'Publish', body: 'A public record that lasts.' },
 ];
 
 const WORKS = [
@@ -74,10 +63,7 @@ export default function CuratorsPage() {
           <h1 className="display">
             A workspace built for the way exhibitions are <em>actually</em> made.
           </h1>
-          <p className="lede">
-            Work on your own terms — one curator, one catalogue at a time — and keep a portable
-            record of every show you make, from first checklist to published page.
-          </p>
+          <p className="lede">A portable record of every show you make.</p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Open a workspace
@@ -94,11 +80,14 @@ export default function CuratorsPage() {
         <div className="container">
           <div className="section-head">
             <p className="eyebrow">How it works</p>
-            <h2 className="headline">Three steps, from empty room to citation.</h2>
+            <h2 className="headline">Three steps.</h2>
           </div>
           <div className="cell-grid cell-grid--3">
             {STEPS.map((step) => (
               <div className="cell" key={step.index}>
+                <span className="cell-icon">
+                  <Icon name={step.icon} />
+                </span>
                 <span className="cell-index">{step.index}</span>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>
@@ -181,10 +170,6 @@ export default function CuratorsPage() {
             <h2 className="headline">Request early access.</h2>
           </div>
           <div>
-            <p className="prose">
-              We are opening workspaces to independent curators a few at a time. Leave an address
-              and we will be in touch when the next set is ready.
-            </p>
             <form className="request-form" onSubmit={(e) => e.preventDefault()}>
               <input type="email" placeholder="you@studio.com" aria-label="Email" />
               <button type="submit" className="cta">
