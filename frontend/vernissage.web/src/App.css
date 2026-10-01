@@ -4,52 +4,64 @@
    ================================================================ */
 
 .app {
-  /* ---- Vernissage palette (paper base, near-black ink, ambient washes) ---- */
-  --paper: oklch(0.995 0.003 90);
-  --ink-base: oklch(0.16 0.01 270);
-  --blossom: oklch(0.86 0.09 5);
-  --blossom-soft: oklch(0.94 0.045 5);
-  --sage: oklch(0.88 0.07 150);
-  --sage-soft: oklch(0.95 0.035 150);
+  /* ---- Vernissage palette — a violet brand with bright pastel accent hues.
+     Colour lives in the washes; ink stays near-black for readability. ------- */
+  --blossom: oklch(0.8 0.17 10);
+  --blossom-soft: oklch(0.94 0.075 10);
+  --sun: oklch(0.88 0.15 75);
+  --sun-soft: oklch(0.96 0.075 82);
+  --sage: oklch(0.85 0.15 155);
+  --sage-soft: oklch(0.94 0.075 155);
+  --sky: oklch(0.8 0.15 230);
+  --sky-soft: oklch(0.94 0.07 230);
+
+  /* Neutral base */
+  --paper: oklch(0.995 0.004 320);
+  --ink-base: oklch(0.19 0.025 300);
 
   /* Semantic tokens (names preserved so existing components restyle in place) */
   --bg: var(--paper);
   --surface: oklch(1 0 0);
-  --surface-2: oklch(0.985 0.004 90);
-  --card: oklch(0.985 0.006 60);
+  --surface-2: oklch(0.98 0.008 320);
+  --card: oklch(0.975 0.012 320);
   --ink: var(--ink-base);
-  --ink-soft: oklch(0.30 0.012 270);
-  --ink-mute: oklch(0.46 0.015 270);
-  --line: oklch(0.91 0.01 80);
-  --line-strong: oklch(0.85 0.012 80);
-  /* "brand" now maps to ink — emphasis is solid, colour lives only in washes */
-  --brand: var(--ink-base);
-  --brand-strong: oklch(0.1 0.01 270);
-  --brand-soft: var(--blossom-soft);
-  --danger: oklch(0.52 0.19 25);
-  --danger-soft: oklch(0.95 0.03 25);
-  --ok: oklch(0.6 0.13 150);
+  --ink-soft: oklch(0.35 0.03 300);
+  --ink-mute: oklch(0.51 0.03 300);
+  --line: oklch(0.9 0.015 320);
+  --line-strong: oklch(0.83 0.02 320);
+  /* "brand" is a vivid violet — emphasis, links and calls to action wear it */
+  --brand: oklch(0.56 0.25 300);
+  --brand-strong: oklch(0.46 0.26 300);
+  --brand-soft: oklch(0.94 0.07 300);
+  --danger: oklch(0.55 0.2 25);
+  --danger-soft: oklch(0.95 0.04 25);
+  --ok: oklch(0.6 0.15 155);
 
-  --radius: 0.25rem;
-  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-sm: 0.375rem;
   --radius-pill: 999px;
 
-  /* Hairline "plate" shadows — only featured cards use the deep one */
-  --shadow-sm: 0 1px 0 var(--line);
-  --shadow-md: 0 1px 0 var(--line);
-  --shadow-lg: 0 1px 0 var(--line), 0 30px 60px -40px oklch(0.16 0.01 270 / 0.18);
+  /* Soft plate shadows, faintly brand-tinted so cards feel lit, not grey */
+  --shadow-sm: 0 1px 2px oklch(0.5 0.2 300 / 0.06);
+  --shadow-md: 0 4px 16px -6px oklch(0.5 0.2 300 / 0.14);
+  --shadow-lg: 0 2px 8px -4px oklch(0.5 0.2 300 / 0.12),
+    0 30px 60px -40px oklch(0.5 0.2 300 / 0.3);
 
+  /* Signature wash — pink → warm cream → green */
   --gradient-vernissage: linear-gradient(
-    120deg,
+    110deg,
     var(--blossom-soft) 0%,
-    oklch(0.97 0.025 60) 40%,
+    var(--sun-soft) 50%,
     var(--sage-soft) 100%
   );
+  /* CTA fill — kept dark enough (both stops) that white text stays AA-legible */
+  --gradient-brand: linear-gradient(135deg, oklch(0.52 0.25 300) 0%, oklch(0.52 0.23 345) 100%);
   --gradient-hairline: linear-gradient(
     90deg,
     transparent,
-    var(--blossom) 35%,
-    var(--sage) 65%,
+    var(--blossom) 20%,
+    var(--brand) 50%,
+    var(--sage) 80%,
     transparent
   );
 
@@ -71,6 +83,16 @@
 .app *::before,
 .app *::after {
   box-sizing: border-box;
+}
+
+/* Consistent keyboard-focus ring for links and buttons that don't define
+   their own. Only shows for keyboard users (:focus-visible), never on click.
+   Inputs are excluded — they keep their existing box-shadow focus styles. */
+.app a:focus-visible,
+.app button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 /* ---- Header ---------------------------------------------------- */
@@ -172,8 +194,8 @@
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-size: 11px;
-  font-weight: 500;
-  color: var(--ink-mute);
+  font-weight: 600;
+  color: var(--brand-strong);
   margin: 0;
 }
 
@@ -250,14 +272,16 @@
 }
 
 .btn-primary {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--gradient-brand);
+  color: #fff;
   border-radius: var(--radius-pill);
   padding-inline: 18px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--ink) 85%, transparent);
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-ghost {
@@ -390,7 +414,7 @@
 
 .ex-card-dates {
   font-size: 0.85rem;
-  color: var(--brand);
+  color: var(--brand-strong);
   font-weight: 550;
   margin: -4px 0 0;
 }
@@ -525,7 +549,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--brand);
+  color: var(--brand-strong);
   background: var(--brand-soft);
   padding: 2px 7px;
   border-radius: 999px;
@@ -648,7 +672,7 @@
   margin-top: 12px;
   font-size: 0.95rem;
   font-weight: 550;
-  color: var(--brand);
+  color: var(--brand-strong);
 }
 
 .view-dates .dot {
@@ -1375,7 +1399,7 @@ fieldset.field > legend {
 }
 
 .section--band {
-  background: var(--card);
+  background: var(--gradient-vernissage);
   border-top: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
   border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
 }
@@ -1525,20 +1549,26 @@ fieldset.field > legend {
   justify-content: center;
   gap: 8px;
   border-radius: var(--radius-pill);
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
+  background: var(--gradient-brand);
+  color: #fff;
+  border: 1px solid transparent;
   padding: 12px 24px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  box-shadow: var(--shadow-md);
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
   white-space: nowrap;
 }
 
 .cta:hover {
-  background: color-mix(in oklab, var(--ink) 85%, transparent);
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.cta:active {
+  transform: translateY(1px);
 }
 
 .cta--secondary {
@@ -1640,6 +1670,7 @@ fieldset.field > legend {
 }
 
 .site-header-inner {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1648,10 +1679,21 @@ fieldset.field > legend {
 
 .wordmark {
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 9px;
   text-decoration: none;
   color: var(--ink);
+}
+
+.wordmark-logo {
+  flex: none;
+  display: block;
+  color: var(--brand);
+  transition: transform 0.2s ease;
+}
+
+.wordmark:hover .wordmark-logo {
+  transform: rotate(-6deg) scale(1.05);
 }
 
 .wordmark-name {
@@ -1662,23 +1704,33 @@ fieldset.field > legend {
 }
 
 .wordmark-sup {
+  align-self: flex-start;
+  margin-top: 2px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--ink-mute);
-  transform: translateY(-0.6em);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-strong);
 }
 
 .site-nav {
   display: none;
   margin-inline: auto;
-  gap: 28px;
+  gap: 18px;
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .site-nav {
+    gap: 26px;
+  }
 }
 
 .site-nav a {
   font-size: 0.9rem;
   color: var(--ink-mute);
   text-decoration: none;
+  white-space: nowrap;
   transition: color 0.15s ease;
 }
 
@@ -1694,10 +1746,115 @@ fieldset.field > legend {
   gap: 12px;
 }
 
+/* Below the nav breakpoint, the nav + actions collapse into a dropdown panel
+   behind the toggle. These rules are scoped to max-width so they never leak
+   onto desktop, where the wrapper is `display: contents` (its DOM node still
+   matches descendant selectors even though its box is gone). */
+@media (max-width: 1059.98px) {
+  .site-header-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin: 0;
+    padding: 12px 24px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .site-header-menu[data-open='true'] {
+    display: flex;
+  }
+
+  .site-header-menu .site-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-inline: 0;
+  }
+
+  .site-header-menu .site-nav a {
+    padding: 10px 4px;
+    font-size: 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
+  }
+
+  .site-header-menu .site-header-actions {
+    margin-left: 0;
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .site-header-menu .site-header-actions .cta,
+  .site-header-menu .site-header-actions .pill-mono {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* Hamburger / close toggle — mobile only */
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.nav-toggle:hover {
+  background: var(--surface-2);
+}
+
+.nav-toggle-icon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 18px;
+  height: 13px;
+}
+
+.nav-toggle-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-toggle-icon.is-open span:nth-child(1) {
+  transform: translateY(5.5px) rotate(45deg);
+}
+
+.nav-toggle-icon.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle-icon.is-open span:nth-child(3) {
+  transform: translateY(-5.5px) rotate(-45deg);
+}
+
 .link-quiet {
   font-size: 0.9rem;
   color: var(--ink-mute);
   text-decoration: none;
+  white-space: nowrap;
   background: none;
   border: 0;
   cursor: pointer;
@@ -1719,7 +1876,16 @@ fieldset.field > legend {
   white-space: nowrap;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1060px) {
+  .nav-toggle {
+    display: none;
+  }
+
+  /* Wrapper dissolves so nav + actions sit directly in the bar as before. */
+  .site-header-menu {
+    display: contents;
+  }
+
   .site-nav {
     display: flex;
   }
@@ -1796,6 +1962,7 @@ fieldset.field > legend {
   border-top: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   font-family: var(--font-mono);
@@ -1803,6 +1970,16 @@ fieldset.field > legend {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-mute);
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-brand svg {
+  color: var(--brand-strong);
 }
 
 @media (min-width: 720px) {
@@ -1849,6 +2026,25 @@ fieldset.field > legend {
   font-size: clamp(3rem, 9vw, 6.5rem);
 }
 
+/* Brand slogan — a bright serif line sitting just under the headline */
+.hero-slogan {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  line-height: 1.2;
+  color: var(--ink-soft);
+  margin: -8px 0 0;
+  max-width: 40ch;
+  text-wrap: balance;
+}
+
+.hero-slogan em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1878,7 +2074,9 @@ fieldset.field > legend {
 }
 
 .role-card:hover {
-  border-color: var(--ink);
+  border-color: var(--brand);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .role-card-index {
@@ -1916,6 +2114,12 @@ fieldset.field > legend {
   }
 }
 
+@media (min-width: 1040px) {
+  .role-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ---- How it works — cell grid --------------------------------- */
 .cell-grid {
   display: grid;
@@ -1941,6 +2145,7 @@ fieldset.field > legend {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.22em;
+  text-transform: uppercase;
   color: var(--ink-mute);
 }
 
@@ -1955,6 +2160,41 @@ fieldset.field > legend {
   font-size: 0.95rem;
 }
 
+/* Circular glyph badge at the head of a cell */
+.cell-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--brand);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Cell laid out as icon + body side by side */
+.cell--icon {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cell-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cell-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 @media (min-width: 640px) {
   .cell-grid {
     grid-template-columns: 1fr 1fr;
@@ -1967,6 +2207,10 @@ fieldset.field > legend {
   }
   .cell-grid--3 {
     grid-template-columns: repeat(3, 1fr);
+  }
+  /* 2-up stays two columns at every width */
+  .cell-grid--2 {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

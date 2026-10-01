@@ -69,8 +69,8 @@ export default function ExhibitionsListPage() {
           Every documented show, <em>indexed</em>.
         </h1>
         <p className="lede">
-          A working index of exhibitions — searchable by title, curator, city and date.
-          {user ? '' : ' Browsing is open to everyone.'}
+          Searchable by title, curator, city and date.
+          {user ? '' : ' Open to everyone.'}
         </p>
         {user && (
           <div>

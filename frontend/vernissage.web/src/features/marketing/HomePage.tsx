@@ -3,9 +3,41 @@ import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { listExhibitions } from '../../api/exhibitionsApi';
 import type { ExhibitionSummary } from '../../types/exhibition';
+import Icon from '../../components/Icon';
+import type { IconName } from '../../components/Icon';
 
 // How many entries the "latest" strip pulls (1 featured + the rest listed).
 const LATEST_COUNT = 5;
+
+const BENEFITS: {
+  index: string;
+  icon: IconName;
+  title: string;
+  body: string;
+  planned?: boolean;
+}[] = [
+  {
+    index: '01',
+    icon: 'folder',
+    title: 'Files sort themselves',
+    body: 'Every show gets a Drive folder, foldered by material — masters, press, essays — filed as you upload.',
+    planned: true,
+  },
+  {
+    index: '02',
+    icon: 'portfolio',
+    title: 'Portfolio & CV in a click',
+    body: 'Generate a portfolio or CV for an open call, grant or residency from records you already keep.',
+    planned: true,
+  },
+  {
+    index: '03',
+    icon: 'bell',
+    title: 'Updates while it runs',
+    body: 'Push quick changes mid-show — dates, works, press — and everyone following the entry hears about it.',
+    planned: true,
+  },
+];
 
 const PIPELINE = [
   {
@@ -98,17 +130,15 @@ export default function HomePage() {
           <div className="hero-meta">
             <span className="chip-mono">v.001</span>
             <span className="hero-meta-text">
-              Workspace for curators &amp; galleries
+              Workspace for artists, curators &amp; galleries
               {archivedCount !== null && ` · ${archivedCount} exhibitions archived`}
             </span>
           </div>
           <h1 className="display">
             Document your art exhibition <em>properly</em>.
           </h1>
-          <p className="lede">
-            A structured workspace for cataloguing works, filing installation photography, plans
-            and audio, and publishing an entry anyone can read — for every show you make. Drive
-            sync and VR walkthroughs are on the way.
+          <p className="hero-slogan">
+            A show is alive for six weeks. <em>Its record is forever.</em>
           </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
@@ -125,9 +155,17 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <p className="eyebrow">Start here</p>
-          <div className="role-grid">
-            <Link className="role-card" to="/curators">
+          <div className="role-grid role-grid--3">
+            <Link className="role-card" to="/artists">
               <span className="role-card-index">01</span>
+              <h3>I&apos;m an artist</h3>
+              <p>Your works and shows, documented and ready to submit.</p>
+              <span className="role-card-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
+            <Link className="role-card" to="/curators">
+              <span className="role-card-index">02</span>
               <h3>I&apos;m an independent curator</h3>
               <p>Solo workspace, portable archive, no gallery required.</p>
               <span className="role-card-arrow" aria-hidden="true">
@@ -135,13 +173,44 @@ export default function HomePage() {
               </span>
             </Link>
             <Link className="role-card" to="/galleries">
-              <span className="role-card-index">02</span>
+              <span className="role-card-index">03</span>
               <h3>I&apos;m a gallery</h3>
               <p>A program-wide archive, with every show catalogued in one place.</p>
               <span className="role-card-arrow" aria-hidden="true">
                 →
               </span>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- What you get --------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">What you get</p>
+            <h2 className="headline">
+              The work around the work, <em>handled</em>.
+            </h2>
+          </div>
+          <div className="cell-grid cell-grid--3">
+            {BENEFITS.map((benefit) => (
+              <div className="cell cell--icon" key={benefit.title}>
+                <span className="cell-icon">
+                  <Icon name={benefit.icon} />
+                </span>
+                <div className="cell-body">
+                  <span className="cell-label">
+                    <span className="cell-index">{benefit.index}</span>
+                    {benefit.planned && (
+                      <span className="chip-mono chip-planned">Planned</span>
+                    )}
+                  </span>
+                  <h3>{benefit.title}</h3>
+                  <p>{benefit.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -180,12 +249,10 @@ export default function HomePage() {
                 <span className="chip-mono">Google Drive</span>
                 <span className="status">Planned</span>
               </div>
-              <h3>Documenting a show means creating a home for its files.</h3>
+              <h3>Every show gets a home for its files.</h3>
               <p>
-                We plan to provision a structured Drive folder at
-                <code> /Exhibitions/&#123;Year&#125;/&#123;Show&#125;/</code> when you open an
-                exhibition, with subfolders for every kind of material — so masters, HDRs and
-                press never scatter. Until then, files attach directly to the entry.
+                A structured Drive folder per exhibition, so masters, HDRs and press never
+                scatter. Until then, files attach directly to the entry.
               </p>
               <ul className="file-mono-list">
                 {DRIVE_FILES.map((f) => (
@@ -207,9 +274,8 @@ export default function HomePage() {
               </div>
               <h3>The show doesn&apos;t have to close.</h3>
               <p>
-                A Matterport or 360° capture will embed alongside the catalogue, so long after
-                the walls come down visitors can step back inside the room. Today the capture
-                files can be attached to an entry, but not yet played back here.
+                A Matterport or 360° capture embeds alongside the catalogue — step back inside
+                the room long after the walls come down.
               </p>
               <div className="vr-viewport">
                 <div className="wash-aurora" aria-hidden="true" />
@@ -309,8 +375,7 @@ export default function HomePage() {
           </div>
           <div>
             <p className="prose">
-              Vernissage exists to record exhibitions properly and keep that record open. Start
-              documenting your own, or read what others have already catalogued.
+              Start documenting your own, or read what others have catalogued.
             </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
