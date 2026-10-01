@@ -6,7 +6,8 @@ import Logo from './Logo';
 
 const NAV_LINKS = [
   { to: '/about', label: 'How it works' },
-  { to: '/curators', label: 'For independent curators' },
+  { to: '/artists', label: 'For artists' },
+  { to: '/curators', label: 'For curators' },
   { to: '/galleries', label: 'For galleries' },
   { to: '/archive', label: 'Archive' },
 ];

@@ -3,9 +3,41 @@ import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { listExhibitions } from '../../api/exhibitionsApi';
 import type { ExhibitionSummary } from '../../types/exhibition';
+import Icon from '../../components/Icon';
+import type { IconName } from '../../components/Icon';
 
 // How many entries the "latest" strip pulls (1 featured + the rest listed).
 const LATEST_COUNT = 5;
+
+const BENEFITS: {
+  index: string;
+  icon: IconName;
+  title: string;
+  body: string;
+  planned?: boolean;
+}[] = [
+  {
+    index: '01',
+    icon: 'folder',
+    title: 'Files sort themselves',
+    body: 'Every show gets a Drive folder, foldered by material — masters, press, essays — filed as you upload.',
+    planned: true,
+  },
+  {
+    index: '02',
+    icon: 'portfolio',
+    title: 'Portfolio & CV in a click',
+    body: 'Generate a portfolio or CV for an open call, grant or residency from records you already keep.',
+    planned: true,
+  },
+  {
+    index: '03',
+    icon: 'bell',
+    title: 'Updates while it runs',
+    body: 'Push quick changes mid-show — dates, works, press — and everyone following the entry hears about it.',
+    planned: true,
+  },
+];
 
 const PIPELINE = [
   {
@@ -98,7 +130,7 @@ export default function HomePage() {
           <div className="hero-meta">
             <span className="chip-mono">v.001</span>
             <span className="hero-meta-text">
-              Workspace for curators &amp; galleries
+              Workspace for artists, curators &amp; galleries
               {archivedCount !== null && ` · ${archivedCount} exhibitions archived`}
             </span>
           </div>
@@ -123,9 +155,17 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <p className="eyebrow">Start here</p>
-          <div className="role-grid">
-            <Link className="role-card" to="/curators">
+          <div className="role-grid role-grid--3">
+            <Link className="role-card" to="/artists">
               <span className="role-card-index">01</span>
+              <h3>I&apos;m an artist</h3>
+              <p>Your works and shows, documented and ready to submit.</p>
+              <span className="role-card-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
+            <Link className="role-card" to="/curators">
+              <span className="role-card-index">02</span>
               <h3>I&apos;m an independent curator</h3>
               <p>Solo workspace, portable archive, no gallery required.</p>
               <span className="role-card-arrow" aria-hidden="true">
@@ -133,13 +173,44 @@ export default function HomePage() {
               </span>
             </Link>
             <Link className="role-card" to="/galleries">
-              <span className="role-card-index">02</span>
+              <span className="role-card-index">03</span>
               <h3>I&apos;m a gallery</h3>
               <p>A program-wide archive, with every show catalogued in one place.</p>
               <span className="role-card-arrow" aria-hidden="true">
                 →
               </span>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- What you get --------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">What you get</p>
+            <h2 className="headline">
+              The work around the work, <em>handled</em>.
+            </h2>
+          </div>
+          <div className="cell-grid cell-grid--3">
+            {BENEFITS.map((benefit) => (
+              <div className="cell cell--icon" key={benefit.title}>
+                <span className="cell-icon">
+                  <Icon name={benefit.icon} />
+                </span>
+                <div className="cell-body">
+                  <span className="cell-label">
+                    <span className="cell-index">{benefit.index}</span>
+                    {benefit.planned && (
+                      <span className="chip-mono chip-planned">Planned</span>
+                    )}
+                  </span>
+                  <h3>{benefit.title}</h3>
+                  <p>{benefit.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

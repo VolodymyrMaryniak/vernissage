@@ -20,6 +20,9 @@ export default function SiteFooter() {
                 <Link to="/about">How it works</Link>
               </li>
               <li>
+                <Link to="/artists">For artists</Link>
+              </li>
+              <li>
                 <Link to="/curators">For independent curators</Link>
               </li>
               <li>
@@ -45,10 +48,7 @@ export default function SiteFooter() {
 
           <div className="footer-col">
             <h4>About the project</h4>
-            <p>
-              A non-commercial archive that records exhibitions properly — catalogued,
-              versioned and citable — and keeps that record open.
-            </p>
+            <p>A non-commercial, open archive of exhibitions.</p>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import SiteHeader from './components/SiteHeader';
 import SiteFooter from './components/SiteFooter';
 import HomePage from './features/marketing/HomePage';
 import HowItWorksPage from './features/marketing/HowItWorksPage';
+import ArtistsPage from './features/marketing/ArtistsPage';
 import CuratorsPage from './features/marketing/CuratorsPage';
 import GalleriesPage from './features/marketing/GalleriesPage';
 import AnalyticsPage from './features/analytics/AnalyticsPage';
@@ -31,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<HowItWorksPage />} />
+          <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/curators" element={<CuratorsPage />} />
           <Route path="/galleries" element={<GalleriesPage />} />
           <Route path="/archive" element={<ExhibitionsListPage />} />
