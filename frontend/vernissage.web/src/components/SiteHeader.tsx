@@ -37,7 +37,6 @@ export default function SiteHeader() {
           <Link className="wordmark" to="/">
             <Logo className="wordmark-logo" size={30} />
             <span className="wordmark-name">Vernissage</span>
-            <span className="wordmark-sup">archive</span>
           </Link>
 
           <button
