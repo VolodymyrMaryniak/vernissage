@@ -24,7 +24,7 @@ describe('App', () => {
 
     expect(screen.getByRole('link', { name: /vernissage/i })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /document your art exhibition properly/i }),
+      screen.getByRole('heading', { name: /document your artshow properly/i }),
     ).toBeInTheDocument();
   });
 
@@ -68,7 +68,7 @@ describe('App', () => {
 
     await waitFor(() =>
       expect(
-        screen.getByRole('heading', { name: /document your art exhibition properly/i }),
+        screen.getByRole('heading', { name: /document your artshow properly/i }),
       ).toBeInTheDocument(),
     );
   });

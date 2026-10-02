@@ -60,7 +60,7 @@ describe('HomePage', () => {
     expect(screen.queryByText('Latest entries')).not.toBeInTheDocument();
     // The hero and its calls to action still render.
     expect(
-      screen.getByRole('heading', { name: /document your art exhibition properly/i }),
+      screen.getByRole('heading', { name: /document your artshow properly/i }),
     ).toBeInTheDocument();
   });
 
