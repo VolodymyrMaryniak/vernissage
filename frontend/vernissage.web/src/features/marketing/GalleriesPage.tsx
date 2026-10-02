@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Bloom from '../../components/Bloom';
 
 const SETUP_STEPS = [
   {
@@ -49,7 +50,7 @@ export default function GalleriesPage() {
     <>
       {/* ---- Hero ------------------------------------------------ */}
       <section className="page-hero">
-        <div className="wash-drift" aria-hidden="true" />
+        <Bloom />
         <div className="container page-hero-inner">
           <p className="eyebrow">For galleries</p>
           <h1 className="display">

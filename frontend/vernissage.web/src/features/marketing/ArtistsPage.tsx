@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Bloom from '../../components/Bloom';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
 
@@ -62,7 +63,7 @@ export default function ArtistsPage() {
     <>
       {/* ---- Hero ------------------------------------------------ */}
       <section className="page-hero">
-        <div className="wash-drift" aria-hidden="true" />
+        <Bloom />
         <div className="container page-hero-inner">
           <p className="eyebrow">For artists</p>
           <h1 className="display">
