@@ -5,14 +5,16 @@
 
 .app {
   /* ---- Vernissage palette ------------------------------------------------
-     Brand: the peony (a gift to the artist on opening night) with the red dot
-     at its centre — the mark a gallery puts beside a sold work. The page stays
-     white; colour appears only as the red accent and as soft "bloom" glows,
-     never as filled colour fields. ---------------------------------------- */
-  --red: #c21f2b;
-  --red-deep: #b81c29;
+     Brand: the logo's deep peony red (the red dot a gallery puts beside a sold
+     work), with a soft olive light as its companion. The page stays warm
+     paper; colour appears as the red accent and as soft peony/olive glows. -- */
+  --peony: #a8172a; /* the logo dot */
+  --red: var(--peony);
+  --red-deep: #8f1424;
   --red-dark: #6e1119;
-  --red-tint: #f7e6e7;
+  --red-tint: #f6e8e7;
+  --olive: oklch(0.8 0.085 115);
+  --olive-soft: oklch(0.935 0.05 115);
 
   /* Neutral base — warm near-white paper, warm near-black ink */
   --paper: #fdfcfa;
@@ -28,24 +30,24 @@
   --ink-mute: #6b6460;
   --line: #e7e3dd;
   --line-strong: #d6d1c9;
-  /* "brand" is the peony red — emphasis, links and calls to action wear it */
-  --brand: var(--red);
+  /* "brand" is deep peony — emphasis, links and calls to action wear it */
+  --brand: var(--peony);
   --brand-strong: var(--red-dark);
   --brand-soft: var(--red-tint);
   --danger: #b3261e;
   --danger-soft: #fbeae8;
   --ok: #2f7d54;
 
-  /* Legacy accent-hue tokens kept pointing at the neutral/red scheme so any
+  /* Legacy accent-hue tokens folded into the peony + olive palette, so any
      wash or pill that still references them stays on-brand. */
-  --blossom: var(--red-tint);
-  --blossom-soft: #fcf3f3;
-  --sun: var(--card);
-  --sun-soft: var(--surface-2);
-  --sage: var(--card);
-  --sage-soft: var(--surface-2);
-  --sky: var(--red-tint);
-  --sky-soft: #fcf3f3;
+  --blossom: oklch(0.8 0.075 35);
+  --blossom-soft: oklch(0.955 0.022 45);
+  --sun: var(--olive);
+  --sun-soft: oklch(0.975 0.015 90);
+  --sage: var(--olive);
+  --sage-soft: var(--olive-soft);
+  --sky: var(--olive);
+  --sky-soft: var(--olive-soft);
 
   --radius: 0.5rem;
   --radius-sm: 0.375rem;
@@ -57,25 +59,38 @@
   --shadow-lg: 0 2px 8px -4px rgba(26, 23, 21, 0.1),
     0 30px 60px -40px rgba(110, 17, 25, 0.35);
 
-  /* The signature "bloom" — a soft red glow on light, as on the brand sheet */
+  /* The signature "bloom" — a soft peony glow with an olive light opposite */
   --bloom-strong: radial-gradient(
       44% 58% at 22% 26%,
-      rgba(194, 31, 43, 0.3) 0%,
-      rgba(194, 31, 43, 0.13) 38%,
+      rgba(168, 23, 42, 0.26) 0%,
+      rgba(168, 23, 42, 0.11) 38%,
       transparent 70%
     ),
-    radial-gradient(38% 50% at 86% 78%, rgba(194, 31, 43, 0.14) 0%, transparent 68%);
+    radial-gradient(38% 50% at 86% 78%, color-mix(in oklab, var(--olive) 45%, transparent) 0%, transparent 68%);
   --bloom-soft: radial-gradient(
       50% 70% at 18% 20%,
-      rgba(194, 31, 43, 0.14) 0%,
+      rgba(168, 23, 42, 0.12) 0%,
       transparent 66%
     ),
-    radial-gradient(45% 60% at 88% 82%, rgba(194, 31, 43, 0.08) 0%, transparent 64%);
+    radial-gradient(45% 60% at 88% 82%, color-mix(in oklab, var(--olive) 30%, transparent) 0%, transparent 64%);
 
-  /* Light wash used by the closing band and footer — paper, not a colour field */
-  --gradient-vernissage: var(--bloom-soft), linear-gradient(110deg, #faf8f5 0%, #f4f1ec 100%);
-  --gradient-brand: linear-gradient(135deg, var(--red) 0%, var(--red-deep) 100%);
-  --gradient-hairline: linear-gradient(90deg, transparent, var(--red) 50%, transparent);
+  /* Signature wash — peony glow → warm paper → olive light */
+  --gradient-vernissage: linear-gradient(
+    110deg,
+    var(--blossom-soft) 0%,
+    var(--sun-soft) 50%,
+    var(--olive-soft) 100%
+  );
+  /* CTA fill — peony into wine; dark enough that white text stays AA-legible */
+  --gradient-brand: linear-gradient(135deg, var(--peony) 0%, var(--red-deep) 100%);
+  --gradient-hairline: linear-gradient(
+    90deg,
+    transparent,
+    var(--blossom) 20%,
+    var(--peony) 50%,
+    var(--olive) 80%,
+    transparent
+  );
 
   --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -881,7 +896,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  color: #f5f3fa;
+  color: #f6f2ec;
   text-align: center;
 }
 
@@ -890,7 +905,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #c9b6ff;
+  color: #d8dba8;
 }
 
 .lightbox-caption-text {
@@ -1510,8 +1525,8 @@ fieldset.field > legend {
 
 .wash-aurora {
   background:
-    radial-gradient(55% 70% at 25% 25%, rgba(194, 31, 43, 0.22), transparent 68%),
-    radial-gradient(50% 65% at 80% 80%, rgba(194, 31, 43, 0.12), transparent 66%),
+    radial-gradient(60% 80% at 20% 20%, color-mix(in oklab, var(--blossom) 60%, transparent), transparent 70%),
+    radial-gradient(60% 80% at 85% 80%, color-mix(in oklab, var(--olive) 55%, transparent), transparent 70%),
     var(--card);
 }
 
@@ -1520,20 +1535,24 @@ fieldset.field > legend {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.9;
   /* Positions are driven by Bloom.tsx as the pointer moves; the defaults are
-     the resting place, so this renders correctly with no JS at all. */
+     the resting place, so this renders correctly with no JS at all. One large,
+     smooth peony glow, with an olive light opposite. */
   background:
     radial-gradient(
-      42% 56% at var(--bloom-x, 24%) var(--bloom-y, 28%),
-      rgba(194, 31, 43, 0.32) 0%,
-      rgba(194, 31, 43, 0.14) 38%,
-      transparent 70%
+      55% 80% at var(--bloom-x, 30%) var(--bloom-y, 42%),
+      rgba(168, 23, 42, 0.24) 0%,
+      rgba(168, 23, 42, 0.17) 30%,
+      rgba(168, 23, 42, 0.08) 60%,
+      rgba(168, 23, 42, 0.02) 85%,
+      transparent 100%
     ),
     radial-gradient(
-      36% 48% at calc(100% - var(--bloom-x, 24%)) calc(100% - var(--bloom-y, 28%)),
-      rgba(194, 31, 43, 0.14) 0%,
-      transparent 68%
+      45% 75% at calc(100% - var(--bloom-x, 30%) / 3) calc(100% - var(--bloom-y, 42%) / 3),
+      color-mix(in oklab, var(--olive) 55%, transparent) 0%,
+      color-mix(in oklab, var(--olive) 30%, transparent) 40%,
+      color-mix(in oklab, var(--olive) 8%, transparent) 75%,
+      transparent 100%
     );
 }
 
@@ -1699,14 +1718,11 @@ fieldset.field > legend {
 .wordmark-logo {
   flex: none;
   display: block;
-  color: var(--red-dark);
-  filter: drop-shadow(0 0 7px rgba(194, 31, 43, 0.3));
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .wordmark:hover .wordmark-logo {
-  filter: drop-shadow(0 0 10px rgba(194, 31, 43, 0.45));
-  transform: scale(1.06);
+  transform: scale(1.12);
 }
 
 .wordmark-name {
@@ -1714,16 +1730,6 @@ fieldset.field > legend {
   font-size: 1.5rem;
   line-height: 1;
   letter-spacing: -0.01em;
-}
-
-.wordmark-sup {
-  align-self: flex-start;
-  margin-top: 2px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--brand-strong);
 }
 
 .site-nav {

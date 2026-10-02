@@ -22,8 +22,8 @@ export default function Bloom() {
     }
 
     // Resting position matches the CSS defaults, so the first frame is seamless.
-    const restX = 24;
-    const restY = 28;
+    const restX = 30;
+    const restY = 42;
     let targetX = restX;
     let targetY = restY;
     let currentX = restX;
