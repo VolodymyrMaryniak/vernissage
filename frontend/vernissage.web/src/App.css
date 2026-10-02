@@ -12,7 +12,7 @@
   --blossom: oklch(0.8 0.075 35);
   --blossom-soft: oklch(0.955 0.022 45);
   --olive: oklch(0.8 0.085 115);
-  --olive-soft: oklch(0.955 0.03 110);
+  --olive-soft: oklch(0.935 0.05 115);
   /* legacy accent names, folded into the two-colour palette */
   --sun: var(--olive);
   --sun-soft: oklch(0.975 0.015 90);
@@ -21,9 +21,9 @@
   --sky: var(--olive);
   --sky-soft: var(--olive-soft);
 
-  /* Neutral base — warm paper and a warm near-black */
+  /* Neutral base — warm paper; ink keeps its original near-black */
   --paper: oklch(0.993 0.004 85);
-  --ink-base: oklch(0.2 0.012 30);
+  --ink-base: oklch(0.19 0.025 300);
 
   /* Semantic tokens (names preserved so existing components restyle in place) */
   --bg: var(--paper);
@@ -31,8 +31,8 @@
   --surface-2: oklch(0.982 0.005 85);
   --card: oklch(0.975 0.008 85);
   --ink: var(--ink-base);
-  --ink-soft: oklch(0.36 0.012 35);
-  --ink-mute: oklch(0.52 0.012 45);
+  --ink-soft: oklch(0.35 0.03 300);
+  --ink-mute: oklch(0.51 0.03 300);
   --line: oklch(0.9 0.01 80);
   --line-strong: oklch(0.83 0.014 80);
   /* "brand" is deep peony — emphasis, links and calls to action wear it */
@@ -1514,11 +1514,24 @@ fieldset.field > legend {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.75;
+  /* one large, smooth peony glow behind the headline + an olive light opposite */
   background:
-    radial-gradient(50% 60% at 15% 10%, color-mix(in oklab, var(--blossom) 55%, transparent), transparent 60%),
-    radial-gradient(50% 60% at 90% 90%, color-mix(in oklab, var(--olive) 50%, transparent), transparent 60%);
-  background-size: 180% 180%;
+    radial-gradient(
+      55% 80% at 34% 46%,
+      color-mix(in oklab, var(--peony) 24%, transparent) 0%,
+      color-mix(in oklab, var(--peony) 17%, transparent) 30%,
+      color-mix(in oklab, var(--peony) 8%, transparent) 60%,
+      color-mix(in oklab, var(--peony) 2%, transparent) 85%,
+      transparent 100%
+    ),
+    radial-gradient(
+      45% 75% at 92% 88%,
+      color-mix(in oklab, var(--olive) 55%, transparent) 0%,
+      color-mix(in oklab, var(--olive) 30%, transparent) 40%,
+      color-mix(in oklab, var(--olive) 8%, transparent) 75%,
+      transparent 100%
+    );
+  background-size: 115% 115%;
   animation: wash-drift 22s ease-in-out infinite alternate;
 }
 

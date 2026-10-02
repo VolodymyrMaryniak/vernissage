@@ -1,14 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
   <defs>
-    <radialGradient id="peony-dot" cx="60" cy="60" r="56" gradientUnits="userSpaceOnUse">
+    <radialGradient id="peony-dot" cx="60" cy="60" r="58" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#A8172A"/>
-      <stop offset="0.48" stop-color="#A8172A"/>
-      <stop offset="0.6" stop-color="#A8172A" stop-opacity="0.9"/>
-      <stop offset="0.72" stop-color="#A1182A" stop-opacity="0.62"/>
-      <stop offset="0.84" stop-color="#A1182A" stop-opacity="0.3"/>
-      <stop offset="0.94" stop-color="#A1182A" stop-opacity="0.08"/>
-      <stop offset="1" stop-color="#A1182A" stop-opacity="0"/>
+      <stop offset="0.32" stop-color="#A8172A"/>
+      <stop offset="0.405" stop-color="#A8172A" stop-opacity="0.957"/>
+      <stop offset="0.49" stop-color="#A8172A" stop-opacity="0.844"/>
+      <stop offset="0.575" stop-color="#A8172A" stop-opacity="0.684"/>
+      <stop offset="0.66" stop-color="#A8172A" stop-opacity="0.5"/>
+      <stop offset="0.745" stop-color="#A8172A" stop-opacity="0.316"/>
+      <stop offset="0.83" stop-color="#A8172A" stop-opacity="0.156"/>
+      <stop offset="0.915" stop-color="#A8172A" stop-opacity="0.043"/>
+      <stop offset="1" stop-color="#A8172A" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <circle cx="60" cy="60" r="56" fill="url(#peony-dot)"/>
+  <circle cx="60" cy="60" r="58" fill="url(#peony-dot)"/>
 </svg>
