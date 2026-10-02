@@ -1688,12 +1688,11 @@ fieldset.field > legend {
 .wordmark-logo {
   flex: none;
   display: block;
-  color: var(--brand);
   transition: transform 0.2s ease;
 }
 
 .wordmark:hover .wordmark-logo {
-  transform: rotate(-6deg) scale(1.05);
+  transform: scale(1.12);
 }
 
 .wordmark-name {
