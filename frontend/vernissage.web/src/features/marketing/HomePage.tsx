@@ -94,7 +94,7 @@ function formatDateRange(entry: ExhibitionSummary): string | null {
 
 export default function HomePage() {
   useDocumentMeta({
-    title: "Let's document your artshow properly",
+    title: "Let's document your art show properly",
     description:
       'Vernissage is a structured workspace and public archive for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
   });
@@ -136,7 +136,7 @@ export default function HomePage() {
             </span>
           </div>
           <h1 className="display">
-            Let&apos;s document your artshow <em>properly</em>.
+            Let&apos;s document your art show <em>properly</em>.
           </h1>
           <p className="hero-slogan">
             A show is alive for six weeks. <em>Its record is forever.</em>

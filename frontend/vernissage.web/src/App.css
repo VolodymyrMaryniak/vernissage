@@ -14,11 +14,6 @@
   --red-dark: #6e1119;
   --red-tint: #f7e6e7;
 
-  /* Light olive — the action colour, against the red accent */
-  --olive: #c4cb9e;
-  --olive-deep: #b0b885;
-  --olive-ink: #2b2f1a;
-
   /* Neutral base — warm near-white paper, warm near-black ink */
   --paper: #fdfcfa;
   --ink-base: #1a1715;
@@ -289,15 +284,15 @@
 }
 
 .btn-primary {
-  background: var(--olive);
-  color: var(--olive-ink);
+  background: var(--gradient-brand);
+  color: #fff;
   border-radius: var(--radius-pill);
   padding-inline: 18px;
   box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--olive-deep);
+  background: var(--red-dark);
   box-shadow: var(--shadow-md);
 }
 
@@ -1564,9 +1559,9 @@ fieldset.field > legend {
   justify-content: center;
   gap: 8px;
   border-radius: var(--radius-pill);
-  background: var(--olive);
-  color: var(--olive-ink);
-  border: 1px solid var(--olive);
+  background: var(--gradient-brand);
+  color: #fff;
+  border: 1px solid transparent;
   padding: 12px 24px;
   font-size: 0.9rem;
   font-weight: 550;
@@ -1579,8 +1574,7 @@ fieldset.field > legend {
 }
 
 .cta:hover {
-  background: var(--olive-deep);
-  border-color: var(--olive-deep);
+  background: var(--red-dark);
   box-shadow: var(--shadow-lg);
 }
 
