@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Bloom from '../../components/Bloom';
 import { listExhibitions } from '../../api/exhibitionsApi';
 import type { ExhibitionSummary } from '../../types/exhibition';
 import Icon from '../../components/Icon';
@@ -93,7 +94,7 @@ function formatDateRange(entry: ExhibitionSummary): string | null {
 
 export default function HomePage() {
   useDocumentMeta({
-    title: 'Document your art exhibition properly',
+    title: 'I will document your art exhibition properly',
     description:
       'Vernissage is a structured workspace and public archive for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
   });
@@ -125,7 +126,7 @@ export default function HomePage() {
     <>
       {/* ---- Hero ------------------------------------------------ */}
       <section className="hero">
-        <div className="wash-drift" aria-hidden="true" />
+        <Bloom />
         <div className="container hero-inner">
           <div className="hero-meta">
             <span className="chip-mono">v.001</span>
@@ -135,7 +136,7 @@ export default function HomePage() {
             </span>
           </div>
           <h1 className="display">
-            Document your art exhibition <em>properly</em>.
+            I will document your art exhibition <em>properly</em>.
           </h1>
           <p className="hero-slogan">
             A show is alive for six weeks. <em>Its record is forever.</em>

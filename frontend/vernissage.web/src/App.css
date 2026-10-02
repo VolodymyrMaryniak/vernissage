@@ -14,6 +14,11 @@
   --red-dark: #6e1119;
   --red-tint: #f7e6e7;
 
+  /* Light olive — the action colour, against the red accent */
+  --olive: #c4cb9e;
+  --olive-deep: #b0b885;
+  --olive-ink: #2b2f1a;
+
   /* Neutral base — warm near-white paper, warm near-black ink */
   --paper: #fdfcfa;
   --ink-base: #1a1715;
@@ -284,15 +289,15 @@
 }
 
 .btn-primary {
-  background: var(--gradient-brand);
-  color: #fff;
+  background: var(--olive);
+  color: var(--olive-ink);
   border-radius: var(--radius-pill);
   padding-inline: 18px;
   box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.07) saturate(1.05);
+  background: var(--olive-deep);
   box-shadow: var(--shadow-md);
 }
 
@@ -1521,20 +1526,20 @@ fieldset.field > legend {
   z-index: 0;
   pointer-events: none;
   opacity: 0.9;
-  background: var(--bloom-strong);
-  background-size: 160% 160%;
-  animation: wash-drift 26s ease-in-out infinite alternate;
-}
-
-@keyframes wash-drift {
-  from { background-position: 0% 0%; }
-  to { background-position: 100% 100%; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wash-drift {
-    animation: none;
-  }
+  /* Positions are driven by Bloom.tsx as the pointer moves; the defaults are
+     the resting place, so this renders correctly with no JS at all. */
+  background:
+    radial-gradient(
+      42% 56% at var(--bloom-x, 24%) var(--bloom-y, 28%),
+      rgba(194, 31, 43, 0.32) 0%,
+      rgba(194, 31, 43, 0.14) 38%,
+      transparent 70%
+    ),
+    radial-gradient(
+      36% 48% at calc(100% - var(--bloom-x, 24%)) calc(100% - var(--bloom-y, 28%)),
+      rgba(194, 31, 43, 0.14) 0%,
+      transparent 68%
+    );
 }
 
 /* Hairline separator — used under the sticky header */
@@ -1559,21 +1564,23 @@ fieldset.field > legend {
   justify-content: center;
   gap: 8px;
   border-radius: var(--radius-pill);
-  background: var(--gradient-brand);
-  color: #fff;
-  border: 1px solid transparent;
+  background: var(--olive);
+  color: var(--olive-ink);
+  border: 1px solid var(--olive);
   padding: 12px 24px;
   font-size: 0.9rem;
   font-weight: 550;
   text-decoration: none;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.05s ease, opacity 0.15s ease;
   white-space: nowrap;
 }
 
 .cta:hover {
-  filter: brightness(1.07) saturate(1.05);
+  background: var(--olive-deep);
+  border-color: var(--olive-deep);
   box-shadow: var(--shadow-lg);
 }
 

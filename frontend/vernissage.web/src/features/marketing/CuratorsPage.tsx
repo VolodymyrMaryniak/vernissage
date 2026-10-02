@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import Bloom from '../../components/Bloom';
 
 const STEPS = [
   {
@@ -68,7 +69,7 @@ export default function CuratorsPage() {
     <>
       {/* ---- Hero ------------------------------------------------ */}
       <section className="page-hero">
-        <div className="wash-drift" aria-hidden="true" />
+        <Bloom />
         <div className="container page-hero-inner">
           <p className="eyebrow">For independent curators</p>
           <h1 className="display">
