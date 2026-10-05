@@ -16,7 +16,7 @@ export default function ExhibitionDetailPage() {
     description:
       exhibition?.explication ??
       exhibition?.aim ??
-      'A documented exhibition in the Vernissage archive.',
+      'A documented exhibition on Vernissage.',
   });
 
   if (loading || !exhibition) {
@@ -33,7 +33,7 @@ export default function ExhibitionDetailPage() {
     <>
       <ExhibitionDetailView
         exhibition={exhibition}
-        onBack={() => navigate('/archive')}
+        onBack={() => navigate(user ? '/exhibitions' : '/')}
         onEdit={isOwner ? () => navigate(`/exhibitions/${exhibition.id}/edit`) : null}
       />
       {isOwner && (

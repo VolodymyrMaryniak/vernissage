@@ -83,9 +83,6 @@ export default function CuratorsPage() {
             <Link className="cta" to="/exhibitions/new">
               Open a workspace
             </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
-            </Link>
           </div>
         </div>
       </section>

@@ -35,13 +35,13 @@ describe('App', () => {
     expect(screen.getAllByRole('link', { name: 'Document a show' }).length).toBeGreaterThan(0);
   });
 
-  it('renders the archive index at /archive', async () => {
+  it('has no public archive: /archive sends anonymous visitors to sign in', async () => {
     renderAt('/archive');
 
-    expect(screen.getByRole('heading', { name: /indexed/i })).toBeInTheDocument();
     await waitFor(() =>
-      expect(screen.getByText(/no exhibitions have been documented yet/i)).toBeInTheDocument(),
+      expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument(),
     );
+    expect(screen.queryByRole('link', { name: /archive/i })).not.toBeInTheDocument();
   });
 
   it('redirects anonymous users from /exhibitions/new to the sign-in page', async () => {

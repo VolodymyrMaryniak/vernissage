@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { to: '/artists', label: 'For artists' },
   { to: '/curators', label: 'For curators' },
   { to: '/galleries', label: 'For galleries' },
-  { to: '/archive', label: 'Archive' },
 ];
 
 export default function SiteHeader() {
@@ -70,6 +69,9 @@ export default function SiteHeader() {
             <div className="site-header-actions">
               {user ? (
                 <>
+                  <Link className="link-quiet" to="/exhibitions">
+                    My exhibitions
+                  </Link>
                   {analyticsEnabled && (
                     <Link className="link-quiet" to="/analytics">
                       Analytics

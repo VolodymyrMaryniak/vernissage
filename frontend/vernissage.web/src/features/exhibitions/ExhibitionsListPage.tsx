@@ -11,17 +11,14 @@ const PAGE_SIZE = 20;
 
 export default function ExhibitionsListPage() {
   const { user } = useAuth();
-  useDocumentMeta({
-    title: 'Archive',
-    description:
-      'Browse the Vernissage archive — documented exhibitions with catalogues, installation views and citable pages, open to researchers and students.',
-  });
+  useDocumentMeta({ title: 'My exhibitions' });
 
   const [summaries, setSummaries] = useState<ExhibitionSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ExhibitionFilters>({});
+  // Private workspace list: always the caller's own shows (no public browsing).
   const [page, setPage] = useState(1);
   const hasFilters = Object.values(filters).some(Boolean);
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -30,7 +27,7 @@ export default function ExhibitionsListPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await listExhibitions({ ...filters, page, pageSize: PAGE_SIZE });
+      const result = await listExhibitions({ ...filters, mine: true, page, pageSize: PAGE_SIZE });
       setSummaries(result.items);
       setTotal(result.total);
     } catch (err) {
@@ -64,24 +61,19 @@ export default function ExhibitionsListPage() {
   return (
     <div className="container">
       <header className="archive-head">
-        <p className="eyebrow">The archive</p>
+        <p className="eyebrow">Workspace</p>
         <h1 className="headline">
-          Every documented show, <em>indexed</em>.
+          My <em>exhibitions</em>.
         </h1>
-        <p className="lede">
-          Searchable by title, curator, city and date.
-          {user ? '' : ' Open to everyone.'}
-        </p>
-        {user && (
-          <div>
-            <Link className="cta" to="/exhibitions/new">
-              Document a show
-            </Link>
-          </div>
-        )}
+        <p className="lede">Every show you have documented, searchable by title, curator, city and date.</p>
+        <div>
+          <Link className="cta" to="/exhibitions/new">
+            Document a show
+          </Link>
+        </div>
       </header>
 
-      <ExhibitionSearchBar onSearch={handleSearch} showMine={user !== null} />
+      <ExhibitionSearchBar onSearch={handleSearch} />
 
       <ExhibitionList
         exhibitions={summaries}

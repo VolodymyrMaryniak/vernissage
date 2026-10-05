@@ -86,7 +86,7 @@ describe('ExhibitionsListPage', () => {
     expect(screen.queryByRole('navigation', { name: 'Pagination' })).not.toBeInTheDocument();
   });
 
-  it('requests only the caller\'s entries when the "mine" toggle is used', async () => {
+  it('only ever requests the caller\'s own entries', async () => {
     localStorage.setItem('vernissage.token', 'jwt');
     const fetchMock = stubFetch([
       { url: '/api/auth/me', body: USER },
@@ -95,22 +95,9 @@ describe('ExhibitionsListPage', () => {
 
     renderWithProviders(<ExhibitionsListPage />);
 
-    const toggle = await screen.findByLabelText('Only my exhibitions');
-    expect(lastListUrl(fetchMock)).not.toContain('mine=true');
-
-    await userEvent.click(toggle);
-
-    await waitFor(() => expect(lastListUrl(fetchMock)).toContain('mine=true'));
-  });
-
-  it('does not offer the "mine" toggle to anonymous visitors', async () => {
-    stubFetch([{ url: '/api/exhibitions', body: pagedResponse([]) }]);
-
-    renderWithProviders(<ExhibitionsListPage />);
-
-    await waitFor(() =>
-      expect(screen.getByText(/no exhibitions have been documented yet/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Solo show')).toBeInTheDocument());
+    expect(lastListUrl(fetchMock)).toContain('mine=true');
+    // A private list: there is no "only mine" toggle to switch it back to public.
     expect(screen.queryByLabelText('Only my exhibitions')).not.toBeInTheDocument();
   });
 
@@ -131,5 +118,6 @@ describe('ExhibitionsListPage', () => {
 
     await waitFor(() => expect(lastListUrl(fetchMock)).toContain('page=1'));
     expect(lastListUrl(fetchMock)).toContain('q=light');
+    expect(lastListUrl(fetchMock)).toContain('mine=true');
   });
 });

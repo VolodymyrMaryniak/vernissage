@@ -185,7 +185,7 @@ export default function ProfilePage() {
           <p className="page-sub">{profile.email}</p>
         </div>
         <nav className="workspace-links">
-          <Link className="btn btn-ghost btn-sm" to="/archive">
+          <Link className="btn btn-ghost btn-sm" to="/exhibitions">
             My exhibitions
           </Link>
           {analyticsEnabled && (

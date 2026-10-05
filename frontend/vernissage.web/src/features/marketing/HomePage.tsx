@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import Bloom from '../../components/Bloom';
-import { listExhibitions } from '../../api/exhibitionsApi';
-import type { ExhibitionSummary } from '../../types/exhibition';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
 
 // How many entries the "latest" strip pulls (1 featured + the rest listed).
-const LATEST_COUNT = 5;
 
 const BENEFITS: {
   index: string;
@@ -71,56 +67,12 @@ const DRIVE_FILES = [
   { path: '/essays', files: '3 files', size: '12 MB' },
 ];
 
-function formatYear(entry: ExhibitionSummary): string | null {
-  const source = entry.startDate ?? entry.endDate;
-  if (!source) return null;
-  const parsed = new Date(source);
-  return Number.isNaN(parsed.getTime()) ? null : String(parsed.getFullYear());
-}
-
-function formatDateRange(entry: ExhibitionSummary): string | null {
-  const format = (value: string | null) => {
-    if (!value) return null;
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime())
-      ? value
-      : parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-  const start = format(entry.startDate);
-  const end = format(entry.endDate);
-  if (start && end) return `${start} – ${end}`;
-  return start ?? end;
-}
-
 export default function HomePage() {
   useDocumentMeta({
     title: "Let's document your art show properly",
     description:
-      'Vernissage is a structured workspace and public archive for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
+      'Vernissage is a structured workspace for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
   });
-
-  const [latest, setLatest] = useState<ExhibitionSummary[]>([]);
-  const [archivedCount, setArchivedCount] = useState<number | null>(null);
-
-  // The archive drives the counts and the entries shown below; a failure just
-  // leaves the marketing sections out rather than breaking the landing page.
-  useEffect(() => {
-    let cancelled = false;
-    void listExhibitions({ page: 1, pageSize: LATEST_COUNT })
-      .then((result) => {
-        if (cancelled) return;
-        setLatest(result.items);
-        setArchivedCount(result.total);
-      })
-      .catch(() => {
-        // Non-fatal: keep the hero and CTAs.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const [featured, ...rest] = latest;
 
   return (
     <>
@@ -132,7 +84,6 @@ export default function HomePage() {
             <span className="chip-mono">v.001</span>
             <span className="hero-meta-text">
               Workspace for artists, curators &amp; galleries
-              {archivedCount !== null && ` · ${archivedCount} exhibitions archived`}
             </span>
           </div>
           <h1 className="display">
@@ -144,9 +95,6 @@ export default function HomePage() {
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
-            </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
             </Link>
           </div>
         </div>
@@ -293,80 +241,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---- On view in the archive ----------------------------- */}
-      {featured && (
-        <section className="section section--band">
-          <div className="container">
-            <p className="eyebrow">On view in the archive</p>
-            <div className="featured">
-              <Link
-                className="featured-frame"
-                to={`/exhibitions/${featured.id}`}
-                aria-label={`Open ${featured.name}`}
-              >
-                {/* Summaries carry no media, so the frame stays a placeholder. */}
-                <span className="featured-placeholder wash-aurora" aria-hidden="true">
-                  <span className="mono-meta">Installation view</span>
-                </span>
-              </Link>
-              <div className="featured-body">
-                {(featured.location ?? featured.focus) && (
-                  <p className="mono-meta">
-                    {[featured.location, featured.focus].filter(Boolean).map((part, i) => (
-                      <span key={i} style={{ display: 'contents' }}>
-                        {i > 0 && <span className="sep">·</span>}
-                        <span>{part}</span>
-                      </span>
-                    ))}
-                  </p>
-                )}
-                <h2 className="title">
-                  <Link to={`/exhibitions/${featured.id}`}>{featured.name}</Link>
-                </h2>
-                {featured.curator && <p className="artist">{featured.curator}</p>}
-                <p className="mono-meta">
-                  {formatDateRange(featured) && <span>{formatDateRange(featured)}</span>}
-                  {formatDateRange(featured) && featured.mediaCount > 0 && (
-                    <span className="sep">·</span>
-                  )}
-                  {featured.mediaCount > 0 && <span>{featured.mediaCount} files</span>}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ---- Recently documented -------------------------------- */}
-      {rest.length > 0 && (
-        <section className="section">
-          <div className="container">
-            <p className="eyebrow">Latest entries</p>
-            <h2 className="headline">Recently documented shows.</h2>
-            <div className="index-list">
-              {rest.map((e, i) => (
-                <div className="index-entry" key={e.id}>
-                  <Link className="index-row" to={`/exhibitions/${e.id}`}>
-                    <span className="index-row-index">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="index-thumb wash-vernissage" aria-hidden="true" />
-                    <span className="index-row-main">
-                      <span className="index-row-title">
-                        {e.name}
-                        {e.curator && <span className="artist"> — {e.curator}</span>}
-                      </span>
-                    </span>
-                    <span className="index-row-meta">
-                      {e.location && <span>{e.location}</span>}
-                      {formatYear(e) && <span>{formatYear(e)}</span>}
-                    </span>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ---- CTA band ------------------------------------------- */}
       <section className="cta-band">
         <div className="container section cta-band-inner">
@@ -376,14 +250,11 @@ export default function HomePage() {
           </div>
           <div>
             <p className="prose">
-              Start documenting your own, or read what others have catalogued.
+              Start documenting your next show.
             </p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
                 Start documenting
-              </Link>
-              <Link className="cta cta--secondary" to="/archive">
-                Browse the archive
               </Link>
             </div>
           </div>

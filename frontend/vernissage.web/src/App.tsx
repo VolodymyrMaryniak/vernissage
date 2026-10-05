@@ -35,7 +35,16 @@ function App() {
           <Route path="/artists" element={<ArtistsPage />} />
           <Route path="/curators" element={<CuratorsPage />} />
           <Route path="/galleries" element={<GalleriesPage />} />
-          <Route path="/archive" element={<ExhibitionsListPage />} />
+          <Route
+            path="/exhibitions"
+            element={
+              <RequireAuth>
+                <ExhibitionsListPage />
+              </RequireAuth>
+            }
+          />
+          {/* The public archive is gone; old links land on the private list. */}
+          <Route path="/archive" element={<Navigate to="/exhibitions" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route

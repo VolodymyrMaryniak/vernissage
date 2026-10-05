@@ -62,7 +62,7 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
         <div className="exhibition-cover">{cover && <img src={cover} alt={exhibition.name} />}</div>
         <div className="container exhibition-headings">
           <button type="button" className="link-quiet" onClick={onBack}>
-            ← Back to the archive
+            ← Back to my exhibitions
           </button>
           <p className="eyebrow">Exhibition</p>
           {metaStrip.length > 0 && (
