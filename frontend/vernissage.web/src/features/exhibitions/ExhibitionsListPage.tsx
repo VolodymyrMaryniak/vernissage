@@ -6,14 +6,18 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from '../auth/useAuth';
 import ExhibitionList from './ExhibitionList';
 import ExhibitionSearchBar from './ExhibitionSearchBar';
-import { ROLE_BADGE } from './roles';
+import { useMessages } from '../../i18n/useI18n';
+import Rich from '../../i18n/Rich';
+import { fmt, plural } from '../../i18n/format';
 import type { CreatorRole } from '../../types/auth';
 
 const PAGE_SIZE = 20;
 
 export default function ExhibitionsListPage() {
   const { user } = useAuth();
-  useDocumentMeta({ title: 'My exhibitions' });
+  const m = useMessages();
+  const t = m.ex.list;
+  useDocumentMeta({ title: t.metaTitle });
 
   const [summaries, setSummaries] = useState<ExhibitionSummary[]>([]);
   const [total, setTotal] = useState(0);
@@ -35,11 +39,11 @@ export default function ExhibitionsListPage() {
       setSummaries(result.items);
       setTotal(result.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load exhibitions');
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
-  }, [filters, page, role]);
+  }, [filters, page, role, t.loadFailed]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -53,38 +57,38 @@ export default function ExhibitionsListPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this exhibition and all its media?')) return;
+    if (!window.confirm(t.confirmDelete)) return;
     try {
       await deleteExhibition(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete exhibition');
+      setError(err instanceof Error ? err.message : t.deleteFailed);
     }
   };
 
   return (
     <div className="container">
       <header className="archive-head">
-        <p className="eyebrow">Workspace</p>
+        <p className="eyebrow">{t.eyebrow}</p>
         <h1 className="headline">
-          My <em>exhibitions</em>.
+          <Rich text={t.title} />
         </h1>
-        <p className="lede">Every show you have documented, searchable by title, curator, city and date.</p>
+        <p className="lede">{t.lede}</p>
         <div>
           <Link className="cta" to="/exhibitions/new">
-            Document a show
+            {m.nav.documentAShow}
           </Link>
         </div>
       </header>
 
       {accountRoles.length > 1 && (
-        <div className="role-filter" role="group" aria-label="Filter by your role">
+        <div className="role-filter" role="group" aria-label={t.filterByRole}>
           <button type="button" aria-pressed={role === null} onClick={() => { setRole(null); setPage(1); }}>
-            All
+            {t.all}
           </button>
           {accountRoles.map((r) => (
             <button key={r} type="button" aria-pressed={role === r} onClick={() => { setRole(r); setPage(1); }}>
-              {ROLE_BADGE[r]}
+              {m.roles.badge[r]}
             </button>
           ))}
         </div>
@@ -103,17 +107,17 @@ export default function ExhibitionsListPage() {
       />
 
       {!loading && !error && total > PAGE_SIZE && (
-        <nav className="pager" aria-label="Pagination">
+        <nav className="pager" aria-label={t.pagination}>
           <button
             type="button"
             className="btn btn-ghost btn-sm"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            ← Previous
+            {t.previous}
           </button>
           <span className="pager-status mono-meta">
-            Page {page} of {pageCount} · {total} entries
+            {fmt(t.pageStatus, { page, pages: pageCount })} · {plural(total, t.entries)}
           </span>
           <button
             type="button"
@@ -121,7 +125,7 @@ export default function ExhibitionsListPage() {
             disabled={page >= pageCount}
             onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
           >
-            Next →
+            {t.next}
           </button>
         </nav>
       )}

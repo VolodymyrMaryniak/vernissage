@@ -66,6 +66,8 @@ Write-Host '==> Resolving secrets'
 $sqlAdminLogin = 'vernissage_admin'
 $sqlPassword = $null
 $jwtKey = $null
+# Optional: the AI assistant is off without it. Taken from $env:ANTHROPIC_API_KEY, else the live app.
+$anthropicKey = $env:ANTHROPIC_API_KEY
 
 $liveSettingsJson = az webapp config appsettings list --name $WebAppName --resource-group $ResourceGroup --subscription $SubscriptionId -o json 2>$null
 if ($LASTEXITCODE -eq 0 -and $liveSettingsJson) {
@@ -74,6 +76,7 @@ if ($LASTEXITCODE -eq 0 -and $liveSettingsJson) {
     if ($connSetting -match 'User ID=([^;]+)') { $sqlAdminLogin = $Matches[1] }
     if ($connSetting -match 'Password=([^;]+)') { $sqlPassword = $Matches[1] }
     $jwtKey = ($liveSettings | Where-Object name -eq 'Jwt__SigningKey').value
+    if (-not $anthropicKey) { $anthropicKey = ($liveSettings | Where-Object name -eq 'Anthropic__ApiKey').value }
     if ($sqlPassword -and $jwtKey) { Write-Host '    Reusing secrets from the live web app.' }
 }
 
@@ -96,6 +99,7 @@ if (-not $jwtKey) {
 $env:VERNISSAGE_SQL_ADMIN_LOGIN = $sqlAdminLogin
 $env:VERNISSAGE_SQL_ADMIN_PASSWORD = $sqlPassword
 $env:VERNISSAGE_JWT_SIGNING_KEY = $jwtKey
+$env:VERNISSAGE_ANTHROPIC_API_KEY = if ($anthropicKey) { $anthropicKey } else { '' }
 $env:VERNISSAGE_CLIENT_IP = $ClientIp
 try {
     $templateArgs = @(
@@ -118,7 +122,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'deployment failed' }
 }
 finally {
-    Remove-Item Env:\VERNISSAGE_SQL_ADMIN_LOGIN, Env:\VERNISSAGE_SQL_ADMIN_PASSWORD, Env:\VERNISSAGE_JWT_SIGNING_KEY, Env:\VERNISSAGE_CLIENT_IP -ErrorAction SilentlyContinue
+    Remove-Item Env:\VERNISSAGE_SQL_ADMIN_LOGIN, Env:\VERNISSAGE_SQL_ADMIN_PASSWORD, Env:\VERNISSAGE_JWT_SIGNING_KEY, Env:\VERNISSAGE_ANTHROPIC_API_KEY, Env:\VERNISSAGE_CLIENT_IP -ErrorAction SilentlyContinue
 }
 
 $outputs = (Invoke-Az deployment sub show --name $deploymentName --subscription $SubscriptionId --query properties.outputs --output json) | ConvertFrom-Json
@@ -148,6 +152,7 @@ $gitHubSecrets = [ordered]@{
     'JWT_SIGNING_KEY'                                                 = $jwtKey
     'AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_ISLAND_0C4E5B50F'           = $swaToken
 }
+if ($anthropicKey) { $gitHubSecrets['ANTHROPIC_API_KEY'] = $anthropicKey }
 
 $ghReady = $false
 if (-not $SkipGitHubSync) {

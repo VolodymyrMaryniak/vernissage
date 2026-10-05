@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ROLE_BADGE } from './roles';
+import { useMessages } from '../../i18n/useI18n';
 import type { ExhibitionSummary } from '../../types/exhibition';
 
 interface Props {
@@ -40,8 +40,10 @@ export default function ExhibitionList({
   indexOffset = 0,
   onDelete,
 }: Props) {
+  const m = useMessages();
+  const t = m.ex.list;
   if (loading) {
-    return <p className="archive-loading mono-meta">Loading entries…</p>;
+    return <p className="archive-loading mono-meta">{t.loading}</p>;
   }
 
   if (error) {
@@ -51,9 +53,7 @@ export default function ExhibitionList({
   if (exhibitions.length === 0) {
     return (
       <p className="archive-empty">
-        {filtered
-          ? 'No exhibitions match your filters.'
-          : 'No exhibitions have been documented yet.'}
+        {filtered ? t.emptyFiltered : t.empty}
       </p>
     );
   }
@@ -81,7 +81,7 @@ export default function ExhibitionList({
                   <span className="index-row-roles">
                     {e.roles.map((r) => (
                       <span key={r} className={`role-badge role-badge--${r.toLowerCase()}`}>
-                        {ROLE_BADGE[r]}
+                        {m.roles.badge[r]}
                       </span>
                     ))}
                   </span>
@@ -101,7 +101,7 @@ export default function ExhibitionList({
                 className="btn btn-danger-ghost btn-sm index-delete"
                 onClick={() => onDelete(e.id)}
               >
-                Delete
+                {m.common.delete}
               </button>
             )}
           </div>

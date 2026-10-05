@@ -1,6 +1,9 @@
 import type { CvDocument, CvExhibitionKind, CvFont, CvPageSize, CvTemplate } from '../../types/cv';
 import type { ExhibitionSummary } from '../../types/exhibition';
 import type { Profile } from '../../types/profile';
+import en from '../../i18n/en';
+import type { Messages } from '../../i18n/en';
+import { fmt } from '../../i18n/format';
 
 /**
  * A CV reduced to what every renderer (HTML preview, PDF, Word) needs: plain
@@ -36,12 +39,6 @@ export interface CvEntry {
   italicTitle: boolean;
 }
 
-export const KIND_HEADINGS: Record<CvExhibitionKind, string> = {
-  solo: 'Solo exhibitions',
-  group: 'Group exhibitions',
-  curated: 'Curated exhibitions',
-};
-
 const KIND_ORDER: CvExhibitionKind[] = ['solo', 'group', 'curated'];
 
 /** The person's (or gallery's) name for the CV heading. */
@@ -51,8 +48,12 @@ export function cvName(profile: Profile): string {
 }
 
 /** A sensible default headline from the profile, e.g. "Artist · Painting · Kyiv". */
-export function suggestedHeadline(profile: Profile): string {
-  const parts = [profile.roles.join(' & '), profile.medium ?? profile.focus, profile.location ?? profile.businessLocation];
+export function suggestedHeadline(profile: Profile, m: Messages = en): string {
+  const parts = [
+    profile.roles.map((r) => m.roles.name[r]).join(' & '),
+    profile.medium ?? profile.focus,
+    profile.location ?? profile.businessLocation,
+  ];
   return parts.filter((p) => p && p.trim()).join(' · ');
 }
 
@@ -70,10 +71,11 @@ export function exhibitionYears(e: Pick<ExhibitionSummary, 'startDate' | 'endDat
   return start || end ? String(start ?? end) : null;
 }
 
-function exhibitionEntry(e: ExhibitionSummary, kind: CvExhibitionKind): CvEntry {
+function exhibitionEntry(e: ExhibitionSummary, kind: CvExhibitionKind, m: Messages): CvEntry {
   const place = [e.galleryLocation, e.location].filter((p) => p && p.trim()).join(', ');
   // Your own curated show doesn't need "curated by" you.
-  const curator = kind !== 'curated' && e.curator ? `Curated by ${e.curator}` : null;
+  const curator =
+    kind !== 'curated' && e.curator ? fmt(m.cv.doc.curatedBy, { name: e.curator }) : null;
   const detail = [place, curator].filter(Boolean).join('. ');
   return { year: exhibitionYears(e), title: e.name, detail: detail || null, italicTitle: true };
 }
@@ -100,6 +102,7 @@ export function buildCvModel(
   profile: Profile,
   document: CvDocument,
   exhibitions: ExhibitionSummary[],
+  m: Messages = en,
 ): CvModel {
   const byId = new Map(exhibitions.map((e) => [e.id, e]));
   const sections: CvModelSection[] = [];
@@ -126,8 +129,8 @@ export function buildCvModel(
         .filter((c) => c.kind === kind && byId.has(c.exhibitionId))
         .map((c) => byId.get(c.exhibitionId)!)
         .sort((a, b) => (b.startDate ?? b.endDate ?? '').localeCompare(a.startDate ?? a.endDate ?? ''))
-        .map((e) => exhibitionEntry(e, kind));
-      if (entries.length > 0) sections.push({ title: KIND_HEADINGS[kind], entries });
+        .map((e) => exhibitionEntry(e, kind, m));
+      if (entries.length > 0) sections.push({ title: m.cv.doc.kind[kind], entries });
     }
   }
 

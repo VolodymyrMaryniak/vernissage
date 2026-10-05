@@ -1,9 +1,12 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { Fragment, useMemo, useState, type FormEvent } from 'react';
 import type { ExhibitionDetail, ExhibitionWrite } from '../../types/exhibition';
 import { CREATOR_ROLES } from '../../types/auth';
 import type { CreatorRole } from '../../types/auth';
-import { FIELD_SECTIONS } from './fields';
-import { ROLE_IN_SHOW } from './roles';
+import { fieldSections } from './fields';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt } from '../../i18n/format';
+import DraftPanel from '../assistant/DraftPanel';
+import TextAssist from '../assistant/TextAssist';
 
 interface Props {
   initial?: ExhibitionDetail;
@@ -16,9 +19,14 @@ interface Props {
   onCancel: () => void;
   /** The signed-in account's roles; drives the "your role in this show" choices. */
   accountRoles?: CreatorRole[];
+  /** Show the AI assistant (drafting + polish/shorten); the server must have it configured. */
+  assistantEnabled?: boolean;
 }
 
-function emptyForm(initial: ExhibitionDetail | undefined, accountRoles: CreatorRole[]): ExhibitionWrite {
+function emptyForm(
+  initial: ExhibitionDetail | undefined,
+  accountRoles: CreatorRole[],
+): ExhibitionWrite {
   return {
     // A new show for a single-role account is that role; with several, you pick.
     roles: initial?.roles ?? (accountRoles.length === 1 ? [...accountRoles] : []),
@@ -62,8 +70,13 @@ export default function ExhibitionForm({
   onSubmit,
   onCancel,
   accountRoles = [],
+  assistantEnabled = false,
 }: Props) {
   const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial, accountRoles));
+  const m = useMessages();
+  const t = m.ex.form;
+  const label = m.ex.fields.label;
+  const ph = m.ex.fields.placeholder;
   // Offer the account's roles, plus any already on the record; everything if unknown.
   const roleChoices = CREATOR_ROLES.filter(
     (r) => accountRoles.length === 0 || accountRoles.includes(r) || (form.roles ?? []).includes(r),
@@ -82,6 +95,9 @@ export default function ExhibitionForm({
     setForm((prev) => ({ ...prev, [key]: value === '' ? null : value }));
   };
 
+  const applyDraft = (values: Partial<ExhibitionWrite>) =>
+    setForm((prev) => ({ ...prev, ...values }));
+
   const { filled, total } = useMemo(() => completeness(form), [form]);
   const nameEmpty = form.name.trim() === '';
 
@@ -95,54 +111,68 @@ export default function ExhibitionForm({
     <form className="ex-form" onSubmit={handleSubmit}>
       <header className="page-head">
         <div>
-          <p className="eyebrow">{initial ? 'Editing' : 'New record'}</p>
-          <h2>{initial ? initial.name || 'Edit exhibition' : 'Create an exhibition'}</h2>
+          <p className="eyebrow">{initial ? t.editing : t.newRecord}</p>
+          <h2>{initial ? initial.name || t.editTitle : t.createTitle}</h2>
           <p className="page-sub">
-            {filled} of {total} optional fields completed
+            {fmt(t.completeness, { filled, total })}
           </p>
         </div>
       </header>
 
+      {assistantEnabled && (
+        <DraftPanel current={form} onApply={applyDraft} defaultOpen={!initial} />
+      )}
+
       {/* Basics --------------------------------------------------------- */}
       <section className="card form-section">
         <div className="section-head">
-          <h3>Basics</h3>
-          <p>The essentials that identify this exhibition.</p>
+          <h3>{t.basics}</h3>
+          <p>{t.basicsDescription}</p>
         </div>
 
         <fieldset className="role-in-show">
-          <legend className="field-label">Your role in this show</legend>
+          <legend className="field-label">{t.yourRole}</legend>
           <div className="role-chips">
             {roleChoices.map((role) => (
-              <label key={role} className={`role-chip${(form.roles ?? []).includes(role) ? ' is-on' : ''}`}>
-                <input type="checkbox" checked={(form.roles ?? []).includes(role)} onChange={() => toggleRole(role)} />
-                {ROLE_IN_SHOW[role]}
+              <label
+                key={role}
+                className={`role-chip${(form.roles ?? []).includes(role) ? ' is-on' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={(form.roles ?? []).includes(role)}
+                  onChange={() => toggleRole(role)}
+                />
+                {m.roles.inShow[role]}
               </label>
             ))}
           </div>
           {roleChoices.length > 1 && (
-            <p className="field-hint">Pick all that apply: it sorts the show in My exhibitions and on your CV.</p>
+            <p className="field-hint">
+              {t.roleHint}
+            </p>
           )}
         </fieldset>
 
         <label className="field">
           <span className="field-label">
-            Name <span className="req">required</span>
+            {label.name} <span className="req">{t.required}</span>
           </span>
           <input
             type="text"
             required
             maxLength={300}
-            placeholder="e.g. Light & Shadow: A Retrospective"
+            placeholder={ph.name}
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
-            autoFocus
+            // With the assistant panel above, focusing Name would scroll past it.
+            autoFocus={!assistantEnabled}
           />
         </label>
 
         <div className="field-grid">
           <label className="field">
-            <span className="field-label">Start date</span>
+            <span className="field-label">{label.startDate}</span>
             <input
               type="date"
               value={form.startDate ?? ''}
@@ -150,7 +180,7 @@ export default function ExhibitionForm({
             />
           </label>
           <label className="field">
-            <span className="field-label">End date</span>
+            <span className="field-label">{label.endDate}</span>
             <input
               type="date"
               value={form.endDate ?? ''}
@@ -162,21 +192,21 @@ export default function ExhibitionForm({
 
         <div className="field-grid">
           <label className="field">
-            <span className="field-label">Curator</span>
+            <span className="field-label">{label.curator}</span>
             <input
               type="text"
               maxLength={500}
-              placeholder="Who curated the show?"
+              placeholder={ph.curator}
               value={form.curator ?? ''}
               onChange={(e) => update('curator', e.target.value)}
             />
           </label>
           <label className="field">
-            <span className="field-label">Location</span>
+            <span className="field-label">{label.location}</span>
             <input
               type="text"
               maxLength={500}
-              placeholder="City, country"
+              placeholder={ph.location}
               value={form.location ?? ''}
               onChange={(e) => update('location', e.target.value)}
             />
@@ -185,21 +215,21 @@ export default function ExhibitionForm({
 
         <div className="field-grid">
           <label className="field">
-            <span className="field-label">Gallery / venue</span>
+            <span className="field-label">{label.galleryLocation}</span>
             <input
               type="text"
               maxLength={500}
-              placeholder="Where is it being held?"
+              placeholder={ph.galleryLocation}
               value={form.galleryLocation ?? ''}
               onChange={(e) => update('galleryLocation', e.target.value)}
             />
           </label>
           <label className="field">
-            <span className="field-label">Focus / topic</span>
+            <span className="field-label">{label.focus}</span>
             <input
               type="text"
               maxLength={200}
-              placeholder="e.g. Light art, Sculpture"
+              placeholder={ph.focus}
               value={form.focus ?? ''}
               onChange={(e) => update('focus', e.target.value)}
             />
@@ -208,7 +238,7 @@ export default function ExhibitionForm({
       </section>
 
       {/* Grouped long-form sections ------------------------------------ */}
-      {FIELD_SECTIONS.map((section) => (
+      {fieldSections(m).map((section) => (
         <section className="card form-section" key={section.id}>
           <div className="section-head">
             <h3>{section.title}</h3>
@@ -216,25 +246,37 @@ export default function ExhibitionForm({
           </div>
 
           {section.fields.map((f) => (
-            <label className="field" key={f.key}>
-              <span className="field-label">{f.label}</span>
-              {f.multiline ? (
-                <textarea
-                  rows={4}
-                  placeholder={f.placeholder}
-                  value={(form[f.key] as string | null) ?? ''}
-                  onChange={(e) => update(f.key, e.target.value)}
-                />
-              ) : (
-                <input
-                  type="text"
-                  maxLength={500}
-                  placeholder={f.placeholder}
-                  value={(form[f.key] as string | null) ?? ''}
-                  onChange={(e) => update(f.key, e.target.value)}
+            <Fragment key={f.key}>
+              <label className="field">
+                <span className="field-label">{f.label}</span>
+                {f.multiline ? (
+                  <textarea
+                    rows={4}
+                    placeholder={f.placeholder}
+                    value={(form[f.key] as string | null) ?? ''}
+                    onChange={(e) => update(f.key, e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    maxLength={500}
+                    placeholder={f.placeholder}
+                    value={(form[f.key] as string | null) ?? ''}
+                    onChange={(e) => update(f.key, e.target.value)}
+                  />
+                )}
+              </label>
+              {/* Outside the <label>, so clicking the label never presses these buttons. */}
+              {assistantEnabled && f.multiline && (
+                <TextAssist
+                  field={f.key}
+                  label={f.label}
+                  text={(form[f.key] as string | null) ?? ''}
+                  exhibitionName={form.name}
+                  onAccept={(text) => update(f.key, text)}
                 />
               )}
-            </label>
+            </Fragment>
           ))}
         </section>
       ))}
@@ -244,10 +286,10 @@ export default function ExhibitionForm({
       <div className={actionsSticky ? 'form-actions' : 'form-actions form-actions--inline'}>
         <div className="form-actions-inner">
           <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>
-            Cancel
+            {m.common.cancel}
           </button>
           <button type="submit" className="btn btn-primary" disabled={submitting || nameEmpty}>
-            {submitting ? 'Saving…' : initial ? 'Save changes' : 'Create exhibition'}
+            {submitting ? m.common.saving : initial ? t.saveChanges : t.create}
           </button>
         </div>
       </div>

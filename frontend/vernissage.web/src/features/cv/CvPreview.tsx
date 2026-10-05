@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { CV_FONT_SPECS } from './fonts';
 import type { CvEntry, CvModel } from './model';
 import { CV_THEMES, PAGE_POINTS } from './theme';
+import { useMessages } from '../../i18n/useI18n';
 
 interface Props {
   model: CvModel;
@@ -50,6 +51,7 @@ function Sections({ model }: { model: CvModel }) {
 
 /** Live HTML rendering of the CV, styled like the generated PDF. */
 export default function CvPreview({ model, photoUrl }: Props) {
+  const emptyText = useMessages().cv.previewEmpty;
   const theme = CV_THEMES[model.template];
   const page = PAGE_POINTS[model.pageSize];
   const font = CV_FONT_SPECS[model.font];
@@ -143,7 +145,7 @@ export default function CvPreview({ model, photoUrl }: Props) {
           </>
         )}
         {model.sections.length === 0 && (
-          <p className="cv-empty">Choose exhibitions or fill in a section to see them here.</p>
+          <p className="cv-empty">{emptyText}</p>
         )}
       </div>
     </div>

@@ -12,4 +12,6 @@ export interface AnalyticsSummary {
 
 export interface AppConfig {
   analyticsEnabled: boolean;
+  /** Whether the AI assistant for documenting shows is configured. */
+  assistantEnabled?: boolean;
 }

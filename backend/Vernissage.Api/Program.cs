@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Vernissage.Api.Data;
 using Vernissage.Api.Models;
 using Vernissage.Api.Services;
+using Vernissage.Api.Services.Assistant;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddScoped<TokenService>();
+
+// AI assistant for documenting shows; only active when an Anthropic API key is set.
+builder.Services.AddExhibitionAssistant(builder.Configuration);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -144,6 +148,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// After authentication, so the assistant's limit is partitioned per signed-in user.
+app.UseRateLimiter();
 
 app.MapControllers();
 

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { getMetrics, saveMetrics } from '../../api/metricsApi';
 import type { CostItemWrite, ExhibitionMetrics } from '../../types/metrics';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt, formatNumber } from '../../i18n/format';
 
 interface Props {
   exhibitionId: string;
@@ -19,7 +21,7 @@ function toNumberOrNull(value: string): number | null {
 }
 
 function formatMoney(value: number): string {
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return formatNumber(value, undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 /**
@@ -27,6 +29,8 @@ function formatMoney(value: number): string {
  * render it only for the exhibition's owner.
  */
 export default function MetricsSection({ exhibitionId }: Props) {
+  const msg = useMessages();
+  const t = msg.metrics;
   const [metrics, setMetrics] = useState<ExhibitionMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -44,9 +48,9 @@ export default function MetricsSection({ exhibitionId }: Props) {
     try {
       setMetrics(await getMetrics(exhibitionId));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load metrics');
+      setError(err instanceof Error ? err.message : t.loadFailed);
     }
-  }, [exhibitionId]);
+  }, [exhibitionId, t.loadFailed]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -99,7 +103,7 @@ export default function MetricsSection({ exhibitionId }: Props) {
       setMetrics(saved);
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save metrics');
+      setError(err instanceof Error ? err.message : t.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -112,8 +116,8 @@ export default function MetricsSection({ exhibitionId }: Props) {
   return (
     <section className="card view-section metrics-section">
       <div className="section-head">
-        <h3 className="view-section-title">Private metrics</h3>
-        <span className="chip">Only visible to you</span>
+        <h3 className="view-section-title">{t.title}</h3>
+        <span className="chip">{t.onlyYou}</span>
       </div>
 
       {error && <p className="banner banner-error">{error}</p>}
@@ -121,27 +125,27 @@ export default function MetricsSection({ exhibitionId }: Props) {
       {metrics && !editing && (
         <>
           {metrics.updatedAtUtc === null ? (
-            <p className="muted">No metrics recorded yet.</p>
+            <p className="muted">{t.none}</p>
           ) : (
             <dl className="meta-grid">
               <div className="meta-item">
-                <dt>Visitors</dt>
-                <dd>{metrics.visitorsCount ?? '—'}</dd>
+                <dt>{t.visitors}</dt>
+                <dd>{metrics.visitorsCount !== null ? formatNumber(metrics.visitorsCount) : '—'}</dd>
               </div>
               <div className="meta-item">
-                <dt>Satisfaction</dt>
+                <dt>{t.satisfaction}</dt>
                 <dd>{metrics.satisfaction !== null ? `${metrics.satisfaction} / 10` : '—'}</dd>
               </div>
               <div className="meta-item">
-                <dt>Artworks sold</dt>
+                <dt>{t.sold}</dt>
                 <dd>{metrics.artworksSold ?? '—'}</dd>
               </div>
               <div className="meta-item">
-                <dt>Total revenue</dt>
+                <dt>{t.revenue}</dt>
                 <dd>{metrics.totalRevenue !== null ? formatMoney(metrics.totalRevenue) : '—'}</dd>
               </div>
               <div className="meta-item">
-                <dt>Total cost</dt>
+                <dt>{t.cost}</dt>
                 <dd>{formatMoney(metrics.totalCost)}</dd>
               </div>
             </dl>
@@ -159,7 +163,7 @@ export default function MetricsSection({ exhibitionId }: Props) {
           )}
 
           <button type="button" className="btn btn-primary btn-sm" onClick={beginEdit}>
-            {metrics.updatedAtUtc === null ? 'Add metrics' : 'Edit metrics'}
+            {metrics.updatedAtUtc === null ? t.add : t.edit}
           </button>
         </>
       )}
@@ -168,11 +172,11 @@ export default function MetricsSection({ exhibitionId }: Props) {
         <form onSubmit={handleSubmit} className="metrics-form">
           <div className="field-grid">
             <label className="field">
-              <span className="field-label">Number of visitors</span>
+              <span className="field-label">{t.visitorsInput}</span>
               <input type="number" min={0} value={visitors} onChange={(e) => setVisitors(e.target.value)} />
             </label>
             <label className="field">
-              <span className="field-label">Satisfaction (1–10)</span>
+              <span className="field-label">{t.satisfactionInput}</span>
               <input
                 type="number"
                 min={1}
@@ -182,11 +186,11 @@ export default function MetricsSection({ exhibitionId }: Props) {
               />
             </label>
             <label className="field">
-              <span className="field-label">Artworks sold</span>
+              <span className="field-label">{t.sold}</span>
               <input type="number" min={0} value={sold} onChange={(e) => setSold(e.target.value)} />
             </label>
             <label className="field">
-              <span className="field-label">Total revenue</span>
+              <span className="field-label">{t.revenue}</span>
               <input
                 type="number"
                 min={0}
@@ -198,14 +202,14 @@ export default function MetricsSection({ exhibitionId }: Props) {
           </div>
 
           <div className="section-head">
-            <h4 className="view-section-title">Cost breakdown</h4>
-            <span className="muted">Total: {formatMoney(editTotalCost)}</span>
+            <h4 className="view-section-title">{t.costBreakdown}</h4>
+            <span className="muted">{fmt(t.total, { amount: formatMoney(editTotalCost) })}</span>
           </div>
           {costRows.map((row) => (
             <div className="cost-row" key={row.rowId}>
               <input
                 type="text"
-                placeholder="e.g. Framing, rent, welcome brunch…"
+                placeholder={t.costPlaceholder}
                 maxLength={200}
                 value={row.label}
                 onChange={(e) => updateCostRow(row.rowId, { label: e.target.value })}
@@ -214,7 +218,7 @@ export default function MetricsSection({ exhibitionId }: Props) {
                 type="number"
                 min={0}
                 step="0.01"
-                aria-label="Amount"
+                aria-label={t.amount}
                 value={Number.isNaN(row.amount) ? '' : row.amount}
                 onChange={(e) => updateCostRow(row.rowId, { amount: Number(e.target.value) })}
               />
@@ -223,17 +227,17 @@ export default function MetricsSection({ exhibitionId }: Props) {
                 className="btn btn-danger-ghost btn-sm"
                 onClick={() => removeCostRow(row.rowId)}
               >
-                Remove
+                {msg.common.remove}
               </button>
             </div>
           ))}
           <button type="button" className="btn btn-ghost btn-sm" onClick={addCostRow}>
-            + Add cost item
+            {t.addCost}
           </button>
 
           <div className="form-actions--inline">
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving…' : 'Save metrics'}
+              {saving ? msg.common.saving : t.save}
             </button>
             <button
               type="button"
@@ -241,7 +245,7 @@ export default function MetricsSection({ exhibitionId }: Props) {
               onClick={() => setEditing(false)}
               disabled={saving}
             >
-              Cancel
+              {msg.common.cancel}
             </button>
           </div>
         </form>

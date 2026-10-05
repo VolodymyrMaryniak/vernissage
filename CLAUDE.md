@@ -195,6 +195,64 @@ galleries and institutions), not a public archive:
   Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
   Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
 
+## Colour: burgundy, light and dark themes
+
+- The brand colour is **burgundy** `#7D1D32` (`--peony` in `App.css`, the logo dot,
+  the favicon and the CV accent). `--brand-fill` is the red behind white text
+  (buttons, active chips); on light it equals `--peony`.
+- **Dark theme** is opt-in (light is the default; the OS setting is ignored): a
+  sun/moon toggle in the header and footer sets `<html data-theme="dark">`, saved
+  in `localStorage` (`vernissage.theme`) and applied in `main.tsx` before the first
+  render. `src/theme/` holds the store and toggle. All dark values are token
+  overrides in the `:root[data-theme='dark'] .app` block at the end of `App.css`,
+  plus a few overrides for backgrounds that are literals. In dark, `--peony` is a
+  lighter rose-burgundy (`#cc6680`) so red *text* stays legible, and `--brand-fill`
+  a deep burgundy so white text on it stays AA. Use tokens, not literal colours, in
+  new styles; literals are only for surfaces that are dark in both themes (reel,
+  lightbox, photo overlays) or for paper objects (CV preview pages).
+
+## Languages (English, French, Ukrainian)
+
+- The UI is translated into **English (default), French and Ukrainian** with a small
+  in-house layer in `src/i18n` (no i18n library). English is the default for every
+  visitor (the browser language is *not* used); the choice is saved in
+  `localStorage` (`vernissage.locale`) and sets `<html lang>`. Pickers: a compact
+  select in the header, EN · FR · UA buttons in the footer.
+- **Dictionaries:** `src/i18n/en/*.ts` is the source text *and* the type
+  (`Messages`); `fr/` and `uk/` are typed against it, so a missing or extra key fails
+  the build. French and Ukrainian are lazy-loaded chunks; `main.tsx` loads the saved
+  language before the first render. Components read text with
+  `const m = useMessages()` → `m.ex.form.title`; no provider is needed in tests
+  (the context defaults to English).
+- **Helpers** (`src/i18n/format.ts`): `fmt('{n} of {total}', vars)`, `plural(n, forms)`
+  (Intl plural rules, so Ukrainian gets one/few/many), `formatDate`/`formatNumber`
+  in the active language. `<Rich text="… *emphasis* …" />` renders `*…*` as `<em>`.
+- **Adding text:** add the key to `en/…`, then the same key to `fr/…` and `uk/…`
+  (the compiler lists what's missing). `i18n.test.tsx` fails if a sentence-length
+  string in fr/uk is still identical to English. French strings use a narrow
+  no-break space before `? ! : ;` and inside « ».
+- The generated CV's headings ("Solo exhibitions", "Curated by …") follow the UI
+  language; default CV section titles are localized until the CV is first saved.
+  API error messages and the unlisted `/version` page stay in English.
+
+## AI assistant ("Draft with AI")
+
+- `POST /api/assistant/draft` (multipart `notes` + optional PDF ≤ 10 MB) proposes
+  values for every record field; `POST /api/assistant/improve` (`polish`/`shorten`)
+  rewrites one long text. Signed-in only, rate-limited to 30 calls/user/hour, and
+  **404 unless configured**. Code: `Controllers/AssistantController.cs`,
+  `Services/Assistant/` (Claude via the official `Anthropic` NuGet SDK, structured
+  JSON output, model `claude-opus-5-5`).
+- **On/off:** needs an Anthropic API key — config `Anthropic:ApiKey` (App Service
+  `Anthropic__ApiKey`, or env `ANTHROPIC_API_KEY`); `Features:AssistantEnabled=false`
+  turns it off. `GET /api/config` exposes `assistantEnabled`. **Never commit the key**:
+  locally use `dotnet user-secrets set Anthropic:ApiKey …`; for dev, add the GitHub
+  secret `ANTHROPIC_API_KEY` — the API deploy workflow and `infra/deploy.ps1` pass it
+  through (optional everywhere; absent = assistant off).
+- Frontend: `src/features/assistant` — `DraftPanel` (top of the create/edit form;
+  every suggestion is opt-in, already-filled fields unticked) and `TextAssist`
+  (Polish/Shorten under long text fields). Nothing is saved until the form is saved.
+
 ## Home visuals & show reels
 
 - **Home slideshow** (`features/marketing/media/PhotoSlideshow.tsx`): opening-night

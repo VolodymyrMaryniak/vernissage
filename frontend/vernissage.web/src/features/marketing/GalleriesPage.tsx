@@ -2,25 +2,28 @@ import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import MarginCalculator from './demos/MarginCalculator';
 import SeasonPlanner from './demos/SeasonPlanner';
+import { euro } from './demos/money';
+import { useMessages } from '../../i18n/useI18n';
+import Rich from '../../i18n/Rich';
+import { formatNumber } from '../../i18n/format';
+import type { Messages } from '../../i18n/en';
 
-const KPIS = [
-  { label: 'Visitors this season', value: '6,280', bars: [40, 55, 35, 70, 90] },
-  { label: 'Works sold', value: '47', bars: [50, 30, 40, 65, 95] },
-  { label: 'Net after costs', value: '€41,700', bars: [30, 45, 25, 80, 70] },
+const KPIS: { key: keyof Messages['galleries']['kpis']; value: () => string; bars: number[] }[] = [
+  { key: 'visitors', value: () => formatNumber(6280), bars: [40, 55, 35, 70, 90] },
+  { key: 'sold', value: () => formatNumber(47), bars: [50, 30, 40, 65, 95] },
+  { key: 'net', value: () => euro(41700), bars: [30, 45, 25, 80, 70] },
 ];
 
-const TEAM = [
-  { title: 'One account, every role', body: 'Gallery, curator and artist in any combination, with a profile to match.' },
-  { title: 'Private by default', body: 'Costs, sales and visitor numbers are visible only to you.' },
-  { title: 'Shared Drive for the program', body: 'One folder per show for views, masters and press.', planned: true },
+const TEAM: { key: keyof Messages['galleries']['team']; planned?: boolean }[] = [
+  { key: 'roles' },
+  { key: 'private' },
+  { key: 'drive', planned: true },
 ];
 
 export default function GalleriesPage() {
-  useDocumentMeta({
-    title: 'For galleries',
-    description:
-      'Document every show in your program and see what each one cost, sold and drew, privately and across the whole season.',
-  });
+  const m = useMessages();
+  const t = m.galleries;
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   return (
     <div className="audience audience--galleries">
@@ -28,25 +31,22 @@ export default function GalleriesPage() {
       <section className="page-hero aud-hero">
         <div className="container aud-hero-inner">
           <div className="aud-hero-text">
-            <p className="eyebrow">For galleries &amp; institutions</p>
+            <p className="eyebrow">{t.eyebrow}</p>
             <h1 className="display">
-              Your program, <em>run like a business</em>.
+              <Rich text={t.title} />
             </h1>
-            <p className="lede">
-              Document every show, then see what each one cost, sold and drew, privately and across
-              the whole season.
-            </p>
+            <p className="lede">{t.lede}</p>
             <div className="hero-actions">
               <Link className="cta" to="/register">
-                Set up your gallery
+                {t.cta}
               </Link>
             </div>
           </div>
-          <ul className="kpi-tiles" aria-label="Example season figures">
+          <ul className="kpi-tiles" aria-label={t.kpiLabel}>
             {KPIS.map((k) => (
-              <li key={k.label}>
-                <span className="kpi-label">{k.label}</span>
-                <span className="kpi-value">{k.value}</span>
+              <li key={k.key}>
+                <span className="kpi-label">{t.kpis[k.key]}</span>
+                <span className="kpi-value">{k.value()}</span>
                 <span className="kpi-bars" aria-hidden="true">
                   {k.bars.map((b, i) => (
                     <span key={i} style={{ height: `${b}%` }} />
@@ -62,11 +62,11 @@ export default function GalleriesPage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Your season</p>
+            <p className="eyebrow">{t.seasonEyebrow}</p>
             <h2 className="headline">
-              Every show in the program, <em>with its numbers</em>.
+              <Rich text={t.seasonTitle} />
             </h2>
-            <p className="prose">Click a show to open its figures.</p>
+            <p className="prose">{t.seasonBody}</p>
           </div>
           <SeasonPlanner />
         </div>
@@ -76,11 +76,11 @@ export default function GalleriesPage() {
       <section className="section section--band">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Before you commit</p>
+            <p className="eyebrow">{t.marginEyebrow}</p>
             <h2 className="headline">
-              What will this show <em>leave you with</em>?
+              <Rich text={t.marginTitle} />
             </h2>
-            <p className="prose">Move the sliders. Vernissage keeps the real figures for every show you run.</p>
+            <p className="prose">{t.marginBody}</p>
           </div>
           <MarginCalculator />
         </div>
@@ -89,15 +89,15 @@ export default function GalleriesPage() {
       {/* ---- Team ---------------------------------------------- */}
       <section className="section">
         <div className="container">
-          <p className="eyebrow">Built for a team</p>
+          <p className="eyebrow">{t.teamEyebrow}</p>
           <ul className="aud-also">
-            {TEAM.map((t) => (
-              <li key={t.title}>
+            {TEAM.map((item) => (
+              <li key={item.key}>
                 <h3>
-                  {t.title}
-                  {t.planned && <span className="chip-mono chip-planned">Planned</span>}
+                  {t.team[item.key].title}
+                  {item.planned && <span className="chip-mono chip-planned">{m.common.planned}</span>}
                 </h3>
-                <p>{t.body}</p>
+                <p>{t.team[item.key].body}</p>
               </li>
             ))}
           </ul>
@@ -107,12 +107,12 @@ export default function GalleriesPage() {
       <section className="cta-band">
         <div className="container section cta-band-inner">
           <div>
-            <p className="eyebrow">Analytics free while in beta</p>
-            <h2 className="headline">Put this season on the record.</h2>
+            <p className="eyebrow">{t.ctaEyebrow}</p>
+            <h2 className="headline">{t.ctaTitle}</h2>
           </div>
           <div className="cta-band-actions">
             <Link className="cta" to="/register">
-              Set up your gallery
+              {t.cta}
             </Link>
           </div>
         </div>

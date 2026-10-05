@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReelData, Scene } from './scenes';
 import { MAX_WORKS, buildScenes, sceneAt, sceneStart, totalDuration } from './scenes';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt, formatNumber, plural } from '../../i18n/format';
+import type { Messages } from '../../i18n/en';
 
 interface Props {
   data: ReelData;
@@ -22,20 +25,11 @@ function timecode(seconds: number): string {
 }
 
 function number(value: number, fractionDigits = 0): string {
-  return value.toLocaleString(undefined, {
+  return formatNumber(value, undefined, {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   });
 }
-
-const SCENE_LABEL: Record<Scene['kind'], string> = {
-  title: 'Title',
-  photo: 'Photograph',
-  works: 'The works',
-  numbers: 'The numbers',
-  costs: 'The costs',
-  end: 'End',
-};
 
 /**
  * A show reel: a short film generated from an exhibition's inventory, played in
@@ -43,6 +37,8 @@ const SCENE_LABEL: Record<Scene['kind'], string> = {
  * is rendered; each scene is drawn from the data and animated by time.
  */
 export default function ShowReel({ data, autoPlay = false, endLine }: Props) {
+  const m = useMessages();
+  const t = m.reel;
   const scenes = useMemo(() => buildScenes(data), [data]);
   const duration = useMemo(() => totalDuration(scenes), [scenes]);
   const [time, setTime] = useState(0);
@@ -114,14 +110,14 @@ export default function ShowReel({ data, autoPlay = false, endLine }: Props) {
       ref={rootRef}
       role="region"
       aria-roledescription="show reel"
-      aria-label={`Show reel: ${data.title}`}
+      aria-label={fmt(t.region, { title: data.title })}
     >
       <div className="reel-screen" onClick={toggle}>
         <div className="reel-scene" key={index} data-kind={scene.kind}>
-          <SceneView scene={scene} data={data} progress={progress} endLine={endLine} />
+          <SceneView scene={scene} data={data} progress={progress} endLine={endLine} t={t} />
         </div>
         <span className="reel-rec chip-mono" aria-hidden="true">
-          Generated from the inventory
+          {t.badge}
         </span>
         {(!started || finished) && !playing && (
           <span className="reel-bigplay" aria-hidden="true">
@@ -135,11 +131,11 @@ export default function ShowReel({ data, autoPlay = false, endLine }: Props) {
           type="button"
           className="reel-play"
           onClick={toggle}
-          aria-label={playing ? 'Pause reel' : finished ? 'Replay reel' : 'Play reel'}
+          aria-label={playing ? t.pause : finished ? t.replay : t.play}
         >
           {playing ? '❚❚' : finished ? '↺' : '▶'}
         </button>
-        <div className="reel-scrubber" role="group" aria-label="Scenes">
+        <div className="reel-scrubber" role="group" aria-label={t.scenes}>
           {scenes.map((s, i) => {
             const fill = i < index ? 1 : i === index ? progress : 0;
             return (
@@ -148,7 +144,7 @@ export default function ShowReel({ data, autoPlay = false, endLine }: Props) {
                 key={i}
                 className="reel-seg"
                 style={{ flexGrow: s.duration }}
-                aria-label={`Scene ${i + 1}: ${SCENE_LABEL[s.kind]}`}
+                aria-label={fmt(t.scene, { n: i + 1, label: t.sceneLabel[s.kind] })}
                 aria-current={i === index ? 'step' : undefined}
                 onClick={() => {
                   // Like a video player: jumping to a scene plays from there.
@@ -175,17 +171,19 @@ function SceneView({
   data,
   progress,
   endLine,
+  t,
 }: {
   scene: Scene;
   data: ReelData;
   progress: number;
   endLine?: string;
+  t: Messages['reel'];
 }) {
   switch (scene.kind) {
     case 'title':
       return (
         <div className="reel-title">
-          <p className="reel-kicker">Vernissage presents</p>
+          <p className="reel-kicker">{t.presents}</p>
           <h3>{data.title}</h3>
           {(data.byline || data.dates || data.venue) && (
             <p className="reel-sub">
@@ -221,17 +219,17 @@ function SceneView({
       const more = data.works.length - shown.length;
       return (
         <div className="reel-works">
-          <p className="reel-kicker">The works · {data.works.length}</p>
+          <p className="reel-kicker">{fmt(t.works, { n: data.works.length })}</p>
           <ol>
             {shown.map((w, i) => (
               <li key={i} style={{ animationDelay: `${0.15 + i * 0.22}s` }}>
                 <span className="reel-work-n">{String(i + 1).padStart(2, '0')}</span>
                 <span className="reel-work-title">{w.title}</span>
-                {w.sold && <span className="reel-sold" aria-label="sold" />}
+                {w.sold && <span className="reel-sold" aria-label={t.sold} />}
               </li>
             ))}
           </ol>
-          {more > 0 && <p className="reel-more">and {more} more</p>}
+          {more > 0 && <p className="reel-more">{plural(more, t.more)}</p>}
         </div>
       );
     }
@@ -240,22 +238,22 @@ function SceneView({
       const s = data.stats ?? {};
       const k = easeOut(progress / 0.55);
       const tiles = [
-        typeof s.visitors === 'number' && { label: 'Visitors', value: number(s.visitors * k) },
+        typeof s.visitors === 'number' && { label: t.visitors, value: number(s.visitors * k) },
         typeof s.sold === 'number' && {
-          label: 'Works sold',
+          label: t.worksSold,
           value: number(s.sold * k),
-          extra: data.works.length >= s.sold ? `of ${data.works.length}` : undefined,
+          extra: data.works.length >= s.sold ? fmt(t.ofTotal, { n: data.works.length }) : undefined,
         },
-        typeof s.revenue === 'number' && { label: 'Revenue', value: number(s.revenue * k) },
+        typeof s.revenue === 'number' && { label: t.revenue, value: number(s.revenue * k) },
         typeof s.satisfaction === 'number' && {
-          label: 'Satisfaction',
+          label: t.satisfaction,
           value: number(s.satisfaction * k, 1),
           extra: '/ 10',
         },
       ].filter(Boolean) as { label: string; value: string; extra?: string }[];
       return (
         <div className="reel-numbers">
-          <p className="reel-kicker">The numbers · private to you</p>
+          <p className="reel-kicker">{t.numbers}</p>
           <dl>
             {tiles.map((t) => (
               <div key={t.label}>
@@ -278,7 +276,7 @@ function SceneView({
       const revenue = data.stats?.revenue;
       return (
         <div className="reel-costs">
-          <p className="reel-kicker">Where the money went · {number(total)}</p>
+          <p className="reel-kicker">{fmt(t.costs, { total: number(total) })}</p>
           <ul>
             {costs.map((c, i) => (
               <li key={c.label + i}>
@@ -296,7 +294,7 @@ function SceneView({
           </ul>
           {typeof revenue === 'number' && (
             <p className="reel-margin">
-              Margin <strong>{number(revenue - total)}</strong>
+              {t.margin} <strong>{number(revenue - total)}</strong>
             </p>
           )}
         </div>
@@ -308,7 +306,7 @@ function SceneView({
         <div className="reel-end">
           <span className="reel-dot" aria-hidden="true" />
           <h3>{data.title}</h3>
-          <p className="reel-sub">{endLine ?? 'Documented on Vernissage'}</p>
+          <p className="reel-sub">{endLine ?? t.endLine}</p>
         </div>
       );
   }

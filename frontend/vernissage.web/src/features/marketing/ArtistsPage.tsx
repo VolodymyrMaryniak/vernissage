@@ -4,22 +4,23 @@ import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
 import CvDemo from './demos/CvDemo';
 import SoldWall from './demos/SoldWall';
+import { useMessages } from '../../i18n/useI18n';
+import Rich from '../../i18n/Rich';
+import type { Messages } from '../../i18n/en';
 
-const ALSO: { icon: IconName; title: string; body: string; planned?: boolean }[] = [
-  { icon: 'document', title: 'One record per show', body: 'Dates, works, texts, installation views and audio, kept together.' },
-  { icon: 'globe', title: 'A link you can send', body: 'Point a curator at a show page instead of a pile of attachments.' },
-  { icon: 'folder', title: 'Files that sort themselves', body: 'A Drive folder per show, filed by material as you upload.', planned: true },
+const ALSO: { icon: IconName; key: keyof Messages['artists']['also']; planned?: boolean }[] = [
+  { icon: 'document', key: 'record' },
+  { icon: 'globe', key: 'link' },
+  { icon: 'folder', key: 'files', planned: true },
 ];
 
 // The salon hang in the hero: frames of different sizes, one already sold.
 const FRAMES = ['a', 'b', 'c', 'd', 'e'];
 
 export default function ArtistsPage() {
-  useDocumentMeta({
-    title: 'For artists',
-    description:
-      'Document each show once and Vernissage keeps your CV current, your shows ready to send and a private tally of what sold.',
-  });
+  const m = useMessages();
+  const t = m.artists;
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   return (
     <div className="audience audience--artists">
@@ -27,20 +28,17 @@ export default function ArtistsPage() {
       <section className="page-hero aud-hero">
         <div className="container aud-hero-inner">
           <div className="aud-hero-text">
-            <p className="eyebrow">For artists</p>
+            <p className="eyebrow">{t.eyebrow}</p>
             <h1 className="display">
-              You make the work. <em>We keep the record.</em>
+              <Rich text={t.title} />
             </h1>
-            <p className="lede">
-              Document each show once, and your CV, your show pages and your sales stay up to date
-              on their own.
-            </p>
+            <p className="lede">{t.lede}</p>
             <div className="hero-actions">
               <Link className="cta" to="/exhibitions/new">
-                Document a show
+                {m.nav.documentAShow}
               </Link>
               <Link className="cta cta--secondary" to="/profile/cv">
-                Build your CV
+                {t.buildCv}
               </Link>
             </div>
           </div>
@@ -58,11 +56,11 @@ export default function ArtistsPage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Your CV, always current</p>
+            <p className="eyebrow">{t.cvEyebrow}</p>
             <h2 className="headline">
-              Open call on Friday? <em>Your CV is already done.</em>
+              <Rich text={t.cvTitle} />
             </h2>
-            <p className="prose">Try it: every show you document can go straight onto your CV.</p>
+            <p className="prose">{t.cvBody}</p>
           </div>
           <CvDemo />
         </div>
@@ -72,11 +70,11 @@ export default function ArtistsPage() {
       <section className="section section--band">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Opening night</p>
+            <p className="eyebrow">{t.soldEyebrow}</p>
             <h2 className="headline">
-              Put a red dot on it. <em>Keep count without a spreadsheet.</em>
+              <Rich text={t.soldTitle} />
             </h2>
-            <p className="prose">Tap a work to mark it sold.</p>
+            <p className="prose">{t.soldBody}</p>
           </div>
           <SoldWall />
         </div>
@@ -85,18 +83,18 @@ export default function ArtistsPage() {
       {/* ---- Also ---------------------------------------------- */}
       <section className="section">
         <div className="container">
-          <p className="eyebrow">Also in your studio</p>
+          <p className="eyebrow">{t.alsoEyebrow}</p>
           <ul className="aud-also">
             {ALSO.map((a) => (
-              <li key={a.title}>
+              <li key={a.key}>
                 <span className="cell-icon">
                   <Icon name={a.icon} />
                 </span>
                 <h3>
-                  {a.title}
-                  {a.planned && <span className="chip-mono chip-planned">Planned</span>}
+                  {t.also[a.key].title}
+                  {a.planned && <span className="chip-mono chip-planned">{m.common.planned}</span>}
                 </h3>
-                <p>{a.body}</p>
+                <p>{t.also[a.key].body}</p>
               </li>
             ))}
           </ul>
@@ -106,12 +104,12 @@ export default function ArtistsPage() {
       <section className="cta-band">
         <div className="container section cta-band-inner">
           <div>
-            <p className="eyebrow">Free while in beta</p>
-            <h2 className="headline">Start with your last show.</h2>
+            <p className="eyebrow">{t.ctaEyebrow}</p>
+            <h2 className="headline">{t.ctaTitle}</h2>
           </div>
           <div className="cta-band-actions">
             <Link className="cta" to="/exhibitions/new">
-              Document a show
+              {m.nav.documentAShow}
             </Link>
           </div>
         </div>

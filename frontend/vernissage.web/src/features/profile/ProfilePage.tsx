@@ -9,6 +9,8 @@ import { saveBlob } from '../cv/download';
 import { useAppConfig } from '../config/useAppConfig';
 import BusinessCard from './BusinessCard';
 import { useProfilePhoto } from './useProfilePhoto';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt } from '../../i18n/format';
 
 /** True when the profile has nothing beyond the email and roles. */
 function isBlank(p: Profile): boolean {
@@ -30,6 +32,8 @@ function isBlank(p: Profile): boolean {
 /** "My profile": the profile shown as a business card, with a way to edit it. */
 export default function ProfilePage() {
   const { analyticsEnabled } = useAppConfig();
+  const m = useMessages();
+  const t = m.profile;
   const location = useLocation();
   const justSaved = (location.state as { saved?: boolean } | null)?.saved === true;
 
@@ -47,7 +51,7 @@ export default function ProfilePage() {
         if (!cancelled) setProfile(p);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load profile');
+        if (!cancelled) setError(err instanceof Error ? err.message : t.loadFailed);
       });
     // The CV panel is secondary: if it fails to load, the card still shows.
     void getCv()
@@ -58,10 +62,10 @@ export default function ProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t.loadFailed]);
 
   if (!profile) {
-    return <p className="muted state-message">{error ?? 'Loading…'}</p>;
+    return <p className="muted state-message">{error ?? m.common.loading}</p>;
   }
 
   const handleUploadCv = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -70,16 +74,16 @@ export default function ProfilePage() {
     if (!file) return;
     setCvMessage(null);
     if (file.size > 10 * 1024 * 1024) {
-      setCvMessage('The CV file must be 10 MB or smaller.');
+      setCvMessage(t.cv.tooLarge);
       return;
     }
     setUploading(true);
     try {
       const cv = await uploadCvFile(file);
       setCvFile(cv.uploadedFile);
-      setCvMessage(`Uploaded ${file.name}.`);
+      setCvMessage(fmt(t.cv.uploaded, { name: file.name }));
     } catch (err) {
-      setCvMessage(err instanceof Error ? err.message : 'Failed to upload the CV');
+      setCvMessage(err instanceof Error ? err.message : t.cv.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -89,7 +93,7 @@ export default function ProfilePage() {
     try {
       saveBlob(await downloadCvFile(), cvFile?.fileName ?? 'CV');
     } catch (err) {
-      setCvMessage(err instanceof Error ? err.message : 'Failed to download the CV');
+      setCvMessage(err instanceof Error ? err.message : t.cv.downloadFailed);
     }
   };
 
@@ -97,28 +101,28 @@ export default function ProfilePage() {
     <div className="profile-page">
       <header className="page-head">
         <div>
-          <p className="eyebrow">Account</p>
-          <h2>My profile</h2>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h2>{t.title}</h2>
         </div>
         <nav className="workspace-links">
           <Link className="btn btn-ghost btn-sm" to="/exhibitions">
-            My exhibitions
+            {m.nav.myExhibitions}
           </Link>
           {analyticsEnabled && (
             <Link className="btn btn-ghost btn-sm" to="/analytics">
-              Analytics
+              {m.nav.analytics}
             </Link>
           )}
         </nav>
       </header>
 
-      {justSaved && <p className="banner banner-success">Profile saved.</p>}
+      {justSaved && <p className="banner banner-success">{t.saved}</p>}
 
       <div className="profile-card-wrap">
         <BusinessCard profile={profile} photoUrl={photoUrl} />
         <div className="profile-card-actions">
           <Link className="btn btn-primary" to="/profile/edit">
-            {isBlank(profile) ? 'Complete your profile' : 'Edit profile'}
+            {isBlank(profile) ? t.complete : t.edit}
           </Link>
         </div>
       </div>
@@ -126,26 +130,24 @@ export default function ProfilePage() {
       <section className="card form-section profile-cv" aria-labelledby="profile-cv-title">
         <div className="section-head">
           <h3 className="view-section-title" id="profile-cv-title">
-            CV
+            {t.cv.title}
           </h3>
         </div>
         <p className="muted">
-          {cvFile
-            ? `Your CV file: ${cvFile.fileName}.`
-            : 'Upload the CV you have, or build one from your profile and documented exhibitions.'}
+          {cvFile ? fmt(t.cv.yourFile, { name: cvFile.fileName }) : t.cv.none}
         </p>
         {cvMessage && <p className="profile-cv-message">{cvMessage}</p>}
         <div className="profile-card-actions">
           <Link className="btn btn-primary btn-sm" to="/profile/cv">
-            Update the CV
+            {t.cv.update}
           </Link>
           <label className="btn btn-ghost btn-sm">
-            {uploading ? 'Uploading…' : cvFile ? 'Replace CV file' : 'Upload CV'}
+            {uploading ? t.cv.uploading : cvFile ? t.cv.replace : t.cv.upload}
             <input type="file" accept=".pdf,.doc,.docx,.odt,.rtf,.txt" hidden onChange={handleUploadCv} />
           </label>
           {cvFile && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={handleDownloadCv}>
-              Download CV file
+              {t.cv.download}
             </button>
           )}
         </div>

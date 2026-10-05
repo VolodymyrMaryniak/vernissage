@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import ExhibitionForm from './ExhibitionForm';
-import { FIELD_SECTIONS } from './fields';
+import { fieldSections } from './fields';
+import en from '../../i18n/en';
 
 function renderForm(overrides: Partial<Parameters<typeof ExhibitionForm>[0]> = {}) {
   const onSubmit = vi.fn();
@@ -23,7 +24,7 @@ describe('ExhibitionForm', () => {
   it('renders every configured field section', () => {
     renderForm();
 
-    for (const section of FIELD_SECTIONS) {
+    for (const section of fieldSections(en)) {
       expect(screen.getByRole('heading', { name: section.title })).toBeInTheDocument();
     }
   });

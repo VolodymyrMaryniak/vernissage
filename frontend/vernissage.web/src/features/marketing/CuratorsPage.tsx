@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import ChecklistDemo from './demos/ChecklistDemo';
 import ShowTimeline from './demos/ShowTimeline';
+import { useMessages } from '../../i18n/useI18n';
+import Rich from '../../i18n/Rich';
+import { formatDate } from '../../i18n/format';
 
 // Shows curated across institutions: the record moves with the curator.
 const CAREER = [
@@ -12,11 +15,10 @@ const CAREER = [
 ];
 
 export default function CuratorsPage() {
-  useDocumentMeta({
-    title: 'For independent curators',
-    description:
-      'One place for every show you curate, from first idea to opening night, that stays yours from one institution to the next.',
-  });
+  const m = useMessages();
+  const t = m.curators;
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
+  const dates = `${formatDate('2026-03-12', { day: 'numeric', month: 'long' })} – ${formatDate('2026-04-30')}`;
 
   return (
     <div className="audience audience--curators">
@@ -24,27 +26,24 @@ export default function CuratorsPage() {
       <section className="page-hero aud-hero">
         <div className="container aud-hero-inner">
           <div className="aud-hero-text">
-            <p className="eyebrow">For independent curators</p>
+            <p className="eyebrow">{t.eyebrow}</p>
             <h1 className="display">
-              Every show you curate, <em>from first idea to opening night</em>.
+              <Rich text={t.title} />
             </h1>
-            <p className="lede">
-              Keep the concept, the checklist, the team and the plans in one place, and take it with
-              you to the next institution.
-            </p>
+            <p className="lede">{t.lede}</p>
             <div className="hero-actions">
               <Link className="cta" to="/register">
-                Open your workspace
+                {t.cta}
               </Link>
             </div>
           </div>
-          <figure className="wall-label" aria-label="Example wall label">
+          <figure className="wall-label" aria-label={t.wallLabel}>
             <p className="wall-label-title">Soft Architectures</p>
-            <p>12 March – 30 April 2026</p>
+            <p>{dates}</p>
             <p>Voloshyn Gallery, Kyiv</p>
             <p className="wall-label-rule" />
-            <p>Five artists · 18 works</p>
-            <p className="wall-label-you">Curated by you</p>
+            <p>{t.wallCount}</p>
+            <p className="wall-label-you">{t.wallYou}</p>
           </figure>
         </div>
       </section>
@@ -53,11 +52,11 @@ export default function CuratorsPage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">The life of a show</p>
+            <p className="eyebrow">{t.timelineEyebrow}</p>
             <h2 className="headline">
-              Six stages, <em>one record</em>.
+              <Rich text={t.timelineTitle} />
             </h2>
-            <p className="prose">Click a stage to see what you keep there.</p>
+            <p className="prose">{t.timelineBody}</p>
           </div>
           <ShowTimeline />
         </div>
@@ -67,11 +66,11 @@ export default function CuratorsPage() {
       <section className="section section--band">
         <div className="container aud-split">
           <div className="section-head">
-            <p className="eyebrow">The checklist</p>
+            <p className="eyebrow">{t.checklistEyebrow}</p>
             <h2 className="headline">
-              Know what&apos;s ready <em>before the van arrives</em>.
+              <Rich text={t.checklistTitle} />
             </h2>
-            <p className="prose">Mark works as catalogued and watch the show come together.</p>
+            <p className="prose">{t.checklistBody}</p>
           </div>
           <ChecklistDemo />
         </div>
@@ -81,9 +80,9 @@ export default function CuratorsPage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">Portable</p>
+            <p className="eyebrow">{t.portableEyebrow}</p>
             <h2 className="headline">
-              Institutions change. <em>Your record doesn&apos;t.</em>
+              <Rich text={t.portableTitle} />
             </h2>
           </div>
           <ol className="career-strip">
@@ -101,12 +100,12 @@ export default function CuratorsPage() {
       <section className="cta-band">
         <div className="container section cta-band-inner">
           <div>
-            <p className="eyebrow">Free while in beta</p>
-            <h2 className="headline">Start with the show you&apos;re working on now.</h2>
+            <p className="eyebrow">{t.ctaEyebrow}</p>
+            <h2 className="headline">{t.ctaTitle}</h2>
           </div>
           <div className="cta-band-actions">
             <Link className="cta" to="/register">
-              Open your workspace
+              {t.cta}
             </Link>
           </div>
         </div>

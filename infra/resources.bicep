@@ -19,6 +19,9 @@ param sqlAdminPassword string
 @secure()
 param jwtSigningKey string
 
+@secure()
+param anthropicApiKey string
+
 param clientIpAddress string
 param httpLoggingRetentionDays int
 param gitHubRepository string
@@ -145,7 +148,7 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
       http20Enabled: false
-      appSettings: [
+      appSettings: concat([
         {
           name: 'ConnectionStrings__DefaultConnection'
           value: sqlConnectionString
@@ -170,7 +173,13 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'Seed__DevData'
           value: 'true'
         }
-      ]
+      ], empty(anthropicApiKey) ? [] : [
+        {
+          // Turns on the AI assistant ("Draft with AI", polish/shorten).
+          name: 'Anthropic__ApiKey'
+          value: anthropicApiKey
+        }
+      ])
     }
   }
 }

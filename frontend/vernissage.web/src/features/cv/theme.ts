@@ -34,7 +34,7 @@ export const CV_THEMES: Record<CvTemplate, CvTheme> = {
     roundPhoto: true,
   },
   modern: {
-    accent: '#a8172a',
+    accent: '#7d1d32',
     muted: '#6b6460',
     sidebar: '#f4f1ec',
     nameSize: 22,
@@ -47,7 +47,7 @@ export const CV_THEMES: Record<CvTemplate, CvTheme> = {
     roundPhoto: true,
   },
   minimal: {
-    accent: '#a8172a',
+    accent: '#7d1d32',
     muted: '#8a817b',
     sidebar: null,
     nameSize: 28,
@@ -65,10 +65,4 @@ export const CV_THEMES: Record<CvTemplate, CvTheme> = {
 export const PAGE_POINTS: Record<CvPageSize, { width: number; height: number }> = {
   A4: { width: 595.28, height: 841.89 },
   Letter: { width: 612, height: 792 },
-};
-
-export const TEMPLATE_LABELS: Record<CvTemplate, { label: string; blurb: string }> = {
-  classic: { label: 'Classic', blurb: 'Centred heading, ruled sections' },
-  modern: { label: 'Modern', blurb: 'Sidebar with photo and contacts' },
-  minimal: { label: 'Minimal', blurb: 'Quiet, left-aligned, red accents' },
 };

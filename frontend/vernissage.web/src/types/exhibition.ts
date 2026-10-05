@@ -17,18 +17,6 @@ export const MediaCategory = {
 
 export type MediaCategory = (typeof MediaCategory)[keyof typeof MediaCategory];
 
-export const MEDIA_CATEGORY_LABELS: Record<MediaCategory, string> = {
-  [MediaCategory.ArtworkImage]: 'Artwork image',
-  [MediaCategory.ExpoDesignFull]: 'Expo design (full)',
-  [MediaCategory.ExpoDesignDetail]: 'Expo design (detail)',
-  [MediaCategory.EventPhoto]: 'Event photo',
-  [MediaCategory.ExpositionDesignPlan]: 'Exposition design plan',
-  [MediaCategory.LocationPlan]: 'Location plan',
-  [MediaCategory.Audio]: 'Audio',
-  [MediaCategory.LightingPlan]: 'Lighting plan',
-  [MediaCategory.VrExcursion]: 'VR excursion',
-};
-
 export interface ExhibitionMedia {
   id: string;
   category: MediaCategory;

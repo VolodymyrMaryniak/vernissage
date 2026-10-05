@@ -8,6 +8,8 @@ import type { Profile, ProfileWrite } from '../../types/profile';
 import { useAuth } from '../auth/useAuth';
 import { useProfilePhoto } from './useProfilePhoto';
 import { validatePhoto } from './photo';
+import { useMessages } from '../../i18n/useI18n';
+import type { Messages } from '../../i18n/en';
 
 function toWrite(profile: Profile): ProfileWrite {
   return {
@@ -32,25 +34,31 @@ interface TextFieldDef {
   placeholder?: string;
 }
 
-const GALLERY_FIELDS: TextFieldDef[] = [
-  { key: 'galleryName', label: 'Gallery name' },
-  { key: 'businessLocation', label: 'Business location', placeholder: 'City, country' },
-  { key: 'focus', label: 'Focus', placeholder: 'e.g. Contemporary sculpture' },
-];
+function galleryFields(t: Messages['profile']['form']): TextFieldDef[] {
+  return [
+    { key: 'galleryName', label: t.galleryName },
+    { key: 'businessLocation', label: t.businessLocation, placeholder: t.cityCountry },
+    { key: 'focus', label: t.focus, placeholder: t.focusPlaceholder },
+  ];
+}
 
-const PERSON_FIELDS: TextFieldDef[] = [
-  { key: 'firstName', label: 'Name' },
-  { key: 'lastName', label: 'Surname' },
-  { key: 'socialMedia', label: 'Social media', placeholder: 'Links or handles' },
-  { key: 'placeOfWork', label: 'Place of work' },
-  { key: 'areasOfInterest', label: 'Areas of interest' },
-  { key: 'location', label: 'Location', placeholder: 'City, country' },
-];
+function personFields(t: Messages['profile']['form']): TextFieldDef[] {
+  return [
+    { key: 'firstName', label: t.firstName },
+    { key: 'lastName', label: t.lastName },
+    { key: 'socialMedia', label: t.socialMedia, placeholder: t.socialMediaPlaceholder },
+    { key: 'placeOfWork', label: t.placeOfWork },
+    { key: 'areasOfInterest', label: t.areasOfInterest },
+    { key: 'location', label: t.location, placeholder: t.cityCountry },
+  ];
+}
 
 /** The profile form. Saving returns to the business-card view at /profile. */
 export default function ProfileEditPage() {
   const { refreshUser } = useAuth();
   const navigate = useNavigate();
+  const m = useMessages();
+  const t = m.profile.form;
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState<ProfileWrite | null>(null);
@@ -68,15 +76,15 @@ export default function ProfileEditPage() {
         setForm(toWrite(p));
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load profile');
+        if (!cancelled) setError(err instanceof Error ? err.message : m.profile.loadFailed);
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [m.profile.loadFailed]);
 
   if (!form || !profile) {
-    return <p className="muted state-message">{error ?? 'Loading…'}</p>;
+    return <p className="muted state-message">{error ?? m.common.loading}</p>;
   }
 
   const update = (key: keyof ProfileWrite, value: string) => {
@@ -100,7 +108,7 @@ export default function ProfileEditPage() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (form.roles.length === 0) {
-      setError('Select at least one role.');
+      setError(m.auth.register.pickRole);
       return;
     }
     setSaving(true);
@@ -111,7 +119,7 @@ export default function ProfileEditPage() {
       // Back to the card, which shows a one-off "saved" confirmation.
       navigate('/profile', { state: { saved: true } });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile');
+      setError(err instanceof Error ? err.message : t.saveFailed);
       setSaving(false);
     }
   };
@@ -121,7 +129,7 @@ export default function ProfileEditPage() {
     event.target.value = '';
     if (!file) return;
     setError(null);
-    const invalid = validatePhoto(file);
+    const invalid = validatePhoto(file, t);
     if (invalid) {
       setError(invalid);
       return;
@@ -131,7 +139,7 @@ export default function ProfileEditPage() {
       setProfile(updated);
       setPhotoVersion((v) => v + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload photo');
+      setError(err instanceof Error ? err.message : t.uploadPhotoFailed);
     }
   };
 
@@ -141,7 +149,7 @@ export default function ProfileEditPage() {
       await deleteProfilePhoto();
       setProfile((p) => (p ? { ...p, hasPhoto: false } : p));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove photo');
+      setError(err instanceof Error ? err.message : t.removePhotoFailed);
     }
   };
 
@@ -149,13 +157,13 @@ export default function ProfileEditPage() {
     <div className="profile-page">
       <header className="page-head">
         <div>
-          <p className="eyebrow">Account</p>
-          <h2>Edit profile</h2>
+          <p className="eyebrow">{m.profile.eyebrow}</p>
+          <h2>{t.title}</h2>
           <p className="page-sub">{profile.email}</p>
         </div>
         <nav className="workspace-links">
           <Link className="btn btn-ghost btn-sm" to="/profile">
-            ← Back to profile
+            {t.back}
           </Link>
         </nav>
       </header>
@@ -164,23 +172,23 @@ export default function ProfileEditPage() {
 
       <section className="card form-section">
         <div className="section-head">
-          <h3 className="view-section-title">Photo</h3>
+          <h3 className="view-section-title">{t.photo}</h3>
         </div>
         <div className="profile-photo-row">
           {photoUrl ? (
-            <img className="profile-photo" src={photoUrl} alt="Profile" />
+            <img className="profile-photo" src={photoUrl} alt={t.photoAlt} />
           ) : (
             <span className="ex-avatar" aria-hidden="true">
               {(profile.displayName || profile.email).slice(0, 2).toUpperCase()}
             </span>
           )}
           <label className="btn btn-ghost btn-sm">
-            {profile.hasPhoto ? 'Replace photo' : 'Upload photo'}
+            {profile.hasPhoto ? t.replacePhoto : t.uploadPhoto}
             <input type="file" accept="image/*" hidden onChange={handlePhotoChange} />
           </label>
           {profile.hasPhoto && (
             <button type="button" className="btn btn-danger-ghost btn-sm" onClick={handlePhotoDelete}>
-              Remove
+              {m.common.remove}
             </button>
           )}
         </div>
@@ -189,7 +197,7 @@ export default function ProfileEditPage() {
       <form onSubmit={handleSubmit}>
         <section className="card form-section">
           <div className="section-head">
-            <h3 className="view-section-title">Roles</h3>
+            <h3 className="view-section-title">{t.roles}</h3>
           </div>
           {CREATOR_ROLES.map((role) => (
             <label key={role} className="checkbox-row">
@@ -198,7 +206,7 @@ export default function ProfileEditPage() {
                 checked={form.roles.includes(role)}
                 onChange={() => toggleRole(role)}
               />
-              <span>{role}</span>
+              <span>{m.roles.name[role]}</span>
             </label>
           ))}
         </section>
@@ -206,10 +214,10 @@ export default function ProfileEditPage() {
         {isGallery && (
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">Gallery</h3>
+              <h3 className="view-section-title">{t.gallery}</h3>
             </div>
             <div className="field-grid">
-              {GALLERY_FIELDS.map((f) => (
+              {galleryFields(t).map((f) => (
                 <label className="field" key={f.key}>
                   <span className="field-label">{f.label}</span>
                   <input
@@ -221,7 +229,7 @@ export default function ProfileEditPage() {
                 </label>
               ))}
               <label className="field">
-                <span className="field-label">Year of founding</span>
+                <span className="field-label">{t.foundingYear}</span>
                 <input
                   type="number"
                   min={1000}
@@ -243,10 +251,10 @@ export default function ProfileEditPage() {
         {isPerson && (
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">About you</h3>
+              <h3 className="view-section-title">{t.aboutYou}</h3>
             </div>
             <div className="field-grid">
-              {PERSON_FIELDS.map((f) => (
+              {personFields(t).map((f) => (
                 <label className="field" key={f.key}>
                   <span className="field-label">{f.label}</span>
                   <input
@@ -259,10 +267,10 @@ export default function ProfileEditPage() {
               ))}
               {isArtist && (
                 <label className="field">
-                  <span className="field-label">Medium</span>
+                  <span className="field-label">{t.medium}</span>
                   <input
                     type="text"
-                    placeholder="e.g. Painting, photography"
+                    placeholder={t.mediumPlaceholder}
                     value={form.medium ?? ''}
                     onChange={(e) => update('medium', e.target.value)}
                   />
@@ -274,10 +282,10 @@ export default function ProfileEditPage() {
 
         <div className="form-actions--inline">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Saving…' : 'Save profile'}
+            {saving ? m.common.saving : t.save}
           </button>
           <Link className="btn btn-ghost" to="/profile">
-            Cancel
+            {m.common.cancel}
           </Link>
         </div>
       </form>

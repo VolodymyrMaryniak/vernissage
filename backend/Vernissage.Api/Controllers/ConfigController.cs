@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vernissage.Api.Dtos;
+using Vernissage.Api.Services.Assistant;
 
 namespace Vernissage.Api.Controllers;
 
@@ -12,5 +13,6 @@ public class ConfigController(IConfiguration configuration) : ControllerBase
     public ActionResult<AppConfigDto> Get() => Ok(new AppConfigDto
     {
         AnalyticsEnabled = configuration.GetValue("Features:AnalyticsEnabled", true),
+        AssistantEnabled = AssistantOptions.IsEnabled(configuration),
     });
 }

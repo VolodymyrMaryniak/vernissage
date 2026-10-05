@@ -1,0 +1,97 @@
+import { useState } from 'react';
+import { improveText } from '../../api/assistantApi';
+import type { ImproveMode } from '../../api/assistantApi';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt } from '../../i18n/format';
+
+interface Props {
+  /** Field key, e.g. "explication", so the assistant knows what kind of text it is. */
+  field: string;
+  label: string;
+  text: string;
+  exhibitionName?: string;
+  onAccept: (text: string) => void;
+}
+
+/** Below this many characters there's not much to polish. */
+export const MIN_TEXT = 40;
+
+/**
+ * "Polish" / "Shorten" under a long-text field. The rewrite is only a
+ * proposal: the field changes when the user picks "Use this".
+ */
+export default function TextAssist({ field, label, text, exhibitionName, onAccept }: Props) {
+  const t = useMessages().assistant;
+  const [busy, setBusy] = useState<ImproveMode | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [proposal, setProposal] = useState<string | null>(null);
+
+  if (text.trim().length < MIN_TEXT && !proposal) return null;
+
+  const run = async (mode: ImproveMode) => {
+    setBusy(mode);
+    setError(null);
+    setProposal(null);
+    try {
+      setProposal(
+        await improveText({ field, text, mode, exhibitionName: exhibitionName || undefined }),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.rewriteFailed);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="text-assist">
+      {!proposal && (
+        <div className="text-assist-buttons">
+          <span className="assist-spark" aria-hidden="true">
+            ✦
+          </span>
+          <button
+            type="button"
+            className="link-quiet"
+            disabled={busy !== null}
+            onClick={() => void run('polish')}
+            aria-label={fmt(t.polishField, { field: label })}
+          >
+            {busy === 'polish' ? t.polishing : t.polish}
+          </button>
+          <button
+            type="button"
+            className="link-quiet"
+            disabled={busy !== null}
+            onClick={() => void run('shorten')}
+            aria-label={fmt(t.shortenField, { field: label })}
+          >
+            {busy === 'shorten' ? t.shortening : t.shorten}
+          </button>
+        </div>
+      )}
+      {error && <p className="field-error">{error}</p>}
+      {proposal && (
+        <div className="text-assist-proposal" aria-live="polite">
+          <p className="assist-field">{t.suggested}</p>
+          <p className="assist-value">{proposal}</p>
+          <div className="assist-actions">
+            <button type="button" className="btn btn-ghost" onClick={() => setProposal(null)}>
+              {t.keepMine}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                onAccept(proposal);
+                setProposal(null);
+              }}
+            >
+              {t.useThis}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

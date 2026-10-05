@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import {
-  MEDIA_CATEGORY_LABELS,
-  MediaCategory,
-  type ExhibitionMedia,
-} from '../../types/exhibition';
+import { MediaCategory, type ExhibitionMedia } from '../../types/exhibition';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt } from '../../i18n/format';
+import { formatSize } from './formatSize';
 import { deleteMedia, mediaDownloadUrl, uploadMedia } from '../../api/exhibitionsApi';
 
 interface Props {
@@ -20,13 +19,9 @@ const CATEGORY_OPTIONS = Object.values(MediaCategory).filter(
 // here saves uploading megabytes only to be rejected by the API.
 const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
 
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 export default function MediaManager({ exhibitionId, media, onChanged }: Props) {
+  const msg = useMessages();
+  const t = msg.ex.media;
   const [category, setCategory] = useState<MediaCategory>(MediaCategory.ArtworkImage);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
@@ -39,7 +34,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
     e.preventDefault();
     if (!file) return;
     if (file.size > MAX_MEDIA_BYTES) {
-      setError(`"${file.name}" is ${formatSize(file.size)} — the limit is 50 MB.`);
+      setError(fmt(t.tooLarge, { name: file.name, size: formatSize(file.size) }));
       return;
     }
     setBusy(true);
@@ -51,7 +46,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
       setFileInputKey((k) => k + 1);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(err instanceof Error ? err.message : t.uploadFailed);
     } finally {
       setBusy(false);
     }
@@ -64,7 +59,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
       await deleteMedia(exhibitionId, mediaId);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : t.deleteFailed);
     } finally {
       setBusy(false);
     }
@@ -73,7 +68,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
   return (
     <div className="media-manager">
       <h3 className="view-section-title">
-        Media &amp; documents
+        {t.title}
         {media.length > 0 && <span className="count-badge">{media.length}</span>}
       </h3>
 
@@ -85,7 +80,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
         >
           {CATEGORY_OPTIONS.map((c) => (
             <option key={c} value={c}>
-              {MEDIA_CATEGORY_LABELS[c]}
+              {t.category[c]}
             </option>
           ))}
         </select>
@@ -99,24 +94,24 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
         <input
           type="text"
           className="media-field"
-          placeholder="Caption / angle (optional)"
+          placeholder={t.captionPlaceholder}
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
         />
         <button type="submit" className="btn btn-primary btn-sm" disabled={busy || !file}>
-          {busy ? 'Uploading…' : 'Upload'}
+          {busy ? t.uploading : t.upload}
         </button>
       </form>
 
       {error && <p className="banner banner-error">{error}</p>}
 
       {media.length === 0 ? (
-        <p className="muted media-empty">No media uploaded yet.</p>
+        <p className="muted media-empty">{t.emptyManager}</p>
       ) : (
         <ul className="media-list">
           {media.map((m) => (
             <li key={m.id} className="media-item">
-              <span className="media-cat">{MEDIA_CATEGORY_LABELS[m.category]}</span>
+              <span className="media-cat">{t.category[m.category]}</span>
               <div className="media-body">
                 <a
                   className="media-name"
@@ -137,7 +132,7 @@ export default function MediaManager({ exhibitionId, media, onChanged }: Props) 
                 onClick={() => handleDelete(m.id)}
                 disabled={busy}
               >
-                Remove
+                {msg.common.remove}
               </button>
             </li>
           ))}

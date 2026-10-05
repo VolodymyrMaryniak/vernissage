@@ -2,6 +2,9 @@ import type { ExhibitionDetail } from '../../types/exhibition';
 import { MediaCategory } from '../../types/exhibition';
 import type { ExhibitionMetrics } from '../../types/metrics';
 import { mediaDownloadUrl } from '../../api/exhibitionsApi';
+import en from '../../i18n/en';
+import type { Messages } from '../../i18n/en';
+import { formatDate } from '../../i18n/format';
 
 /**
  * Everything a show reel plays back. The reel is generated from this, never
@@ -90,18 +93,22 @@ export function parseWorks(artworksList: string | null): string[] {
     .filter(Boolean);
 }
 
-const PHOTO_TAGS: Partial<Record<MediaCategory, string>> = {
-  [MediaCategory.ArtworkImage]: 'The works',
-  [MediaCategory.ExpoDesignFull]: 'The room',
-  [MediaCategory.ExpoDesignDetail]: 'The room',
-  [MediaCategory.EventPhoto]: 'The program',
-};
+function photoTag(category: MediaCategory, m: Messages): string | null {
+  switch (category) {
+    case MediaCategory.ArtworkImage:
+      return m.reel.tag.works;
+    case MediaCategory.ExpoDesignFull:
+    case MediaCategory.ExpoDesignDetail:
+      return m.reel.tag.room;
+    case MediaCategory.EventPhoto:
+      return m.reel.tag.program;
+    default:
+      return null;
+  }
+}
 
 function formatDay(value: string | null): string | null {
-  if (!value) return null;
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDate(value, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /**
@@ -111,6 +118,7 @@ function formatDay(value: string | null): string | null {
 export function reelFromExhibition(
   exhibition: ExhibitionDetail,
   metrics?: ExhibitionMetrics | null,
+  m: Messages = en,
 ): ReelData {
   const order = [
     MediaCategory.ExpoDesignFull,
@@ -119,7 +127,7 @@ export function reelFromExhibition(
     MediaCategory.ExpoDesignDetail,
   ];
   const images = exhibition.media
-    .filter((m) => m.contentType.startsWith('image/') && order.includes(m.category as never))
+    .filter((item) => item.contentType.startsWith('image/') && order.includes(item.category as never))
     .sort((a, b) => order.indexOf(a.category as never) - order.indexOf(b.category as never));
 
   const start = formatDay(exhibition.startDate);
@@ -130,10 +138,10 @@ export function reelFromExhibition(
     dates: start && end ? `${start} – ${end}` : (start ?? end),
     venue: [exhibition.galleryLocation, exhibition.location].filter(Boolean).join(', ') || null,
     byline: exhibition.curator,
-    photos: images.map((m) => ({
-      src: mediaDownloadUrl(exhibition.id, m.id),
-      caption: m.caption,
-      tag: PHOTO_TAGS[m.category] ?? null,
+    photos: images.map((item) => ({
+      src: mediaDownloadUrl(exhibition.id, item.id),
+      caption: item.caption,
+      tag: photoTag(item.category, m),
     })),
     works: parseWorks(exhibition.artworksList).map((title) => ({ title })),
     stats: metrics

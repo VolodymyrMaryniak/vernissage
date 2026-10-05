@@ -9,12 +9,15 @@ import { getMetrics } from '../../api/metricsApi';
 import type { ExhibitionMetrics } from '../../types/metrics';
 import ShowReel from '../reel/ShowReel';
 import { isPlayable, reelFromExhibition } from '../reel/scenes';
+import { useMessages } from '../../i18n/useI18n';
 
 export default function ExhibitionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { exhibition, loading, error } = useExhibition(id);
+  const m = useMessages();
+  const t = m.ex.detail;
   const isOwner = !!user && !!exhibition && exhibition.ownerId === user.id;
 
   // The owner's reel also plays the private numbers.
@@ -31,22 +34,19 @@ export default function ExhibitionDetailPage() {
   }, [isOwner, exhibition]);
 
   const reel = useMemo(
-    () => (exhibition ? reelFromExhibition(exhibition, isOwner ? metrics : null) : null),
-    [exhibition, isOwner, metrics],
+    () => (exhibition ? reelFromExhibition(exhibition, isOwner ? metrics : null, m) : null),
+    [exhibition, isOwner, metrics, m],
   );
 
   useDocumentMeta({
-    title: exhibition?.name ?? 'Exhibition',
-    description:
-      exhibition?.explication ??
-      exhibition?.aim ??
-      'A documented exhibition on Vernissage.',
+    title: exhibition?.name ?? t.metaTitle,
+    description: exhibition?.explication ?? exhibition?.aim ?? t.metaDescription,
   });
 
   if (loading || !exhibition) {
     return (
       <div className="container">
-        <p className="muted state-message">{error ?? 'Loading…'}</p>
+        <p className="muted state-message">{error ?? m.common.loading}</p>
       </div>
     );
   }
@@ -61,11 +61,11 @@ export default function ExhibitionDetailPage() {
       {reel && isPlayable(reel) && (
         <section className="container exhibition-reel" aria-labelledby="reel-heading">
           <p className="eyebrow" id="reel-heading">
-            Show reel
+            {t.reel}
           </p>
           <ShowReel
             data={reel}
-            endLine={isOwner ? 'Your reel · the numbers are visible only to you' : undefined}
+            endLine={isOwner ? t.reelOwnerEnd : undefined}
           />
         </section>
       )}

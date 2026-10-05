@@ -4,79 +4,44 @@ import Bloom from '../../components/Bloom';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
 import PhotoSlideshow from './media/PhotoSlideshow';
-import { PHOTOS } from './media/photos';
-import { DEMO_REEL } from './media/demoReel';
+import { localizedPhotos } from './media/photos';
+import { demoReel } from './media/demoReel';
 import ShowReel from '../reel/ShowReel';
+import { useMessages } from '../../i18n/useI18n';
+import Rich from '../../i18n/Rich';
+import { plural } from '../../i18n/format';
+import type { Messages } from '../../i18n/en';
 
-// How many entries the "latest" strip pulls (1 featured + the rest listed).
-
-const BENEFITS: {
-  index: string;
-  icon: IconName;
-  title: string;
-  body: string;
-  planned?: boolean;
-}[] = [
-  {
-    index: '01',
-    icon: 'folder',
-    title: 'Files sort themselves',
-    body: 'Every show gets a Drive folder, foldered by material — masters, press, essays — filed as you upload.',
-    planned: true,
-  },
-  {
-    index: '02',
-    icon: 'portfolio',
-    title: 'Portfolio & CV in a click',
-    body: 'Generate a portfolio or CV for an open call, grant or residency from records you already keep.',
-    planned: true,
-  },
-  {
-    index: '03',
-    icon: 'bell',
-    title: 'Updates while it runs',
-    body: 'Push quick changes mid-show — dates, works, press — and everyone following the entry hears about it.',
-    planned: true,
-  },
+const BENEFITS: { index: string; icon: IconName; key: keyof Messages['home']['benefits'] }[] = [
+  { index: '01', icon: 'folder', key: 'files' },
+  { index: '02', icon: 'portfolio', key: 'portfolio' },
+  { index: '03', icon: 'bell', key: 'updates' },
 ];
 
-const PIPELINE = [
-  {
-    index: '01',
-    title: 'Set up the show',
-    body: 'Title, dates, artists, works — a proper catalogue schema, not a blank document.',
-  },
-  {
-    index: '02',
-    title: 'Attach the material',
-    body: 'Installation views, plans, audio and documents, filed by category on the entry.',
-  },
-  {
-    index: '03',
-    title: 'Sync to Drive',
-    body: 'Planned: a structured Google Drive folder per show for masters, HDRs and press.',
-    planned: true,
-  },
-  {
-    index: '04',
-    title: 'Publish & share',
-    body: 'A public entry anyone can read, search and link to.',
-  },
+const PIPELINE: { index: string; key: keyof Messages['home']['pipeline']; planned?: boolean }[] = [
+  { index: '01', key: 'setUp' },
+  { index: '02', key: 'attach' },
+  { index: '03', key: 'sync', planned: true },
+  { index: '04', key: 'share' },
 ];
 
 const DRIVE_FILES = [
-  { path: '/installation-views', files: '42 files', size: '6.1 GB' },
-  { path: '/works-masters', files: '18 files', size: '2.4 GB' },
-  { path: '/press', files: '9 files', size: '84 MB' },
-  { path: '/essays', files: '3 files', size: '12 MB' },
+  { path: '/installation-views', files: 42, size: '6.1 GB' },
+  { path: '/works-masters', files: 18, size: '2.4 GB' },
+  { path: '/press', files: 9, size: '84 MB' },
+  { path: '/essays', files: 3, size: '12 MB' },
 ];
 
+const ROLE_CARDS = [
+  { to: '/artists', index: '01', key: 'artist' },
+  { to: '/curators', index: '02', key: 'curator' },
+  { to: '/galleries', index: '03', key: 'gallery' },
+] as const;
+
 export default function HomePage() {
-  useDocumentMeta({
-    title: "Let's document your art show properly",
-    description:
-      'Vernissage is a structured workspace for art exhibitions — catalogue works, attach installation photography, plans and audio, and publish an entry anyone can find.',
-  });
+  const m = useMessages();
+  const t = m.home;
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   return (
     <>
@@ -86,19 +51,17 @@ export default function HomePage() {
         <div className="container hero-inner">
           <div className="hero-meta">
             <span className="chip-mono">v.001</span>
-            <span className="hero-meta-text">
-              Workspace for artists, curators &amp; galleries
-            </span>
+            <span className="hero-meta-text">{t.metaWorkspace}</span>
           </div>
           <h1 className="display">
-            Let&apos;s document your art show <em>properly</em>.
+            <Rich text={t.title} />
           </h1>
           <p className="hero-slogan">
-            A show is alive for six weeks. <em>Its record is forever.</em>
+            <Rich text={t.slogan} />
           </p>
           <div className="hero-actions">
             <Link className="cta" to="/exhibitions/new">
-              Document a show
+              {m.nav.documentAShow}
             </Link>
           </div>
         </div>
@@ -107,39 +70,25 @@ export default function HomePage() {
       {/* ---- On view: exhibitions & opening nights ------------- */}
       <section className="section section--tight home-slides">
         <div className="container">
-          <PhotoSlideshow photos={PHOTOS} />
+          <PhotoSlideshow photos={localizedPhotos(m)} />
         </div>
       </section>
 
       {/* ---- Role selection ------------------------------------- */}
       <section className="section">
         <div className="container">
-          <p className="eyebrow">Start here</p>
+          <p className="eyebrow">{t.startHere}</p>
           <div className="role-grid role-grid--3">
-            <Link className="role-card" to="/artists">
-              <span className="role-card-index">01</span>
-              <h3>I&apos;m an artist</h3>
-              <p>Your works and shows, documented and ready to submit.</p>
-              <span className="role-card-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
-            <Link className="role-card" to="/curators">
-              <span className="role-card-index">02</span>
-              <h3>I&apos;m an independent curator</h3>
-              <p>Solo workspace, portable archive, no gallery required.</p>
-              <span className="role-card-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
-            <Link className="role-card" to="/galleries">
-              <span className="role-card-index">03</span>
-              <h3>I&apos;m a gallery</h3>
-              <p>A program-wide archive, with every show catalogued in one place.</p>
-              <span className="role-card-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
+            {ROLE_CARDS.map((card) => (
+              <Link className="role-card" to={card.to} key={card.key}>
+                <span className="role-card-index">{card.index}</span>
+                <h3>{t.roleCards[card.key].title}</h3>
+                <p>{t.roleCards[card.key].body}</p>
+                <span className="role-card-arrow" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -148,26 +97,24 @@ export default function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">What you get</p>
+            <p className="eyebrow">{t.whatEyebrow}</p>
             <h2 className="headline">
-              The work around the work, <em>handled</em>.
+              <Rich text={t.whatTitle} />
             </h2>
           </div>
           <div className="cell-grid cell-grid--3">
             {BENEFITS.map((benefit) => (
-              <div className="cell cell--icon" key={benefit.title}>
+              <div className="cell cell--icon" key={benefit.key}>
                 <span className="cell-icon">
                   <Icon name={benefit.icon} />
                 </span>
                 <div className="cell-body">
                   <span className="cell-label">
                     <span className="cell-index">{benefit.index}</span>
-                    {benefit.planned && (
-                      <span className="chip-mono chip-planned">Planned</span>
-                    )}
+                    <span className="chip-mono chip-planned">{m.common.planned}</span>
                   </span>
-                  <h3>{benefit.title}</h3>
-                  <p>{benefit.body}</p>
+                  <h3>{t.benefits[benefit.key].title}</h3>
+                  <p>{t.benefits[benefit.key].body}</p>
                 </div>
               </div>
             ))}
@@ -179,16 +126,13 @@ export default function HomePage() {
       <section className="section home-reel">
         <div className="container home-reel-inner">
           <div className="section-head home-reel-head">
-            <p className="eyebrow">Show reels</p>
+            <p className="eyebrow">{t.reelEyebrow}</p>
             <h2 className="headline">
-              Every documented show <em>plays back</em>.
+              <Rich text={t.reelTitle} />
             </h2>
-            <p className="prose">
-              Vernissage turns an inventory into a short film: installation views, the works,
-              then the numbers. Visitors, sales and costs appear only in your own reel.
-            </p>
+            <p className="prose">{t.reelBody}</p>
           </div>
-          <ShowReel data={DEMO_REEL} autoPlay endLine="Inventory complete · 18 works · 4 photographs" />
+          <ShowReel data={demoReel(m)} autoPlay endLine={t.reelEnd} />
         </div>
       </section>
 
@@ -196,9 +140,9 @@ export default function HomePage() {
       <section className="section section--band">
         <div className="container">
           <div className="section-head">
-            <p className="eyebrow">How it works</p>
+            <p className="eyebrow">{t.pipelineEyebrow}</p>
             <h2 className="headline">
-              A four-step pipeline, from opening night to <em>citation</em>.
+              <Rich text={t.pipelineTitle} />
             </h2>
           </div>
           <div className="cell-grid cell-grid--4">
@@ -206,10 +150,10 @@ export default function HomePage() {
               <div className="cell" key={step.index}>
                 <span className="cell-index">{step.index}</span>
                 <h3>
-                  {step.title}
-                  {step.planned && <span className="chip-mono chip-planned">Planned</span>}
+                  {t.pipeline[step.key].title}
+                  {step.planned && <span className="chip-mono chip-planned">{m.common.planned}</span>}
                 </h3>
-                <p>{step.body}</p>
+                <p>{t.pipeline[step.key].body}</p>
               </div>
             ))}
           </div>
@@ -224,19 +168,16 @@ export default function HomePage() {
             <article className="plaque integration">
               <div className="integration-head">
                 <span className="chip-mono">Google Drive</span>
-                <span className="status">Planned</span>
+                <span className="status">{m.common.planned}</span>
               </div>
-              <h3>Every show gets a home for its files.</h3>
-              <p>
-                A structured Drive folder per exhibition, so masters, HDRs and press never
-                scatter. Until then, files attach directly to the entry.
-              </p>
+              <h3>{t.drive.title}</h3>
+              <p>{t.drive.body}</p>
               <ul className="file-mono-list">
                 {DRIVE_FILES.map((f) => (
                   <li key={f.path}>
                     <span className="path">{f.path}</span>
                     <span className="file-meta">
-                      {f.files} · {f.size}
+                      {plural(f.files, t.drive.files)} · {f.size}
                     </span>
                   </li>
                 ))}
@@ -246,21 +187,18 @@ export default function HomePage() {
             {/* VR walkthroughs */}
             <article className="plaque integration">
               <div className="integration-head">
-                <span className="chip-mono">VR walkthroughs</span>
-                <span className="status">Planned · Matterport · 360°</span>
+                <span className="chip-mono">{t.vr.chip}</span>
+                <span className="status">{t.vr.status}</span>
               </div>
-              <h3>The show doesn&apos;t have to close.</h3>
-              <p>
-                A Matterport or 360° capture embeds alongside the catalogue — step back inside
-                the room long after the walls come down.
-              </p>
+              <h3>{t.vr.title}</h3>
+              <p>{t.vr.body}</p>
               <div className="vr-viewport">
                 <div className="wash-aurora" aria-hidden="true" />
                 <button type="button" className="pill-mono" disabled>
-                  ● Enter VR walkthrough
+                  {t.vr.enter}
                 </button>
                 <div className="vr-chips">
-                  <span className="chip-mono">14 rooms</span>
+                  <span className="chip-mono">{t.vr.rooms}</span>
                   <span className="chip-mono">4K</span>
                 </div>
               </div>
@@ -273,16 +211,14 @@ export default function HomePage() {
       <section className="cta-band">
         <div className="container section cta-band-inner">
           <div>
-            <p className="eyebrow">Open access, non-commercial</p>
-            <h2 className="headline">A working archive, not a portfolio site.</h2>
+            <p className="eyebrow">{t.ctaEyebrow}</p>
+            <h2 className="headline">{t.ctaTitle}</h2>
           </div>
           <div>
-            <p className="prose">
-              Start documenting your next show.
-            </p>
+            <p className="prose">{t.ctaBody}</p>
             <div className="cta-band-actions">
               <Link className="cta" to="/exhibitions/new">
-                Start documenting
+                {t.cta}
               </Link>
             </div>
           </div>

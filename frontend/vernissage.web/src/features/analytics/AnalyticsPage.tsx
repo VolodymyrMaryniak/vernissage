@@ -5,13 +5,17 @@ import type { AnalyticsSummary } from '../../types/analytics';
 import type { ExhibitionFilters } from '../../types/exhibition';
 import { useAppConfig } from '../config/useAppConfig';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
+import { useMessages } from '../../i18n/useI18n';
+import { formatNumber } from '../../i18n/format';
 
 function formatMoney(value: number): string {
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return formatNumber(value, undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default function AnalyticsPage() {
-  useDocumentMeta({ title: 'Analytics' });
+  const m = useMessages();
+  const t = m.analytics;
+  useDocumentMeta({ title: t.metaTitle });
   const { analyticsEnabled, loading: configLoading } = useAppConfig();
 
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
@@ -29,11 +33,11 @@ export default function AnalyticsPage() {
     try {
       setSummary(await getAnalyticsSummary(filters));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t.loadFailed]);
 
   useEffect(() => {
     // The API 404s when the feature is off; don't ask for data we can't have.
@@ -54,15 +58,15 @@ export default function AnalyticsPage() {
 
   const stats = summary
     ? [
-        { label: 'Exhibitions', value: String(summary.exhibitionCount) },
-        { label: 'With metrics', value: String(summary.exhibitionsWithMetrics) },
-        { label: 'Visitors', value: summary.totalVisitors.toLocaleString() },
-        { label: 'Artworks sold', value: summary.totalArtworksSold.toLocaleString() },
-        { label: 'Total revenue', value: formatMoney(summary.totalRevenue) },
-        { label: 'Total cost', value: formatMoney(summary.totalCost) },
+        { label: t.exhibitions, value: formatNumber(summary.exhibitionCount) },
+        { label: t.withMetrics, value: formatNumber(summary.exhibitionsWithMetrics) },
+        { label: t.visitors, value: formatNumber(summary.totalVisitors) },
+        { label: t.sold, value: formatNumber(summary.totalArtworksSold) },
+        { label: t.revenue, value: formatMoney(summary.totalRevenue) },
+        { label: t.cost, value: formatMoney(summary.totalCost) },
         {
-          label: 'Avg. satisfaction',
-          value: summary.averageSatisfaction !== null ? `${summary.averageSatisfaction} / 10` : '—',
+          label: t.satisfaction,
+          value: summary.averageSatisfaction !== null ? `${formatNumber(summary.averageSatisfaction)} / 10` : '—',
         },
       ]
     : [];
@@ -73,11 +77,11 @@ export default function AnalyticsPage() {
       <div className="analytics-page">
         <header className="page-head">
           <div>
-            <p className="eyebrow">Insights</p>
-            <h2>Analytics</h2>
+            <p className="eyebrow">{t.eyebrow}</p>
+            <h2>{t.title}</h2>
           </div>
         </header>
-        <p className="muted">Analytics is currently unavailable.</p>
+        <p className="muted">{t.unavailable}</p>
       </div>
     );
   }
@@ -86,46 +90,46 @@ export default function AnalyticsPage() {
     <div className="analytics-page">
       <header className="page-head">
         <div>
-          <p className="eyebrow">Insights</p>
+          <p className="eyebrow">{t.eyebrow}</p>
           <h2>
-            Analytics <span className="chip">Pro — free during beta</span>
+            {t.title} <span className="chip">{t.badge}</span>
           </h2>
-          <p className="page-sub">Aggregated from your own exhibitions&apos; private metrics.</p>
+          <p className="page-sub">{t.sub}</p>
         </div>
       </header>
 
       <form className="search-bar card" onSubmit={handleSubmit}>
         <div className="field-grid">
           <label className="field">
-            <span className="field-label">Search</span>
+            <span className="field-label">{m.ex.search.search}</span>
             <input
               type="search"
-              placeholder="Name or curator…"
+              placeholder={m.ex.search.searchPlaceholder}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </label>
           <label className="field">
-            <span className="field-label">Focus / topic</span>
+            <span className="field-label">{m.ex.search.focus}</span>
             <input
               type="text"
-              placeholder="e.g. Light art"
+              placeholder={m.ex.search.focusPlaceholder}
               value={focus}
               onChange={(e) => setFocus(e.target.value)}
             />
           </label>
           <label className="field">
-            <span className="field-label">From</span>
+            <span className="field-label">{m.ex.search.from}</span>
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </label>
           <label className="field">
-            <span className="field-label">To</span>
+            <span className="field-label">{m.ex.search.to}</span>
             <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} />
           </label>
         </div>
         <div className="search-bar-actions">
           <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>
-            {loading ? 'Loading…' : 'Apply filters'}
+            {loading ? m.common.loading : t.apply}
           </button>
         </div>
       </form>
@@ -144,10 +148,7 @@ export default function AnalyticsPage() {
       )}
 
       {summary && summary.exhibitionsWithMetrics === 0 && (
-        <p className="muted">
-          No metrics recorded yet — open one of your exhibitions and add private metrics to see
-          numbers here.
-        </p>
+        <p className="muted">{t.none}</p>
       )}
     </div>
   );

@@ -1,19 +1,12 @@
 import { useState } from 'react';
 import { CREATOR_ROLES } from '../../../types/auth';
 import type { CreatorRole } from '../../../types/auth';
-import { ROLE_IN_SHOW } from '../../exhibitions/roles';
-
-// What each role adds to the account: these are the real per-role parts of the app.
-const ROLE_ADDS: Record<CreatorRole, string[]> = {
-  Artist: ['Medium on your profile', 'Solo & group shows on your CV', 'Works sold per show'],
-  Curator: ['Place of work on your profile', '"Curated by me" on your CV', 'Checklist, team & research per show'],
-  Gallery: ['Gallery name, focus & founding year', 'Season figures across the program', 'Costs & visitors per show'],
-};
-
-const NOUN: Record<CreatorRole, string> = { Artist: 'Artist', Curator: 'Curator', Gallery: 'Gallery' };
+import { useMessages } from '../../../i18n/useI18n';
 
 /** Tick roles to see one account combine them: profile line, per-show choice, features. */
 export default function RoleMixer() {
+  const m = useMessages();
+  const t = m.how.mixer;
   const [roles, setRoles] = useState<CreatorRole[]>(['Artist', 'Curator']);
   const toggle = (role: CreatorRole) =>
     setRoles((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
@@ -23,49 +16,51 @@ export default function RoleMixer() {
     <div className="role-mixer">
       <div className="role-mixer-pick">
         <p className="demo-step">
-          <span>1</span> Tick every role that&apos;s yours
+          <span>1</span> {t.step1}
         </p>
         <div className="role-chips role-chips--lg">
           {CREATOR_ROLES.map((r) => (
             <label key={r} className={`role-chip${roles.includes(r) ? ' is-on' : ''}`}>
               <input type="checkbox" checked={roles.includes(r)} onChange={() => toggle(r)} />
-              {NOUN[r]}
+              {m.roles.name[r]}
             </label>
           ))}
         </div>
         <p className="role-mixer-card" aria-live="polite">
-          <span className="role-mixer-card-roles">{ordered.length ? ordered.join(' · ') : 'No role yet'}</span>
-          <span className="role-mixer-card-name">Your Name</span>
+          <span className="role-mixer-card-roles">
+            {ordered.length ? ordered.map((r) => m.roles.name[r]).join(' · ') : t.noRole}
+          </span>
+          <span className="role-mixer-card-name">{t.yourName}</span>
         </p>
       </div>
 
       <div className="role-mixer-result" aria-live="polite">
         <p className="demo-step">
-          <span>2</span> For each show, say which hat you wore
+          <span>2</span> {t.step2}
         </p>
         {ordered.length > 0 ? (
           <div className="role-chips">
             {ordered.map((r) => (
               <span key={r} className="role-chip is-preview">
-                {ROLE_IN_SHOW[r]}
+                {m.roles.inShow[r]}
               </span>
             ))}
           </div>
         ) : (
-          <p className="muted">Pick at least one role.</p>
+          <p className="muted">{t.pickOne}</p>
         )}
         <p className="demo-step">
-          <span>3</span> Everything sorts itself
+          <span>3</span> {t.step3}
         </p>
         <ul className="role-mixer-adds">
           {ordered.flatMap((r) =>
-            ROLE_ADDS[r].map((item) => (
+            t.adds[r].map((item) => (
               <li key={item} className={`role-add role-add--${r.toLowerCase()}`}>
                 {item}
               </li>
             )),
           )}
-          {ordered.length > 1 && <li className="role-add role-add--all">My exhibitions filtered by role</li>}
+          {ordered.length > 1 && <li className="role-add role-add--all">{t.filtered}</li>}
         </ul>
       </div>
     </div>

@@ -62,6 +62,7 @@ jobs:
         env:
           SQL_CONNECTION_STRING: ${{ secrets.SQL_CONNECTION_STRING }}
           JWT_SIGNING_KEY: ${{ secrets.JWT_SIGNING_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -euo pipefail
           settings=()
@@ -71,6 +72,9 @@ jobs:
           fi
           if [ -n "${JWT_SIGNING_KEY:-}" ]; then
             settings+=("Jwt__SigningKey=$JWT_SIGNING_KEY")
+          fi
+          if [ -n "${ANTHROPIC_API_KEY:-}" ]; then # optional: turns on the AI assistant
+            settings+=("Anthropic__ApiKey=$ANTHROPIC_API_KEY")
           fi
           if [ "${#settings[@]}" -eq 0 ]; then
             echo "No app-setting secrets provided; skipping app settings update."

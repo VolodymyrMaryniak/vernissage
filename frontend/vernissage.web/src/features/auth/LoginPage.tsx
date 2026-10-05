@@ -3,17 +3,17 @@ import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from './useAuth';
+import { useMessages } from '../../i18n/useI18n';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? '/';
+  const m = useMessages();
+  const t = m.auth.login;
 
-  useDocumentMeta({
-    title: 'Sign in',
-    description: 'Sign in to your Vernissage workspace.',
-  });
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +28,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : t.failed);
     } finally {
       setSubmitting(false);
     }
@@ -37,22 +37,22 @@ export default function LoginPage() {
   return (
     <div className="container auth-shell">
       <div className="auth-card">
-        <p className="eyebrow">Workspace</p>
-        <h1>Sign in</h1>
-        <p className="auth-sub">Pick up where you left off documenting your shows.</p>
+        <p className="eyebrow">{m.auth.eyebrow}</p>
+        <h1>{t.title}</h1>
+        <p className="auth-sub">{t.sub}</p>
 
         {/* Google OAuth is not wired up yet — shown but disabled. */}
-        <button type="button" className="btn-google" disabled title="Coming soon">
-          Continue with Google
+        <button type="button" className="btn-google" disabled title={m.common.comingSoon}>
+          {m.auth.google}
         </button>
 
-        <div className="auth-divider">or</div>
+        <div className="auth-divider">{m.common.or}</div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && <p className="banner banner-error">{error}</p>}
 
           <label className="field">
-            <span className="field-label">Email</span>
+            <span className="field-label">{m.auth.email}</span>
             <input
               type="email"
               required
@@ -63,7 +63,7 @@ export default function LoginPage() {
           </label>
 
           <label className="field">
-            <span className="field-label">Password</span>
+            <span className="field-label">{m.auth.password}</span>
             <input
               type="password"
               required
@@ -74,12 +74,12 @@ export default function LoginPage() {
           </label>
 
           <button type="submit" className="cta btn-block" disabled={submitting}>
-            {submitting ? 'Logging in…' : 'Log in'}
+            {submitting ? t.submitting : t.submit}
           </button>
         </form>
 
         <p className="auth-foot">
-          No workspace yet? <Link to="/register">Open one</Link>
+          {t.noWorkspace} <Link to="/register">{t.openOne}</Link>
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ExhibitionDetail } from '../../types/exhibition';
 import { getExhibition } from '../../api/exhibitionsApi';
+import { useMessages } from '../../i18n/useI18n';
 
 interface UseExhibitionResult {
   exhibition: ExhibitionDetail | null;
@@ -15,6 +16,7 @@ export function useExhibition(id: string | undefined): UseExhibitionResult {
   const [exhibition, setExhibition] = useState<ExhibitionDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadFailed = useMessages().ex.detail.loadFailed;
 
   const reload = useCallback(async () => {
     if (!id) return;
@@ -23,11 +25,11 @@ export function useExhibition(id: string | undefined): UseExhibitionResult {
     try {
       setExhibition(await getExhibition(id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load exhibition');
+      setError(err instanceof Error ? err.message : loadFailed);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, loadFailed]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

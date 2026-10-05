@@ -1,17 +1,13 @@
 import { useState } from 'react';
-import { MEDIA_CATEGORY_LABELS, type ExhibitionMedia } from '../../types/exhibition';
+import type { ExhibitionMedia } from '../../types/exhibition';
+import { useMessages } from '../../i18n/useI18n';
+import { formatSize } from './formatSize';
 import { mediaDownloadUrl } from '../../api/exhibitionsApi';
 import Lightbox from './Lightbox';
 
 interface Props {
   exhibitionId: string;
   media: ExhibitionMedia[];
-}
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 const isImage = (m: ExhibitionMedia) => m.contentType.startsWith('image/');
@@ -21,6 +17,7 @@ const isAudio = (m: ExhibitionMedia) => m.contentType.startsWith('audio/');
 // gallery; everything else is listed with an individual download link (audio
 // also gets an inline player). Uploading/removing lives on the edit page.
 export default function MediaGallery({ exhibitionId, media }: Props) {
+  const t = useMessages().ex.media;
   const images = media.filter(isImage);
   const files = media.filter((m) => !isImage(m));
   // Index of the image shown in the lightbox, or null when it's closed.
@@ -29,11 +26,11 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
   return (
     <div className="media-gallery">
       <h3 className="view-section-title">
-        Media &amp; documents
+        {t.title}
         {media.length > 0 && <span className="count-badge">{media.length}</span>}
       </h3>
 
-      {media.length === 0 && <p className="muted media-empty">No media yet.</p>}
+      {media.length === 0 && <p className="muted media-empty">{t.empty}</p>}
 
       {images.length > 0 && (
         <div className="gallery-grid">
@@ -45,12 +42,12 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
                   type="button"
                   className="gallery-thumb"
                   onClick={() => setLightboxIndex(i)}
-                  title="Open preview"
+                  title={t.openPreview}
                 >
                   <img src={url} alt={m.caption ?? m.fileName} loading="lazy" />
                 </button>
                 <figcaption className="gallery-cap">
-                  <span className="gallery-cat">{MEDIA_CATEGORY_LABELS[m.category]}</span>
+                  <span className="gallery-cat">{t.category[m.category]}</span>
                   {m.caption && <span className="gallery-caption-text">{m.caption}</span>}
                 </figcaption>
               </figure>
@@ -72,7 +69,7 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
                 <div className="file-body">
                   <span className="file-name">{m.fileName}</span>
                   <span className="file-sub">
-                    <span className="media-cat-inline">{MEDIA_CATEGORY_LABELS[m.category]}</span>
+                    <span className="media-cat-inline">{t.category[m.category]}</span>
                     {m.caption && <span> · {m.caption}</span>}
                     <span> · {formatSize(m.fileSize)}</span>
                   </span>
@@ -83,7 +80,7 @@ export default function MediaGallery({ exhibitionId, media }: Props) {
                   href={url}
                   download={m.fileName}
                 >
-                  Download
+                  {t.download}
                 </a>
               </li>
             );
