@@ -68,6 +68,8 @@ export interface ExhibitionSummary {
   location: string | null;
   focus: string | null;
   curator: string | null;
+  /** Venue (gallery or institution). */
+  galleryLocation: string | null;
   ownerId: string | null;
   mediaCount: number;
   createdAtUtc: string;

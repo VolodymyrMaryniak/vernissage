@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import SiteHeader from './components/SiteHeader';
@@ -18,6 +19,9 @@ import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import RequireAuth from './features/auth/RequireAuth';
 import VersionPage from './features/version/VersionPage';
+
+// The CV builder pulls in the PDF/Word generators, so it loads on demand.
+const CvPage = lazy(() => import('./features/cv/CvPage'));
 import './App.css';
 
 /** Narrow centred wrapper for the functional workspace pages. */
@@ -76,6 +80,16 @@ function App() {
                 <Shell>
                   <ProfilePage />
                 </Shell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile/cv"
+            element={
+              <RequireAuth>
+                <Suspense fallback={<p className="muted state-message">Loading…</p>}>
+                  <CvPage />
+                </Suspense>
               </RequireAuth>
             }
           />
