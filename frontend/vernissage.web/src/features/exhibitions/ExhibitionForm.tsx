@@ -1,9 +1,11 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { Fragment, useMemo, useState, type FormEvent } from 'react';
 import type { ExhibitionDetail, ExhibitionWrite } from '../../types/exhibition';
 import { CREATOR_ROLES } from '../../types/auth';
 import type { CreatorRole } from '../../types/auth';
 import { FIELD_SECTIONS } from './fields';
 import { ROLE_IN_SHOW } from './roles';
+import DraftPanel from '../assistant/DraftPanel';
+import TextAssist from '../assistant/TextAssist';
 
 interface Props {
   initial?: ExhibitionDetail;
@@ -16,9 +18,14 @@ interface Props {
   onCancel: () => void;
   /** The signed-in account's roles; drives the "your role in this show" choices. */
   accountRoles?: CreatorRole[];
+  /** Show the AI assistant (drafting + polish/shorten); the server must have it configured. */
+  assistantEnabled?: boolean;
 }
 
-function emptyForm(initial: ExhibitionDetail | undefined, accountRoles: CreatorRole[]): ExhibitionWrite {
+function emptyForm(
+  initial: ExhibitionDetail | undefined,
+  accountRoles: CreatorRole[],
+): ExhibitionWrite {
   return {
     // A new show for a single-role account is that role; with several, you pick.
     roles: initial?.roles ?? (accountRoles.length === 1 ? [...accountRoles] : []),
@@ -62,6 +69,7 @@ export default function ExhibitionForm({
   onSubmit,
   onCancel,
   accountRoles = [],
+  assistantEnabled = false,
 }: Props) {
   const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial, accountRoles));
   // Offer the account's roles, plus any already on the record; everything if unknown.
@@ -81,6 +89,9 @@ export default function ExhibitionForm({
   const update = (key: keyof ExhibitionWrite, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value === '' ? null : value }));
   };
+
+  const applyDraft = (values: Partial<ExhibitionWrite>) =>
+    setForm((prev) => ({ ...prev, ...values }));
 
   const { filled, total } = useMemo(() => completeness(form), [form]);
   const nameEmpty = form.name.trim() === '';
@@ -103,6 +114,10 @@ export default function ExhibitionForm({
         </div>
       </header>
 
+      {assistantEnabled && (
+        <DraftPanel current={form} onApply={applyDraft} defaultOpen={!initial} />
+      )}
+
       {/* Basics --------------------------------------------------------- */}
       <section className="card form-section">
         <div className="section-head">
@@ -114,14 +129,23 @@ export default function ExhibitionForm({
           <legend className="field-label">Your role in this show</legend>
           <div className="role-chips">
             {roleChoices.map((role) => (
-              <label key={role} className={`role-chip${(form.roles ?? []).includes(role) ? ' is-on' : ''}`}>
-                <input type="checkbox" checked={(form.roles ?? []).includes(role)} onChange={() => toggleRole(role)} />
+              <label
+                key={role}
+                className={`role-chip${(form.roles ?? []).includes(role) ? ' is-on' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={(form.roles ?? []).includes(role)}
+                  onChange={() => toggleRole(role)}
+                />
                 {ROLE_IN_SHOW[role]}
               </label>
             ))}
           </div>
           {roleChoices.length > 1 && (
-            <p className="field-hint">Pick all that apply: it sorts the show in My exhibitions and on your CV.</p>
+            <p className="field-hint">
+              Pick all that apply: it sorts the show in My exhibitions and on your CV.
+            </p>
           )}
         </fieldset>
 
@@ -136,7 +160,8 @@ export default function ExhibitionForm({
             placeholder="e.g. Light & Shadow: A Retrospective"
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
-            autoFocus
+            // With the assistant panel above, focusing Name would scroll past it.
+            autoFocus={!assistantEnabled}
           />
         </label>
 
@@ -216,25 +241,37 @@ export default function ExhibitionForm({
           </div>
 
           {section.fields.map((f) => (
-            <label className="field" key={f.key}>
-              <span className="field-label">{f.label}</span>
-              {f.multiline ? (
-                <textarea
-                  rows={4}
-                  placeholder={f.placeholder}
-                  value={(form[f.key] as string | null) ?? ''}
-                  onChange={(e) => update(f.key, e.target.value)}
-                />
-              ) : (
-                <input
-                  type="text"
-                  maxLength={500}
-                  placeholder={f.placeholder}
-                  value={(form[f.key] as string | null) ?? ''}
-                  onChange={(e) => update(f.key, e.target.value)}
+            <Fragment key={f.key}>
+              <label className="field">
+                <span className="field-label">{f.label}</span>
+                {f.multiline ? (
+                  <textarea
+                    rows={4}
+                    placeholder={f.placeholder}
+                    value={(form[f.key] as string | null) ?? ''}
+                    onChange={(e) => update(f.key, e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    maxLength={500}
+                    placeholder={f.placeholder}
+                    value={(form[f.key] as string | null) ?? ''}
+                    onChange={(e) => update(f.key, e.target.value)}
+                  />
+                )}
+              </label>
+              {/* Outside the <label>, so clicking the label never presses these buttons. */}
+              {assistantEnabled && f.multiline && (
+                <TextAssist
+                  field={f.key}
+                  label={f.label}
+                  text={(form[f.key] as string | null) ?? ''}
+                  exhibitionName={form.name}
+                  onAccept={(text) => update(f.key, text)}
                 />
               )}
-            </label>
+            </Fragment>
           ))}
         </section>
       ))}

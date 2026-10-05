@@ -6,6 +6,8 @@ import { getAppConfig } from '../../api/analyticsApi';
 export interface ConfigContextValue {
   /** Whether the analytics feature is switched on server-side. */
   analyticsEnabled: boolean;
+  /** Whether the AI assistant is configured server-side. */
+  assistantEnabled: boolean;
   /** True until /api/config has answered (or failed). */
   loading: boolean;
 }
@@ -19,13 +21,16 @@ export const ConfigContext = createContext<ConfigContextValue | null>(null);
  */
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const [assistantEnabled, setAssistantEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     void getAppConfig()
       .then((config) => {
-        if (!cancelled) setAnalyticsEnabled(config.analyticsEnabled);
+        if (cancelled) return;
+        setAnalyticsEnabled(config.analyticsEnabled);
+        setAssistantEnabled(config.assistantEnabled === true);
       })
       .catch(() => {
         // Config is best-effort: an unreachable API just leaves flags off.
@@ -39,8 +44,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ analyticsEnabled, loading }),
-    [analyticsEnabled, loading],
+    () => ({ analyticsEnabled, assistantEnabled, loading }),
+    [analyticsEnabled, assistantEnabled, loading],
   );
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

@@ -4,9 +4,11 @@ import type { ExhibitionWrite } from '../../types/exhibition';
 import { createExhibition } from '../../api/exhibitionsApi';
 import ExhibitionForm from './ExhibitionForm';
 import { useAuth } from '../auth/useAuth';
+import { useAppConfig } from '../config/useAppConfig';
 
 export default function ExhibitionCreatePage() {
   const { user } = useAuth();
+  const { assistantEnabled } = useAppConfig();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +29,7 @@ export default function ExhibitionCreatePage() {
   return (
     <ExhibitionForm
         accountRoles={user?.roles}
+        assistantEnabled={assistantEnabled}
       submitting={submitting}
       error={error}
       onSubmit={handleCreate}

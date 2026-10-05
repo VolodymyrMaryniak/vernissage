@@ -195,6 +195,24 @@ galleries and institutions), not a public archive:
   Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
   Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
 
+## AI assistant ("Draft with AI")
+
+- `POST /api/assistant/draft` (multipart `notes` + optional PDF ≤ 10 MB) proposes
+  values for every record field; `POST /api/assistant/improve` (`polish`/`shorten`)
+  rewrites one long text. Signed-in only, rate-limited to 30 calls/user/hour, and
+  **404 unless configured**. Code: `Controllers/AssistantController.cs`,
+  `Services/Assistant/` (Claude via the official `Anthropic` NuGet SDK, structured
+  JSON output, model `claude-opus-5-5`).
+- **On/off:** needs an Anthropic API key — config `Anthropic:ApiKey` (App Service
+  `Anthropic__ApiKey`, or env `ANTHROPIC_API_KEY`); `Features:AssistantEnabled=false`
+  turns it off. `GET /api/config` exposes `assistantEnabled`. **Never commit the key**:
+  locally use `dotnet user-secrets set Anthropic:ApiKey …`; for dev, add the GitHub
+  secret `ANTHROPIC_API_KEY` — the API deploy workflow and `infra/deploy.ps1` pass it
+  through (optional everywhere; absent = assistant off).
+- Frontend: `src/features/assistant` — `DraftPanel` (top of the create/edit form;
+  every suggestion is opt-in, already-filled fields unticked) and `TextAssist`
+  (Polish/Shorten under long text fields). Nothing is saved until the form is saved.
+
 ## Home visuals & show reels
 
 - **Home slideshow** (`features/marketing/media/PhotoSlideshow.tsx`): opening-night

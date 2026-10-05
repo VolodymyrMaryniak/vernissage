@@ -6,4 +6,5 @@ using 'main.bicep'
 param sqlAdminLogin = readEnvironmentVariable('VERNISSAGE_SQL_ADMIN_LOGIN', 'vernissage_admin')
 param sqlAdminPassword = readEnvironmentVariable('VERNISSAGE_SQL_ADMIN_PASSWORD')
 param jwtSigningKey = readEnvironmentVariable('VERNISSAGE_JWT_SIGNING_KEY')
+param anthropicApiKey = readEnvironmentVariable('VERNISSAGE_ANTHROPIC_API_KEY', '')
 param clientIpAddress = readEnvironmentVariable('VERNISSAGE_CLIENT_IP', '')

@@ -5952,3 +5952,178 @@ fieldset.field > legend {
     animation: none !important;
   }
 }
+
+/* ================================================================
+   AI assistant — "Draft with AI" panel and polish/shorten
+   ================================================================ */
+.assist-panel {
+  border-color: color-mix(in oklab, var(--peony) 22%, var(--line));
+  background:
+    radial-gradient(70% 120% at 0% 0%, color-mix(in oklab, var(--peony) 7%, transparent), transparent 70%),
+    radial-gradient(60% 120% at 100% 100%, color-mix(in oklab, var(--olive) 14%, transparent), transparent 70%),
+    var(--surface);
+}
+
+.assist-panel:not(.is-open) {
+  padding-bottom: 22px;
+}
+
+.assist-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.assist-panel:not(.is-open) .assist-head .section-head {
+  margin-bottom: 0;
+}
+
+.assist-spark {
+  color: var(--peony);
+}
+
+.assist-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.assist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.assist-actions .assist-file {
+  margin-right: auto;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.assist-file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.assist-file:focus-within {
+  outline: 2px solid var(--peony);
+  outline-offset: 2px;
+}
+
+.assist-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.assist-summary {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.assist-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.assist-suggestions li {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.assist-suggestions li.is-on {
+  border-color: color-mix(in oklab, var(--peony) 45%, var(--line));
+  background: color-mix(in oklab, var(--red-tint) 55%, var(--surface));
+}
+
+.assist-suggestions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.assist-suggestions input {
+  accent-color: var(--peony);
+}
+
+.assist-field {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.assist-value {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  max-height: 11em;
+  overflow: auto;
+}
+
+.assist-existing {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--ink-mute);
+  overflow-wrap: anywhere;
+}
+
+.assist-existing span {
+  text-decoration: line-through;
+}
+
+.text-assist {
+  margin: -8px 0 16px;
+}
+
+.text-assist-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.text-assist-proposal {
+  padding: 12px;
+  border: 1px solid color-mix(in oklab, var(--peony) 35%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--red-tint) 45%, var(--surface));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.text-assist-proposal .assist-value {
+  margin: 0;
+}
+
+.field-error {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--danger);
+}

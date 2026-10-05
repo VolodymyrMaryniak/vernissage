@@ -5,4 +5,7 @@ public class AppConfigDto
 {
     /// <summary>Whether the analytics feature is available ("Pro", free during beta).</summary>
     public bool AnalyticsEnabled { get; set; }
+
+    /// <summary>Whether the AI assistant for documenting shows is configured and on.</summary>
+    public bool AssistantEnabled { get; set; }
 }

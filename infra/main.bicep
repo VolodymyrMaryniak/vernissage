@@ -32,6 +32,10 @@ param sqlAdminPassword string
 @secure()
 param jwtSigningKey string
 
+@description('Optional Anthropic API key for the AI assistant (Anthropic__ApiKey app setting). Empty = assistant off.')
+@secure()
+param anthropicApiKey string = ''
+
 @description('Optional developer client IP allowed through the SQL firewall. Empty = no rule.')
 param clientIpAddress string = ''
 
@@ -62,6 +66,7 @@ module resources 'resources.bicep' = {
     sqlAdminLogin: sqlAdminLogin
     sqlAdminPassword: sqlAdminPassword
     jwtSigningKey: jwtSigningKey
+    anthropicApiKey: anthropicApiKey
     clientIpAddress: clientIpAddress
     httpLoggingRetentionDays: httpLoggingRetentionDays
     gitHubRepository: gitHubRepository

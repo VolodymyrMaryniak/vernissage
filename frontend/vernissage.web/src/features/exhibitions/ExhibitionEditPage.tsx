@@ -4,11 +4,13 @@ import type { ExhibitionWrite } from '../../types/exhibition';
 import { updateExhibition } from '../../api/exhibitionsApi';
 import ExhibitionForm from './ExhibitionForm';
 import { useAuth } from '../auth/useAuth';
+import { useAppConfig } from '../config/useAppConfig';
 import MediaManager from './MediaManager';
 import { useExhibition } from './useExhibition';
 
 export default function ExhibitionEditPage() {
   const { user } = useAuth();
+  const { assistantEnabled } = useAppConfig();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { exhibition, error: loadError, reload } = useExhibition(id);
@@ -40,6 +42,7 @@ export default function ExhibitionEditPage() {
     <div className="ex-edit">
       <ExhibitionForm
         accountRoles={user?.roles}
+        assistantEnabled={assistantEnabled}
         initial={exhibition}
         submitting={submitting}
         error={saveError}
