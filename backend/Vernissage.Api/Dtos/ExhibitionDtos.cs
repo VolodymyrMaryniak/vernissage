@@ -114,6 +114,8 @@ public class ExhibitionSummaryDto
     public string? Location { get; set; }
     public string? Focus { get; set; }
     public string? Curator { get; set; }
+    /// <summary>Venue (gallery or institution); used e.g. for CV entries.</summary>
+    public string? GalleryLocation { get; set; }
     public Guid? OwnerId { get; set; }
     public int MediaCount { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }

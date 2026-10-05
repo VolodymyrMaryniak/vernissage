@@ -18,6 +18,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<CostItem> CostItems => Set<CostItem>();
 
+    public DbSet<CurriculumVitae> CurriculumVitae => Set<CurriculumVitae>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -74,6 +76,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .WithOne(m => m.Exhibition)
                 .HasForeignKey(m => m.ExhibitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CurriculumVitae>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+
+            // One CV per user; deleting the account deletes its CV.
+            entity.HasIndex(c => c.OwnerId).IsUnique();
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(c => c.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(c => c.DocumentJson).IsRequired();
+            entity.Property(c => c.UploadedFile).HasColumnType("varbinary(max)");
+            entity.Property(c => c.UploadedFileName).HasMaxLength(260);
+            entity.Property(c => c.UploadedContentType).HasMaxLength(200);
         });
 
         modelBuilder.Entity<ExhibitionMetrics>(entity =>

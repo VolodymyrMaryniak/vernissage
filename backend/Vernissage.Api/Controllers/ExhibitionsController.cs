@@ -56,6 +56,7 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
                 Location = e.Location,
                 Focus = e.Focus,
                 Curator = e.Curator,
+                GalleryLocation = e.GalleryLocation,
                 OwnerId = e.OwnerId,
                 MediaCount = e.Media.Count,
                 CreatedAtUtc = e.CreatedAtUtc,
