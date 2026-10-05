@@ -195,6 +195,19 @@ galleries and institutions), not a public archive:
   Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
   Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
 
+## Home visuals & show reels
+
+- **Home slideshow** (`features/marketing/media/PhotoSlideshow.tsx`): opening-night
+  and installation photos in `public/media/home/*.webp`, all Creative Commons
+  (CC BY / BY-SA 2.0, Flickr). The credit + licence link for the photo on screen is
+  required by the licence; keep it when adding photos (`media/photos.ts`).
+- **Show reel** (`features/reel`): a short film *generated in the browser* from an
+  inventory (title card → installation views → works → numbers → costs → end), played
+  like a video with a scene scrubber. No video file is rendered. `scenes.ts` builds
+  the running order from the data and skips scenes with nothing to show. Home plays
+  a fictional demo (`media/demoReel.ts`); each exhibition page plays its own reel,
+  with the private metrics scenes only for the owner.
+
 ## App version endpoint
 
 `GET /api/version` returns `{ version, branch, buildTimeUtc }`. The branch and
