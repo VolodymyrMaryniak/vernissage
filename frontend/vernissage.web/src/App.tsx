@@ -9,6 +9,7 @@ import CuratorsPage from './features/marketing/CuratorsPage';
 import GalleriesPage from './features/marketing/GalleriesPage';
 import AnalyticsPage from './features/analytics/AnalyticsPage';
 import ProfilePage from './features/profile/ProfilePage';
+import ProfileEditPage from './features/profile/ProfileEditPage';
 import ExhibitionsListPage from './features/exhibitions/ExhibitionsListPage';
 import ExhibitionCreatePage from './features/exhibitions/ExhibitionCreatePage';
 import ExhibitionDetailPage from './features/exhibitions/ExhibitionDetailPage';
@@ -74,6 +75,16 @@ function App() {
               <RequireAuth>
                 <Shell>
                   <ProfilePage />
+                </Shell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={
+              <RequireAuth>
+                <Shell>
+                  <ProfileEditPage />
                 </Shell>
               </RequireAuth>
             }

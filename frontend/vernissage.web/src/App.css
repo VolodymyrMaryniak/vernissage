@@ -1375,6 +1375,166 @@ fieldset.field > legend {
   color: #1e7e34;
 }
 
+/* Business card ("My profile") — a printed card: paper, one red accent, a
+   faint peony/olive bloom in the corners. */
+.profile-card-wrap {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+}
+
+.profile-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.business-card {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 580px);
+  min-height: 320px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 22px;
+  padding: 30px 32px 22px;
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(168, 23, 42, 0.07), transparent 70%),
+    radial-gradient(55% 65% at 0% 100%, color-mix(in oklab, var(--olive) 22%, transparent), transparent 70%),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+.business-card-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.business-card-photo {
+  flex: none;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line);
+}
+
+.business-card-initials {
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-family: var(--font-serif);
+  font-size: 2rem;
+}
+
+.business-card-id {
+  min-width: 0;
+}
+
+.business-card-roles {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.app .business-card-name {
+  font-size: 2.1rem;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.business-card-org {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.business-card-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+  align-content: start;
+}
+
+.business-card-details dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.business-card-details dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.business-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.business-card-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.business-card-contact a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.business-card-contact a:hover {
+  color: var(--brand);
+  border-color: currentColor;
+}
+
+.business-card-contact .sep {
+  opacity: 0.4;
+}
+
+.business-card-brand {
+  flex: none;
+  display: inline-flex;
+}
+
+@media (max-width: 560px) {
+  .business-card {
+    padding: 24px 20px 18px;
+  }
+
+  .business-card-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .business-card-details {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Analytics ---- */
 
 .stat-grid {
