@@ -1,51 +1,55 @@
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
+import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import { useMessages } from '../i18n/useI18n';
 
 export default function SiteFooter() {
   const year = new Date().getFullYear();
+  const m = useMessages();
 
   return (
     <footer className="site-footer">
       <div className="container site-footer-inner">
-        <p className="footer-lead">A living memory of the exhibition world.</p>
+        <p className="footer-lead">{m.footer.lead}</p>
 
         <div className="footer-cols">
           <div className="footer-col">
-            <h4>Browse</h4>
+            <h4>{m.footer.browse}</h4>
             <ul>
               <li>
-                <Link to="/about">How it works</Link>
+                <Link to="/about">{m.nav.howItWorks}</Link>
               </li>
               <li>
-                <Link to="/artists">For artists</Link>
+                <Link to="/artists">{m.nav.forArtists}</Link>
               </li>
               <li>
-                <Link to="/curators">For independent curators</Link>
+                <Link to="/curators">{m.footer.forIndependentCurators}</Link>
               </li>
               <li>
-                <Link to="/galleries">For galleries</Link>
+                <Link to="/galleries">{m.nav.forGalleries}</Link>
               </li>
             </ul>
           </div>
 
           <div className="footer-col">
-            <h4>Contribute</h4>
+            <h4>{m.footer.contribute}</h4>
             <ul>
               <li>
-                <Link to="/exhibitions/new">Document a show</Link>
+                <Link to="/exhibitions/new">{m.nav.documentAShow}</Link>
               </li>
               <li>
-                <Link to="/register">Open a workspace</Link>
+                <Link to="/register">{m.footer.openWorkspace}</Link>
               </li>
               <li>
-                <Link to="/login">Sign in</Link>
+                <Link to="/login">{m.nav.signIn}</Link>
               </li>
             </ul>
           </div>
 
           <div className="footer-col">
-            <h4>About the project</h4>
-            <p>A non-commercial, open archive of exhibitions.</p>
+            <h4>{m.footer.about}</h4>
+            <p>{m.footer.aboutText}</p>
+            <LanguageSwitcher className="lang-switch--footer" />
           </div>
         </div>
 
@@ -53,7 +57,7 @@ export default function SiteFooter() {
           <span className="footer-brand">
             <Logo size={22} />© {year} Vernissage
           </span>
-          <span>v.001 — opened summer 2026</span>
+          <span>{m.footer.opened}</span>
         </div>
       </div>
     </footer>

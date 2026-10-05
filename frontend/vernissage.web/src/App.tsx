@@ -19,10 +19,15 @@ import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import RequireAuth from './features/auth/RequireAuth';
 import VersionPage from './features/version/VersionPage';
+import { useMessages } from './i18n/useI18n';
 
 // The CV builder pulls in the PDF/Word generators, so it loads on demand.
 const CvPage = lazy(() => import('./features/cv/CvPage'));
 import './App.css';
+
+function PageLoading() {
+  return <p className="muted state-message">{useMessages().common.loading}</p>;
+}
 
 /** Narrow centred wrapper for the functional workspace pages. */
 function Shell({ children }: { children: ReactNode }) {
@@ -87,7 +92,7 @@ function App() {
             path="/profile/cv"
             element={
               <RequireAuth>
-                <Suspense fallback={<p className="muted state-message">Loading…</p>}>
+                <Suspense fallback={<PageLoading />}>
                   <CvPage />
                 </Suspense>
               </RequireAuth>

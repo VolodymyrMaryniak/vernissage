@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { MarketingPhoto } from './photos';
 import { licenseUrl } from './photos';
+import { useMessages } from '../../../i18n/useI18n';
+import { fmt } from '../../../i18n/format';
 
 interface Props {
   photos: MarketingPhoto[];
@@ -19,6 +21,7 @@ function prefersReducedMotion(): boolean {
  * Creative Commons credit.
  */
 export default function PhotoSlideshow({ photos, interval = 5500 }: Props) {
+  const t = useMessages().home.slideshow;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(prefersReducedMotion);
   const [hovered, setHovered] = useState(false);
@@ -38,7 +41,7 @@ export default function PhotoSlideshow({ photos, interval = 5500 }: Props) {
       className={`slideshow${running ? ' is-running' : ''}`}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Exhibitions and opening nights"
+      aria-label={t.region}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
@@ -52,7 +55,7 @@ export default function PhotoSlideshow({ photos, interval = 5500 }: Props) {
             className={`slide${i === index ? ' is-active' : ''}`}
             aria-hidden={i !== index}
             aria-roledescription="slide"
-            aria-label={`${i + 1} of ${photos.length}`}
+            aria-label={fmt(t.slide, { n: i + 1, total: photos.length })}
           >
             <img
               src={p.src}
@@ -70,30 +73,30 @@ export default function PhotoSlideshow({ photos, interval = 5500 }: Props) {
           <span className="slideshow-title">{current.caption}</span>
         </div>
         <div className="slideshow-nav">
-          <button type="button" onClick={() => go(index - 1)} aria-label="Previous photo">
+          <button type="button" onClick={() => go(index - 1)} aria-label={t.previous}>
             ←
           </button>
           <button
             type="button"
             onClick={() => setPaused((p) => !p)}
-            aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}
+            aria-label={paused ? t.play : t.pause}
           >
             {paused ? '▶' : '❚❚'}
           </button>
-          <button type="button" onClick={() => go(index + 1)} aria-label="Next photo">
+          <button type="button" onClick={() => go(index + 1)} aria-label={t.next}>
             →
           </button>
         </div>
       </div>
 
       <div className="slideshow-foot">
-        <div className="slideshow-dots" role="group" aria-label="Choose a photo">
+        <div className="slideshow-dots" role="group" aria-label={t.choose}>
           {photos.map((p, i) => (
             <button
               type="button"
               key={p.src}
               className={i === index ? 'is-active' : undefined}
-              aria-label={`Photo ${i + 1}: ${p.caption}`}
+              aria-label={fmt(t.photo, { n: i + 1, caption: p.caption })}
               aria-current={i === index ? 'true' : undefined}
               onClick={() => go(i)}
             >
@@ -102,7 +105,7 @@ export default function PhotoSlideshow({ photos, interval = 5500 }: Props) {
           ))}
         </div>
         <p className="slideshow-credit">
-          Photo:{' '}
+          {t.credit}{' '}
           <a href={current.sourceUrl} target="_blank" rel="noreferrer noopener">
             {current.creator}
           </a>

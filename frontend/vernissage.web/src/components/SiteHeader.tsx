@@ -3,17 +3,19 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/useAuth';
 import { useAppConfig } from '../features/config/useAppConfig';
 import Logo from './Logo';
-
-const NAV_LINKS = [
-  { to: '/about', label: 'How it works' },
-  { to: '/artists', label: 'For artists' },
-  { to: '/curators', label: 'For curators' },
-  { to: '/galleries', label: 'For galleries' },
-];
+import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import { useMessages } from '../i18n/useI18n';
 
 export default function SiteHeader() {
   const { user, logout } = useAuth();
   const { analyticsEnabled } = useAppConfig();
+  const m = useMessages();
+  const NAV_LINKS = [
+    { to: '/about', label: m.nav.howItWorks },
+    { to: '/artists', label: m.nav.forArtists },
+    { to: '/curators', label: m.nav.forCurators },
+    { to: '/galleries', label: m.nav.forGalleries },
+  ];
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -43,7 +45,7 @@ export default function SiteHeader() {
             className="nav-toggle"
             aria-expanded={menuOpen}
             aria-controls={menuId}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? m.nav.closeMenu : m.nav.openMenu}
             onClick={() => setMenuOpen((open) => !open)}
           >
             <span className={`nav-toggle-icon${menuOpen ? ' is-open' : ''}`} aria-hidden="true">
@@ -54,7 +56,7 @@ export default function SiteHeader() {
           </button>
 
           <div className="site-header-menu" id={menuId} data-open={menuOpen}>
-            <nav className="site-nav" aria-label="Primary">
+            <nav className="site-nav" aria-label={m.nav.primary}>
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
@@ -67,14 +69,15 @@ export default function SiteHeader() {
             </nav>
 
             <div className="site-header-actions">
+              <LanguageSwitcher variant="select" />
               {user ? (
                 <>
                   <Link className="link-quiet" to="/exhibitions">
-                    My exhibitions
+                    {m.nav.myExhibitions}
                   </Link>
                   {analyticsEnabled && (
                     <Link className="link-quiet" to="/analytics">
-                      Analytics
+                      {m.nav.analytics}
                     </Link>
                   )}
                   <button
@@ -85,19 +88,19 @@ export default function SiteHeader() {
                       navigate('/');
                     }}
                   >
-                    Sign out
+                    {m.nav.signOut}
                   </button>
                   <Link className="pill-mono" to="/profile">
-                    Workspace
+                    {m.nav.workspace}
                   </Link>
                 </>
               ) : (
                 <>
                   <Link className="link-quiet" to="/login">
-                    Sign in
+                    {m.nav.signIn}
                   </Link>
                   <Link className="cta" to="/exhibitions/new">
-                    Document a show
+                    {m.nav.documentAShow}
                   </Link>
                 </>
               )}

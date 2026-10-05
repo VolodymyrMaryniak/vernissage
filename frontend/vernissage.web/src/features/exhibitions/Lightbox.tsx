@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MEDIA_CATEGORY_LABELS, type ExhibitionMedia } from '../../types/exhibition';
+import type { ExhibitionMedia } from '../../types/exhibition';
+import { useMessages } from '../../i18n/useI18n';
 import { mediaDownloadUrl } from '../../api/exhibitionsApi';
 
 interface Props {
@@ -22,6 +23,7 @@ export default function Lightbox({
   onClose,
 }: Props) {
   const current = images[index];
+  const t = useMessages().ex.media;
 
   const goPrev = useCallback(() => {
     onIndexChange((index - 1 + images.length) % images.length);
@@ -60,7 +62,7 @@ export default function Lightbox({
       aria-label={current.caption ?? current.fileName}
       onClick={onClose}
     >
-      <button type="button" className="lightbox-close" onClick={onClose} aria-label="Close preview">
+      <button type="button" className="lightbox-close" onClick={onClose} aria-label={t.closePreview}>
         ×
       </button>
 
@@ -68,7 +70,7 @@ export default function Lightbox({
         <button
           type="button"
           className="lightbox-nav lightbox-prev"
-          aria-label="Previous image"
+          aria-label={t.previousImage}
           onClick={(e) => {
             e.stopPropagation();
             goPrev();
@@ -81,7 +83,7 @@ export default function Lightbox({
       <figure className="lightbox-figure" onClick={(e) => e.stopPropagation()}>
         <img className="lightbox-img" src={url} alt={current.caption ?? current.fileName} />
         <figcaption className="lightbox-cap">
-          <span className="lightbox-cat">{MEDIA_CATEGORY_LABELS[current.category]}</span>
+          <span className="lightbox-cat">{t.category[current.category]}</span>
           {current.caption && <span className="lightbox-caption-text">{current.caption}</span>}
           <span className="lightbox-meta">
             <span className="lightbox-file">{current.fileName}</span>
@@ -91,7 +93,7 @@ export default function Lightbox({
               </span>
             )}
             <a className="btn btn-ghost btn-sm" href={url} download={current.fileName}>
-              Download
+              {t.download}
             </a>
           </span>
         </figcaption>
@@ -101,7 +103,7 @@ export default function Lightbox({
         <button
           type="button"
           className="lightbox-nav lightbox-next"
-          aria-label="Next image"
+          aria-label={t.nextImage}
           onClick={(e) => {
             e.stopPropagation();
             goNext();

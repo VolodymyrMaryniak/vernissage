@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
-
-const euro = (n: number) => `${n < 0 ? '−' : ''}€${Math.abs(Math.round(n)).toLocaleString('en-GB')}`;
+import { useMessages } from '../../../i18n/useI18n';
+import { formatNumber } from '../../../i18n/format';
+import { euro } from './money';
 
 interface SliderProps {
   label: string;
@@ -38,6 +39,7 @@ function Slider({ label, value, min, max, step, format, onChange }: SliderProps)
  * figures the private show metrics keep, here to play with.
  */
 export default function MarginCalculator() {
+  const t = useMessages().galleries.margin;
   const [sold, setSold] = useState(8);
   const [price, setPrice] = useState(2200);
   const [commission, setCommission] = useState(50);
@@ -52,27 +54,27 @@ export default function MarginCalculator() {
   return (
     <div className="calc">
       <div className="calc-inputs">
-        <Slider label="Works sold" value={sold} min={0} max={40} step={1} format={String} onChange={setSold} />
-        <Slider label="Average price" value={price} min={200} max={10000} step={100} format={euro} onChange={setPrice} />
-        <Slider label="Gallery commission" value={commission} min={0} max={70} step={5} format={(n) => `${n}%`} onChange={setCommission} />
-        <Slider label="Show costs" value={costs} min={0} max={30000} step={250} format={euro} onChange={setCosts} />
-        <Slider label="Visitors" value={visitors} min={0} max={5000} step={50} format={(n) => n.toLocaleString('en-GB')} onChange={setVisitors} />
+        <Slider label={t.sold} value={sold} min={0} max={40} step={1} format={String} onChange={setSold} />
+        <Slider label={t.price} value={price} min={200} max={10000} step={100} format={euro} onChange={setPrice} />
+        <Slider label={t.commission} value={commission} min={0} max={70} step={5} format={(n) => formatNumber(n / 100, undefined, { style: 'percent' })} onChange={setCommission} />
+        <Slider label={t.costs} value={costs} min={0} max={30000} step={250} format={euro} onChange={setCosts} />
+        <Slider label={t.visitors} value={visitors} min={0} max={5000} step={50} format={(n) => formatNumber(n)} onChange={setVisitors} />
       </div>
       <div className="calc-result" aria-live="polite">
-        <p className="calc-result-label">The show leaves you with</p>
+        <p className="calc-result-label">{t.result}</p>
         <p className={`calc-net${net < 0 ? ' is-loss' : ''}`}>{euro(net)}</p>
         <dl className="calc-breakdown">
           <div>
-            <dt>Sales</dt>
+            <dt>{t.sales}</dt>
             <dd>{euro(sales)}</dd>
           </div>
           <div>
-            <dt>Your commission</dt>
+            <dt>{t.yourCommission}</dt>
             <dd>{euro(income)}</dd>
           </div>
           <div>
-            <dt>Cost per visitor</dt>
-            <dd>€{perVisitor.toFixed(2)}</dd>
+            <dt>{t.perVisitor}</dt>
+            <dd>{formatNumber(perVisitor, undefined, { style: 'currency', currency: 'EUR' })}</dd>
           </div>
         </dl>
       </div>

@@ -5,21 +5,16 @@ import { CREATOR_ROLES } from '../../types/auth';
 import type { CreatorRole } from '../../types/auth';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from './useAuth';
-
-const ROLE_HINTS: Record<CreatorRole, string> = {
-  Gallery: 'A gallery or exhibition space',
-  Curator: 'An independent art curator',
-  Artist: 'An artist showing their own work',
-};
+import { useMessages } from '../../i18n/useI18n';
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  useDocumentMeta({
-    title: 'Open a workspace',
-    description: 'Create a Vernissage workspace to document and archive your exhibitions.',
-  });
+  const m = useMessages();
+  const t = m.auth.register;
+
+  useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +31,7 @@ export default function RegisterPage() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (roles.length === 0) {
-      setError('Select at least one role.');
+      setError(t.pickRole);
       return;
     }
     setError(null);
@@ -45,7 +40,7 @@ export default function RegisterPage() {
       await register(email, password, roles);
       navigate('/profile', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      setError(err instanceof Error ? err.message : t.failed);
     } finally {
       setSubmitting(false);
     }
@@ -54,21 +49,21 @@ export default function RegisterPage() {
   return (
     <div className="container auth-shell">
       <div className="auth-card">
-        <p className="eyebrow">Workspace</p>
-        <h1>Open a workspace</h1>
-        <p className="auth-sub">Free during beta — including analytics.</p>
+        <p className="eyebrow">{m.auth.eyebrow}</p>
+        <h1>{t.title}</h1>
+        <p className="auth-sub">{t.sub}</p>
 
-        <button type="button" className="btn-google" disabled title="Coming soon">
-          Continue with Google
+        <button type="button" className="btn-google" disabled title={m.common.comingSoon}>
+          {m.auth.google}
         </button>
 
-        <div className="auth-divider">or</div>
+        <div className="auth-divider">{m.common.or}</div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && <p className="banner banner-error">{error}</p>}
 
           <label className="field">
-            <span className="field-label">Email</span>
+            <span className="field-label">{m.auth.email}</span>
             <input
               type="email"
               required
@@ -79,7 +74,7 @@ export default function RegisterPage() {
           </label>
 
           <label className="field">
-            <span className="field-label">Password (min. 8 characters)</span>
+            <span className="field-label">{t.passwordMin}</span>
             <input
               type="password"
               required
@@ -91,7 +86,7 @@ export default function RegisterPage() {
           </label>
 
           <fieldset className="field">
-            <legend className="field-label">I am a… (choose all that apply)</legend>
+            <legend className="field-label">{t.iAmA}</legend>
             {CREATOR_ROLES.map((role) => (
               <label key={role} className="checkbox-row">
                 <input
@@ -100,20 +95,20 @@ export default function RegisterPage() {
                   onChange={() => toggleRole(role)}
                 />
                 <span>
-                  <strong>{role}</strong>
-                  <span className="muted"> — {ROLE_HINTS[role]}</span>
+                  <strong>{m.roles.name[role]}</strong>
+                  <span className="muted"> — {m.roles.hint[role]}</span>
                 </span>
               </label>
             ))}
           </fieldset>
 
           <button type="submit" className="cta btn-block" disabled={submitting}>
-            {submitting ? 'Creating account…' : 'Register'}
+            {submitting ? t.submitting : t.submit}
           </button>
         </form>
 
         <p className="auth-foot">
-          Already have a workspace? <Link to="/login">Sign in</Link>
+          {t.haveWorkspace} <Link to="/login">{t.signIn}</Link>
         </p>
       </div>
     </div>

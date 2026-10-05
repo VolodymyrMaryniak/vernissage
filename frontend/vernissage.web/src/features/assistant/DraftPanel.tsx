@@ -4,6 +4,8 @@ import { draftExhibition } from '../../api/assistantApi';
 import type { DraftField } from '../../api/assistantApi';
 import { suggestionsFrom } from './suggestions';
 import type { Suggestion } from './suggestions';
+import { useMessages } from '../../i18n/useI18n';
+import { plural } from '../../i18n/format';
 
 interface Props {
   current: ExhibitionWrite;
@@ -21,6 +23,8 @@ const MAX_PDF_BYTES = 10 * 1024 * 1024;
  * saved until you save the form.
  */
 export default function DraftPanel({ current, onApply, defaultOpen = false }: Props) {
+  const m = useMessages();
+  const t = m.assistant;
   const [open, setOpen] = useState(defaultOpen);
   const [notes, setNotes] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -41,11 +45,11 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
   const pickFile = (f: File | null) => {
     setError(null);
     if (f && !f.name.toLowerCase().endsWith('.pdf')) {
-      setError('Attach the document as a PDF.');
+      setError(t.notPdf);
       return;
     }
     if (f && f.size > MAX_PDF_BYTES) {
-      setError('The PDF must be 10 MB or smaller.');
+      setError(t.pdfTooLarge);
       return;
     }
     setFile(f);
@@ -57,12 +61,12 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
     reset();
     try {
       const result = await draftExhibition({ notes, file });
-      const found = suggestionsFrom(result, current);
+      const found = suggestionsFrom(result, current, m);
       setSummary(result.summary || null);
       setSuggestions(found);
       setChosen(new Set(found.filter((s) => s.existing === null).map((s) => s.key)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'The assistant could not draft this.');
+      setError(err instanceof Error ? err.message : t.draftFailed);
     } finally {
       setBusy(false);
     }
@@ -95,7 +99,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
   return (
     <section
       className={`card form-section assist-panel${open ? ' is-open' : ''}`}
-      aria-label="Draft with AI"
+      aria-label={t.panel}
     >
       <div className="assist-head">
         <div className="section-head">
@@ -103,12 +107,9 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
             <span className="assist-spark" aria-hidden="true">
               ✦
             </span>{' '}
-            Draft with AI
+            {t.panel}
           </h3>
-          <p>
-            Paste your notes, a press release or an email, or attach a PDF. The assistant fills in
-            what it finds; you choose what to keep.
-          </p>
+          <p>{t.intro}</p>
         </div>
         <button
           type="button"
@@ -116,7 +117,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
         >
-          {open ? 'Hide' : 'Open'}
+          {open ? t.hide : t.open}
         </button>
       </div>
 
@@ -124,11 +125,11 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
         // Not a nested <form>: this panel lives inside the exhibition form.
         <div className="assist-body">
           <label className="field">
-            <span className="field-label">Your material</span>
+            <span className="field-label">{t.material}</span>
             <textarea
               rows={6}
               maxLength={50000}
-              placeholder="e.g. “Soft Wall opens 12 September at Galerie Nord, Lviv, curated by …”"
+              placeholder={t.materialPlaceholder}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -141,7 +142,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
                 accept="application/pdf,.pdf"
                 onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
               />
-              {file ? `📎 ${file.name}` : 'Attach a PDF'}
+              {file ? `📎 ${file.name}` : t.attachPdf}
             </label>
             {file && (
               <button
@@ -152,7 +153,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
                   setFileKey((k) => k + 1);
                 }}
               >
-                Remove
+                {m.common.remove}
               </button>
             )}
             <button
@@ -161,13 +162,10 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
               disabled={!canDraft}
               onClick={() => void draft()}
             >
-              {busy ? 'Reading your material…' : 'Draft the record'}
+              {busy ? t.drafting : t.draft}
             </button>
           </div>
-          <p className="field-hint">
-            Your material is sent to Claude (Anthropic) to draft the record and isn&apos;t stored.
-            Always check the result: the assistant can make mistakes.
-          </p>
+          <p className="field-hint">{t.privacy}</p>
 
           {error && <p className="banner banner-error">{error}</p>}
 
@@ -175,7 +173,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
             <div className="assist-results" aria-live="polite">
               {summary && <p className="assist-summary">{summary}</p>}
               {suggestions.length === 0 ? (
-                <p className="muted">Nothing new to add from this material.</p>
+                <p className="muted">{t.nothingNew}</p>
               ) : (
                 <>
                   <ul className="assist-suggestions">
@@ -192,7 +190,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
                         <p className="assist-value">{s.value}</p>
                         {s.existing && (
                           <p className="assist-existing">
-                            Replaces: <span>{s.existing}</span>
+                            {t.replaces} <span>{s.existing}</span>
                           </p>
                         )}
                       </li>
@@ -200,7 +198,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
                   </ul>
                   <div className="assist-actions">
                     <button type="button" className="btn btn-ghost" onClick={reset}>
-                      Discard
+                      {t.discard}
                     </button>
                     <button
                       type="button"
@@ -208,7 +206,7 @@ export default function DraftPanel({ current, onApply, defaultOpen = false }: Pr
                       disabled={chosen.size === 0}
                       onClick={apply}
                     >
-                      Fill in {chosen.size} {chosen.size === 1 ? 'field' : 'fields'}
+                      {plural(chosen.size, t.fillIn)}
                     </button>
                   </div>
                 </>

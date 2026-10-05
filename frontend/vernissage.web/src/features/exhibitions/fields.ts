@@ -1,4 +1,5 @@
 import type { ExhibitionWrite } from '../../types/exhibition';
+import type { Messages } from '../../i18n/en';
 
 // A single editable/viewable text field.
 export interface FieldDef {
@@ -18,51 +19,29 @@ export interface FieldSection {
   fields: FieldDef[];
 }
 
-export const FIELD_SECTIONS: FieldSection[] = [
-  {
-    id: 'concept',
-    title: 'Concept & research',
-    description: 'The idea behind the exhibition and the material it draws on.',
-    fields: [
-      { key: 'aim', label: 'Aim', multiline: true, placeholder: 'What is this exhibition trying to achieve?' },
-      { key: 'explication', label: 'Explication', multiline: true, placeholder: 'The curatorial statement or wall text.' },
-      {
-        key: 'investigationMaterial',
-        label: 'Investigation material',
-        multiline: true,
-        placeholder: 'Sources, archives and research feeding the show.',
-      },
-      {
-        key: 'referencedLiterature',
-        label: 'Referenced literature & research',
-        multiline: true,
-        placeholder: 'Books, papers and citations.',
-      },
-    ],
-  },
-  {
-    id: 'people',
-    title: 'People & artworks',
-    description: 'Who made it happen and what is on display.',
-    fields: [
-      { key: 'team', label: 'Team', multiline: true, placeholder: 'Curators, designers, technicians, contributors.' },
-      { key: 'artworksList', label: 'List of artworks', multiline: true, placeholder: 'Works featured in the exhibition.' },
-    ],
-  },
-  {
-    id: 'program',
-    title: 'Program & events',
-    description: 'Everything happening around the exhibition.',
-    fields: [
-      { key: 'preOpeningDetails', label: 'Pre-opening details', multiline: true },
-      { key: 'openingDetails', label: 'Opening details', multiline: true },
-      { key: 'eventsDetails', label: 'Events within expo', multiline: true },
-    ],
-  },
-  {
-    id: 'notes',
-    title: 'Notes',
-    description: 'Anything else worth recording.',
-    fields: [{ key: 'notes', label: 'Notes', multiline: true }],
-  },
+type SectionId = keyof Messages['ex']['fields']['sections'];
+type TextKey = keyof Messages['ex']['fields']['label'] & keyof ExhibitionWrite;
+
+const LAYOUT: { id: SectionId; fields: TextKey[] }[] = [
+  { id: 'concept', fields: ['aim', 'explication', 'investigationMaterial', 'referencedLiterature'] },
+  { id: 'people', fields: ['team', 'artworksList'] },
+  { id: 'program', fields: ['preOpeningDetails', 'openingDetails', 'eventsDetails'] },
+  { id: 'notes', fields: ['notes'] },
 ];
+
+/** The long-text sections, labelled in the active language. */
+export function fieldSections(m: Messages): FieldSection[] {
+  const f = m.ex.fields;
+  const placeholders = f.placeholder as Partial<Record<TextKey, string>>;
+  return LAYOUT.map(({ id, fields }) => ({
+    id,
+    title: f.sections[id].title,
+    description: f.sections[id].description,
+    fields: fields.map((key) => ({
+      key,
+      label: f.label[key],
+      multiline: true,
+      placeholder: placeholders[key],
+    })),
+  }));
+}

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { improveText } from '../../api/assistantApi';
 import type { ImproveMode } from '../../api/assistantApi';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt } from '../../i18n/format';
 
 interface Props {
   /** Field key, e.g. "explication", so the assistant knows what kind of text it is. */
@@ -19,6 +21,7 @@ export const MIN_TEXT = 40;
  * proposal: the field changes when the user picks "Use this".
  */
 export default function TextAssist({ field, label, text, exhibitionName, onAccept }: Props) {
+  const t = useMessages().assistant;
   const [busy, setBusy] = useState<ImproveMode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [proposal, setProposal] = useState<string | null>(null);
@@ -34,7 +37,7 @@ export default function TextAssist({ field, label, text, exhibitionName, onAccep
         await improveText({ field, text, mode, exhibitionName: exhibitionName || undefined }),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'The assistant could not rewrite this.');
+      setError(err instanceof Error ? err.message : t.rewriteFailed);
     } finally {
       setBusy(null);
     }
@@ -52,29 +55,29 @@ export default function TextAssist({ field, label, text, exhibitionName, onAccep
             className="link-quiet"
             disabled={busy !== null}
             onClick={() => void run('polish')}
-            aria-label={`Polish ${label}`}
+            aria-label={fmt(t.polishField, { field: label })}
           >
-            {busy === 'polish' ? 'Polishing…' : 'Polish'}
+            {busy === 'polish' ? t.polishing : t.polish}
           </button>
           <button
             type="button"
             className="link-quiet"
             disabled={busy !== null}
             onClick={() => void run('shorten')}
-            aria-label={`Shorten ${label}`}
+            aria-label={fmt(t.shortenField, { field: label })}
           >
-            {busy === 'shorten' ? 'Shortening…' : 'Shorten'}
+            {busy === 'shorten' ? t.shortening : t.shorten}
           </button>
         </div>
       )}
       {error && <p className="field-error">{error}</p>}
       {proposal && (
         <div className="text-assist-proposal" aria-live="polite">
-          <p className="assist-field">Suggested</p>
+          <p className="assist-field">{t.suggested}</p>
           <p className="assist-value">{proposal}</p>
           <div className="assist-actions">
             <button type="button" className="btn btn-ghost" onClick={() => setProposal(null)}>
-              Keep mine
+              {t.keepMine}
             </button>
             <button
               type="button"
@@ -84,7 +87,7 @@ export default function TextAssist({ field, label, text, exhibitionName, onAccep
                 setProposal(null);
               }}
             >
-              Use this
+              {t.useThis}
             </button>
           </div>
         </div>

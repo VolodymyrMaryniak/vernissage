@@ -7,12 +7,14 @@ import { useAuth } from '../auth/useAuth';
 import { useAppConfig } from '../config/useAppConfig';
 import MediaManager from './MediaManager';
 import { useExhibition } from './useExhibition';
+import { useMessages } from '../../i18n/useI18n';
 
 export default function ExhibitionEditPage() {
   const { user } = useAuth();
   const { assistantEnabled } = useAppConfig();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const m = useMessages();
   const { exhibition, error: loadError, reload } = useExhibition(id);
 
   const [submitting, setSubmitting] = useState(false);
@@ -22,7 +24,7 @@ export default function ExhibitionEditPage() {
   // upload/delete — which reloads the exhibition — doesn't unmount the form
   // and discard the user's in-progress text edits.
   if (!exhibition) {
-    return <p className="muted state-message">{loadError ?? 'Loading…'}</p>;
+    return <p className="muted state-message">{loadError ?? m.common.loading}</p>;
   }
 
   const handleUpdate = async (payload: ExhibitionWrite) => {
@@ -32,7 +34,7 @@ export default function ExhibitionEditPage() {
       await updateExhibition(exhibition.id, payload);
       navigate(`/exhibitions/${exhibition.id}`);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to update exhibition');
+      setSaveError(err instanceof Error ? err.message : m.ex.form.updateFailed);
     } finally {
       setSubmitting(false);
     }

@@ -1,18 +1,21 @@
 import { useState } from 'react';
+import { useMessages } from '../../../i18n/useI18n';
+import { fmt } from '../../../i18n/format';
+import { euro } from './money';
 
 const WORKS = [
-  { id: 1, title: 'Afterimage I', medium: 'Oil on linen', price: 2400, tone: 'peony' },
-  { id: 2, title: 'Blackout, Podil', medium: 'Pigment print', price: 900, tone: 'ink' },
-  { id: 3, title: 'Small Hours', medium: 'Oil on board', price: 1600, tone: 'olive' },
-  { id: 4, title: 'Afterimage II', medium: 'Oil on linen', price: 2400, tone: 'sand' },
-  { id: 5, title: 'Window, 4 a.m.', medium: 'Gouache', price: 750, tone: 'dusk' },
-  { id: 6, title: 'Тиха вода', medium: 'Light installation', price: 5200, tone: 'night' },
+  { id: 1, title: 'Afterimage I', medium: 'oilLinen', price: 2400, tone: 'peony' },
+  { id: 2, title: 'Blackout, Podil', medium: 'print', price: 900, tone: 'ink' },
+  { id: 3, title: 'Small Hours', medium: 'oilBoard', price: 1600, tone: 'olive' },
+  { id: 4, title: 'Afterimage II', medium: 'oilLinen', price: 2400, tone: 'sand' },
+  { id: 5, title: 'Window, 4 a.m.', medium: 'gouache', price: 750, tone: 'dusk' },
+  { id: 6, title: 'Тиха вода', medium: 'light', price: 5200, tone: 'night' },
 ] as const;
 
-const euro = (n: number) => `€${n.toLocaleString('en-GB')}`;
 
 /** Opening night: click a work to put the red "sold" dot on it; the tally keeps count. */
 export default function SoldWall() {
+  const t = useMessages().artists.soldWall;
   const [sold, setSold] = useState<Set<number>>(new Set([1]));
   const toggle = (id: number) =>
     setSold((prev) => {
@@ -41,7 +44,7 @@ export default function SoldWall() {
               <span className="sold-work-label">
                 <span className="sold-work-title">{w.title}</span>
                 <span className="sold-work-meta">
-                  {w.medium} · {euro(w.price)}
+                  {t.mediums[w.medium]} · {euro(w.price)}
                 </span>
               </span>
             </button>
@@ -50,10 +53,10 @@ export default function SoldWall() {
       </ul>
       <div className="sold-tally" aria-live="polite">
         <p className="sold-tally-number">
-          {sold.size} <span>of {WORKS.length} sold</span>
+          {sold.size} <span>{fmt(t.of, { n: WORKS.length })}</span>
         </p>
         <p className="sold-tally-revenue">{euro(revenue)}</p>
-        <p className="sold-tally-note">Visible only to you. It feeds your private show metrics.</p>
+        <p className="sold-tally-note">{t.note}</p>
       </div>
     </div>
   );

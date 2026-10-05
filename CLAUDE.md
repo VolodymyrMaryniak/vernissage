@@ -195,6 +195,30 @@ galleries and institutions), not a public archive:
   Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
   Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
 
+## Languages (English, French, Ukrainian)
+
+- The UI is translated into **English (default), French and Ukrainian** with a small
+  in-house layer in `src/i18n` (no i18n library). English is the default for every
+  visitor (the browser language is *not* used); the choice is saved in
+  `localStorage` (`vernissage.locale`) and sets `<html lang>`. Pickers: a compact
+  select in the header, EN · FR · UA buttons in the footer.
+- **Dictionaries:** `src/i18n/en/*.ts` is the source text *and* the type
+  (`Messages`); `fr/` and `uk/` are typed against it, so a missing or extra key fails
+  the build. French and Ukrainian are lazy-loaded chunks; `main.tsx` loads the saved
+  language before the first render. Components read text with
+  `const m = useMessages()` → `m.ex.form.title`; no provider is needed in tests
+  (the context defaults to English).
+- **Helpers** (`src/i18n/format.ts`): `fmt('{n} of {total}', vars)`, `plural(n, forms)`
+  (Intl plural rules, so Ukrainian gets one/few/many), `formatDate`/`formatNumber`
+  in the active language. `<Rich text="… *emphasis* …" />` renders `*…*` as `<em>`.
+- **Adding text:** add the key to `en/…`, then the same key to `fr/…` and `uk/…`
+  (the compiler lists what's missing). `i18n.test.tsx` fails if a sentence-length
+  string in fr/uk is still identical to English. French strings use a narrow
+  no-break space before `? ! : ;` and inside « ».
+- The generated CV's headings ("Solo exhibitions", "Curated by …") follow the UI
+  language; default CV section titles are localized until the CV is first saved.
+  API error messages and the unlisted `/version` page stay in English.
+
 ## AI assistant ("Draft with AI")
 
 - `POST /api/assistant/draft` (multipart `notes` + optional PDF ≤ 10 MB) proposes

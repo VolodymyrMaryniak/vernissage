@@ -1,5 +1,6 @@
 import type { ExhibitionWrite } from '../types/exhibition';
 import { API_BASE, apiFetch, parseJson } from './http';
+import { currentMessages } from '../i18n/current';
 
 const RESOURCE = `${API_BASE}/api/assistant`;
 
@@ -15,7 +16,7 @@ export type ImproveMode = 'polish' | 'shorten';
 
 async function assistantJson<T>(response: Response): Promise<T> {
   if (response.status === 429) {
-    throw new Error("You've used the assistant a lot this hour. Please try again a bit later.");
+    throw new Error(currentMessages().assistant.busyHour);
   }
   return parseJson<T>(response);
 }

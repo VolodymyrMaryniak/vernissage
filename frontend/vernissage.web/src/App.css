@@ -1929,7 +1929,8 @@ fieldset.field > legend {
    behind the toggle. These rules are scoped to max-width so they never leak
    onto desktop, where the wrapper is `display: contents` (its DOM node still
    matches descendant selectors even though its box is gone). */
-@media (max-width: 1059.98px) {
+/* 1280px leaves room for the longer French and Ukrainian labels. */
+@media (max-width: 1279.98px) {
   .site-header-menu {
     position: absolute;
     top: 100%;
@@ -2055,7 +2056,7 @@ fieldset.field > legend {
   white-space: nowrap;
 }
 
-@media (min-width: 1060px) {
+@media (min-width: 1280px) {
   .nav-toggle {
     display: none;
   }
@@ -6126,4 +6127,114 @@ fieldset.field > legend {
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--danger);
+}
+
+/* ================================================================
+   Language switcher (EN · FR · UA)
+   ================================================================ */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+}
+
+.lang-switch button {
+  min-width: 32px;
+  height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lang-switch button:hover {
+  color: var(--ink);
+}
+
+.lang-switch button.is-active {
+  background: var(--brand);
+  color: #fff;
+}
+
+.lang-switch button:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.lang-switch--footer {
+  margin-top: 16px;
+}
+
+/* Translated labels run longer; header items never wrap mid-label. */
+.site-nav a,
+.site-header-actions > * {
+  white-space: nowrap;
+}
+
+/* Compact header picker: a pill showing the code, over a native select. */
+.lang-select {
+  position: relative;
+  display: inline-flex;
+}
+
+.lang-select-face {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.lang-select-caret {
+  font-size: 9px;
+  color: var(--ink-mute);
+}
+
+.lang-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px; /* no zoom-on-focus on iOS */
+}
+
+.lang-select:focus-within .lang-select-face {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.lang-select:hover .lang-select-face {
+  border-color: var(--line-strong);
+}
+
+/* French and Ukrainian labels are longer: a slightly tighter bar on narrow desktops. */
+@media (min-width: 1280px) and (max-width: 1439.98px) {
+  :root:is([lang='fr'], [lang='uk']) .site-nav {
+    gap: 16px;
+  }
+  :root:is([lang='fr'], [lang='uk']) .site-nav a {
+    font-size: 0.84rem;
+  }
+  :root:is([lang='fr'], [lang='uk']) .site-header-actions {
+    gap: 10px;
+  }
 }

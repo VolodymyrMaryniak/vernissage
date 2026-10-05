@@ -1,19 +1,31 @@
 import type { ExhibitionWrite } from '../../types/exhibition';
 import type { DraftField, ExhibitionDraft } from '../../api/assistantApi';
-import { FIELD_SECTIONS } from '../exhibitions/fields';
+import en from '../../i18n/en';
+import type { Messages } from '../../i18n/en';
 
-/** Every field the assistant may fill, in form order, with its form label and length cap. */
-export const DRAFT_FIELDS: { key: DraftField; label: string; max?: number }[] = [
-  { key: 'name', label: 'Name', max: 300 },
-  { key: 'startDate', label: 'Start date' },
-  { key: 'endDate', label: 'End date' },
-  { key: 'curator', label: 'Curator', max: 500 },
-  { key: 'location', label: 'Location', max: 500 },
-  { key: 'galleryLocation', label: 'Gallery / venue', max: 500 },
-  { key: 'focus', label: 'Focus / topic', max: 200 },
-  ...FIELD_SECTIONS.flatMap((s) =>
-    s.fields.map((f) => ({ key: f.key as DraftField, label: f.label })),
-  ),
+/** Every field the assistant may fill, in form order, with its length cap. */
+export const DRAFT_FIELDS: { key: DraftField; max?: number }[] = [
+  { key: 'name', max: 300 },
+  { key: 'startDate' },
+  { key: 'endDate' },
+  { key: 'curator', max: 500 },
+  { key: 'location', max: 500 },
+  { key: 'galleryLocation', max: 500 },
+  { key: 'focus', max: 200 },
+  ...(
+    [
+      'aim',
+      'explication',
+      'investigationMaterial',
+      'referencedLiterature',
+      'team',
+      'artworksList',
+      'preOpeningDetails',
+      'openingDetails',
+      'eventsDetails',
+      'notes',
+    ] as const
+  ).map((key) => ({ key })),
 ];
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -26,8 +38,13 @@ export interface Suggestion {
 }
 
 /** The usable suggestions in a draft: non-empty, well-formed dates, within length caps. */
-export function suggestionsFrom(draft: ExhibitionDraft, current: ExhibitionWrite): Suggestion[] {
-  return DRAFT_FIELDS.flatMap(({ key, label, max }) => {
+export function suggestionsFrom(
+  draft: ExhibitionDraft,
+  current: ExhibitionWrite,
+  m: Messages = en,
+): Suggestion[] {
+  return DRAFT_FIELDS.flatMap(({ key, max }) => {
+    const label = m.ex.fields.label[key];
     const raw = draft[key];
     if (typeof raw !== 'string' || raw.trim() === '') return [];
     const value = max ? raw.trim().slice(0, max) : raw.trim();

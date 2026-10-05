@@ -1,5 +1,6 @@
 import Logo from '../../components/Logo';
 import type { Profile } from '../../types/profile';
+import { useMessages } from '../../i18n/useI18n';
 
 interface Props {
   profile: Profile;
@@ -33,6 +34,8 @@ function Social({ value }: { value: string }) {
  * a clean card rather than a column of empty labels.
  */
 export default function BusinessCard({ profile, photoUrl }: Props) {
+  const m = useMessages();
+  const t = m.profile.card;
   const isGallery = profile.roles.includes('Gallery');
   const isPerson = profile.roles.includes('Curator') || profile.roles.includes('Artist');
   const isArtist = profile.roles.includes('Artist');
@@ -48,15 +51,15 @@ export default function BusinessCard({ profile, photoUrl }: Props) {
       details.push({ label, value: String(value) });
     }
   };
-  add('Medium', profile.medium, isArtist);
-  add('Focus', profile.focus, isGallery);
-  add('Interests', profile.areasOfInterest, isPerson);
-  add('Based in', profile.location, isPerson);
-  add('Gallery', profile.businessLocation, isGallery);
-  add('Founded', profile.foundingYear, isGallery);
+  add(t.medium, profile.medium, isArtist);
+  add(t.focus, profile.focus, isGallery);
+  add(t.interests, profile.areasOfInterest, isPerson);
+  add(t.basedIn, profile.location, isPerson);
+  add(t.gallery, profile.businessLocation, isGallery);
+  add(t.founded, profile.foundingYear, isGallery);
 
   return (
-    <article className="business-card" aria-label="Business card">
+    <article className="business-card" aria-label={t.label}>
       <div className="business-card-main">
         {photoUrl ? (
           <img className="business-card-photo" src={photoUrl} alt="" />
@@ -67,7 +70,7 @@ export default function BusinessCard({ profile, photoUrl }: Props) {
         )}
 
         <div className="business-card-id">
-          <p className="business-card-roles">{profile.roles.join(' · ')}</p>
+          <p className="business-card-roles">{profile.roles.map((r) => m.roles.name[r]).join(' · ')}</p>
           <h3 className="business-card-name">{name}</h3>
           {organisation && <p className="business-card-org">{organisation}</p>}
         </div>

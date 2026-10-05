@@ -1,5 +1,8 @@
 import type { ExhibitionDetail } from '../../types/exhibition';
-import { FIELD_SECTIONS } from './fields';
+import { fieldSections } from './fields';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt, formatDate } from '../../i18n/format';
+import type { Messages } from '../../i18n/en';
 import { coverUrl } from './cover';
 import MediaGallery from './MediaGallery';
 
@@ -10,17 +13,6 @@ interface Props {
   onEdit: (() => void) | null;
 }
 
-function formatDate(value: string | null): string | null {
-  if (!value) return null;
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
-
 function formatDateRange(start: string | null, end: string | null): string | null {
   const s = formatDate(start);
   const e = formatDate(end);
@@ -29,20 +21,20 @@ function formatDateRange(start: string | null, end: string | null): string | nul
 }
 
 function formatTimestamp(value: string): string {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return formatDate(value, { year: 'numeric', month: 'short', day: 'numeric' }) ?? value;
 }
 
 // Aside metadata blocks.
-const ASIDE_FIELDS: { key: keyof ExhibitionDetail; label: string }[] = [
-  { key: 'curator', label: 'Curator' },
-  { key: 'galleryLocation', label: 'Gallery / venue' },
-  { key: 'location', label: 'City' },
-  { key: 'focus', label: 'Focus / topic' },
+const ASIDE_FIELDS: { key: keyof ExhibitionDetail; label: (m: Messages) => string }[] = [
+  { key: 'curator', label: (m) => m.ex.fields.label.curator },
+  { key: 'galleryLocation', label: (m) => m.ex.fields.label.galleryLocation },
+  { key: 'location', label: (m) => m.ex.fields.label.city },
+  { key: 'focus', label: (m) => m.ex.fields.label.focus },
 ];
 
 export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Props) {
+  const m = useMessages();
+  const t = m.ex.detail;
   const dates = formatDateRange(exhibition.startDate, exhibition.endDate);
   const cover = coverUrl(exhibition.id, exhibition.media);
 
@@ -51,7 +43,7 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
   ) as string[];
 
   const aside = ASIDE_FIELDS.map(({ key, label }) => ({
-    label,
+    label: label(m),
     value: exhibition[key] as string | null,
   })).filter((m) => m.value);
 
@@ -62,9 +54,9 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
         <div className="exhibition-cover">{cover && <img src={cover} alt={exhibition.name} />}</div>
         <div className="container exhibition-headings">
           <button type="button" className="link-quiet" onClick={onBack}>
-            ← Back to my exhibitions
+            {t.back}
           </button>
-          <p className="eyebrow">Exhibition</p>
+          <p className="eyebrow">{t.eyebrow}</p>
           {metaStrip.length > 0 && (
             <p className="mono-meta">
               {metaStrip.map((part, i) => (
@@ -83,7 +75,7 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
       {/* Body + aside ---------------------------------------------------- */}
       <div className="container exhibition-cols">
         <div>
-          {FIELD_SECTIONS.map((section) => {
+          {fieldSections(m).map((section) => {
             const populated = section.fields
               .map((f) => ({ label: f.label, value: exhibition[f.key] as string | null }))
               .filter((f) => f.value);
@@ -116,33 +108,33 @@ export default function ExhibitionDetailView({ exhibition, onBack, onEdit }: Pro
           })}
 
           <section className="exhibition-body-section">
-            <p className="eyebrow">Installation views &amp; media</p>
+            <p className="eyebrow">{t.mediaSection}</p>
             <MediaGallery exhibitionId={exhibition.id} media={exhibition.media} />
           </section>
 
           <p className="mono-meta" style={{ marginTop: '32px' }}>
-            <span>Created {formatTimestamp(exhibition.createdAtUtc)}</span>
+            <span>{fmt(t.created, { date: formatTimestamp(exhibition.createdAtUtc) })}</span>
             <span className="sep">·</span>
-            <span>Updated {formatTimestamp(exhibition.updatedAtUtc)}</span>
+            <span>{fmt(t.updated, { date: formatTimestamp(exhibition.updatedAtUtc) })}</span>
           </p>
         </div>
 
         <aside className="exhibition-aside">
           {dates && (
             <div className="aside-block">
-              <dt>Dates</dt>
+              <dt>{t.dates}</dt>
               <dd>{dates}</dd>
             </div>
           )}
-          {aside.map((m) => (
-            <div className="aside-block" key={m.label}>
-              <dt>{m.label}</dt>
-              <dd>{m.value}</dd>
+          {aside.map((a) => (
+            <div className="aside-block" key={a.label}>
+              <dt>{a.label}</dt>
+              <dd>{a.value}</dd>
             </div>
           ))}
           {onEdit && (
             <button type="button" className="cta" onClick={onEdit}>
-              Edit this entry
+              {t.edit}
             </button>
           )}
         </aside>

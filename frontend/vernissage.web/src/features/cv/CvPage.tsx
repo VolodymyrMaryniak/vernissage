@@ -14,23 +14,10 @@ import { useProfilePhoto } from '../profile/useProfilePhoto';
 import CvPreview from './CvPreview';
 import { saveBlob, squareJpeg } from './download';
 import { CV_FONT_SPECS } from './fonts';
-import { buildCvModel, cvFileBase, exhibitionYears, KIND_HEADINGS, suggestedHeadline } from './model';
-import { TEMPLATE_LABELS } from './theme';
-
-const KIND_LABELS: Record<CvExhibitionKind, string> = {
-  solo: 'Solo',
-  group: 'Group',
-  curated: 'Curated by me',
-};
-
-const SECTION_HINTS: Record<string, string> = {
-  statement: 'A few sentences about your practice. Leave a blank line between paragraphs.',
-  education: 'One per line, e.g. "2019–2021 — MA Fine Art, Kyiv Academy of Arts"',
-  otherExhibitions: 'Shows not documented on Vernissage, one per line, e.g. "2018 — Spring Salon, Lviv"',
-  awards: 'One per line, e.g. "2023 — Residency, Cité internationale des arts, Paris"',
-  collections: 'One per line, e.g. "National Art Museum of Ukraine, Kyiv"',
-  publications: 'One per line, e.g. "2024 — Interview, Art Ukraine magazine"',
-};
+import { buildCvModel, cvFileBase, exhibitionYears, suggestedHeadline } from './model';
+import { useMessages } from '../../i18n/useI18n';
+import { fmt, formatDate as formatLocalDate, formatNumber, plural } from '../../i18n/format';
+import type { Messages } from '../../i18n/en';
 
 const ACCEPTED_CV_FILES = '.pdf,.doc,.docx,.odt,.rtf,.txt';
 
@@ -44,11 +31,18 @@ function defaultKind(profile: Profile, show?: ExhibitionSummary): CvExhibitionKi
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  return formatLocalDate(value) ?? value;
 }
 
 function formatSize(bytes: number): string {
-  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return bytes >= 1024 * 1024
+    ? `${formatNumber(bytes / (1024 * 1024), undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 })} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+/** A never-saved CV's default sections, titled in the active language. */
+function localizeDefaultSections(sections: CvSection[], m: Messages): CvSection[] {
+  return sections.map((s) => (m.cv.doc.section[s.key] ? { ...s, title: m.cv.doc.section[s.key] } : s));
 }
 
 /**
@@ -56,7 +50,9 @@ function formatSize(bytes: number): string {
  * profile and documented exhibitions, downloadable as PDF or Word.
  */
 export default function CvPage() {
-  useDocumentMeta({ title: 'CV' });
+  const m = useMessages();
+  const t = m.cv;
+  useDocumentMeta({ title: t.metaTitle });
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [cv, setCv] = useState<Cv | null>(null);
@@ -83,26 +79,29 @@ export default function CvPage() {
             ? c.document
             : {
                 ...c.document,
-                headline: c.document.headline ?? (suggestedHeadline(p) || null),
+                sections: localizeDefaultSections(c.document.sections, m),
+                headline: c.document.headline ?? (suggestedHeadline(p, m) || null),
                 exhibitions: list.map((e) => ({ exhibitionId: e.id, kind: defaultKind(p, e) })),
               },
         );
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load your CV');
+        if (!cancelled) setError(err instanceof Error ? err.message : t.loadFailed);
       });
     return () => {
       cancelled = true;
     };
+    // Loaded once; a language switch later keeps the user's edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const model = useMemo(
-    () => (profile && doc ? buildCvModel(profile, doc, exhibitions) : null),
-    [profile, doc, exhibitions],
+    () => (profile && doc ? buildCvModel(profile, doc, exhibitions, m) : null),
+    [profile, doc, exhibitions, m],
   );
 
   if (!profile || !cv || !doc || !model) {
-    return <p className="muted state-message">{error ?? 'Loading…'}</p>;
+    return <p className="muted state-message">{error ?? m.common.loading}</p>;
   }
 
   const selected = new Map(doc.exhibitions.map((e) => [e.exhibitionId, e.kind]));
@@ -144,7 +143,7 @@ export default function CvPage() {
     try {
       await action();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : m.common.requestFailed);
     } finally {
       setBusy(null);
     }
@@ -156,7 +155,7 @@ export default function CvPage() {
       setCv(saved);
       setDoc(saved.document);
       setDirty(false);
-      setNotice('CV saved.');
+      setNotice(t.savedNotice);
     });
 
   // "Update the CV": pull in exhibitions documented since the last update and
@@ -181,9 +180,7 @@ export default function CvPage() {
       setDoc(saved.document);
       setDirty(false);
       setNotice(
-        added.length > 0
-          ? `CV updated: added ${added.length} new exhibition${added.length === 1 ? '' : 's'}.`
-          : 'CV updated. No new exhibitions since the last update.',
+        added.length > 0 ? plural(added.length, t.updated) : t.updatedNone,
       );
     });
 
@@ -205,7 +202,7 @@ export default function CvPage() {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    const invalid = validatePhoto(file);
+    const invalid = validatePhoto(file, m.profile.form);
     if (invalid) {
       setError(invalid);
       return;
@@ -221,13 +218,13 @@ export default function CvPage() {
     event.target.value = '';
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      setError('The CV file must be 10 MB or smaller.');
+      setError(m.profile.cv.tooLarge);
       return;
     }
     void run('upload', async () => {
       const updated = await uploadCvFile(file);
       setCv((c) => (c ? { ...c, uploadedFile: updated.uploadedFile } : updated));
-      setNotice(`Uploaded ${file.name}.`);
+      setNotice(fmt(m.profile.cv.uploaded, { name: file.name }));
     });
   };
 
@@ -237,7 +234,7 @@ export default function CvPage() {
     });
 
   const handleRemoveOwn = () => {
-    if (!window.confirm('Remove your uploaded CV file?')) return;
+    if (!window.confirm(t.file.confirmRemove)) return;
     void run('remove', async () => {
       await deleteCvFile();
       setCv((c) => (c ? { ...c, uploadedFile: null } : c));
@@ -248,7 +245,7 @@ export default function CvPage() {
     edit({
       sections: [
         ...doc.sections,
-        { key: `custom-${Date.now()}`, title: 'New section', include: true, text: '' },
+        { key: `custom-${Date.now()}`, title: t.sections.newSection, include: true, text: '' },
       ],
     });
 
@@ -256,17 +253,17 @@ export default function CvPage() {
     <div className="container cv-page">
       <header className="page-head">
         <div>
-          <p className="eyebrow">Account</p>
-          <h2>Your CV</h2>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h2>{t.title}</h2>
           <p className="page-sub">
             {cv.generatedAtUtc
-              ? `Last updated ${formatDate(cv.generatedAtUtc)}.`
-              : 'Built from your profile and your documented exhibitions.'}
+              ? fmt(t.lastUpdated, { date: formatDate(cv.generatedAtUtc) })
+              : t.builtFrom}
           </p>
         </div>
         <nav className="workspace-links">
           <Link className="btn btn-ghost btn-sm" to="/profile">
-            ← Back to profile
+            {t.back}
           </Link>
         </nav>
       </header>
@@ -277,19 +274,19 @@ export default function CvPage() {
       <div className="cv-toolbar card">
         <div className="cv-toolbar-main">
           <button type="button" className="btn btn-primary" onClick={handleUpdate} disabled={busy !== null}>
-            {busy === 'update' ? 'Updating…' : 'Update the CV'}
+            {busy === 'update' ? t.updating : t.update}
           </button>
-          <span className="muted cv-toolbar-hint">Adds newly documented exhibitions and your latest profile details.</span>
+          <span className="muted cv-toolbar-hint">{t.updateHint}</span>
         </div>
         <div className="cv-toolbar-actions">
           <button type="button" className="btn btn-ghost btn-sm" onClick={handleSave} disabled={busy !== null || !dirty}>
-            {busy === 'save' ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+            {busy === 'save' ? m.common.saving : dirty ? t.saveChanges : t.saved}
           </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={handlePdf} disabled={busy !== null}>
-            {busy === 'pdf' ? 'Preparing PDF…' : 'Download PDF'}
+            {busy === 'pdf' ? t.preparingPdf : t.downloadPdf}
           </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={handleDocx} disabled={busy !== null}>
-            {busy === 'docx' ? 'Preparing Word…' : 'Download Word'}
+            {busy === 'docx' ? t.preparingWord : t.downloadWord}
           </button>
         </div>
       </div>
@@ -299,34 +296,34 @@ export default function CvPage() {
           {/* ---- Uploaded CV file ------------------------------------ */}
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">Your CV file</h3>
+              <h3 className="view-section-title">{t.file.title}</h3>
             </div>
             {cv.uploadedFile ? (
               <div className="cv-file-row">
                 <div>
                   <p className="cv-file-name">{cv.uploadedFile.fileName}</p>
                   <p className="muted cv-file-meta">
-                    {formatSize(cv.uploadedFile.fileSize)} · uploaded {formatDate(cv.uploadedFile.uploadedAtUtc)}
+                    {fmt(t.file.meta, { size: formatSize(cv.uploadedFile.fileSize), date: formatDate(cv.uploadedFile.uploadedAtUtc) })}
                   </p>
                 </div>
                 <div className="cv-file-actions">
                   <button type="button" className="btn btn-ghost btn-sm" onClick={handleDownloadOwn} disabled={busy !== null}>
-                    Download
+                    {t.file.download}
                   </button>
                   <label className="btn btn-ghost btn-sm">
-                    Replace
+                    {t.file.replace}
                     <input type="file" accept={ACCEPTED_CV_FILES} hidden onChange={handleUploadCv} />
                   </label>
                   <button type="button" className="btn btn-danger-ghost btn-sm" onClick={handleRemoveOwn} disabled={busy !== null}>
-                    Remove
+                    {m.common.remove}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="cv-file-row">
-                <p className="muted">Keep the CV you already have here: PDF, Word, ODT, RTF or text, up to 10 MB.</p>
+                <p className="muted">{t.file.none}</p>
                 <label className="btn btn-ghost btn-sm">
-                  {busy === 'upload' ? 'Uploading…' : 'Upload CV'}
+                  {busy === 'upload' ? t.file.uploading : t.file.upload}
                   <input type="file" accept={ACCEPTED_CV_FILES} hidden onChange={handleUploadCv} />
                 </label>
               </div>
@@ -336,10 +333,10 @@ export default function CvPage() {
           {/* ---- Design --------------------------------------------- */}
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">Design</h3>
+              <h3 className="view-section-title">{t.design.title}</h3>
             </div>
             <fieldset className="cv-choice-group">
-              <legend className="field-label">Layout</legend>
+              <legend className="field-label">{t.design.layout}</legend>
               <div className="cv-choices cv-choices--3">
                 {CV_TEMPLATES.map((key) => (
                   <label key={key} className={`cv-choice${doc.template === key ? ' is-selected' : ''}`}>
@@ -349,14 +346,14 @@ export default function CvPage() {
                       <span />
                       <span />
                     </span>
-                    <span className="cv-choice-label">{TEMPLATE_LABELS[key].label}</span>
-                    <span className="cv-choice-blurb">{TEMPLATE_LABELS[key].blurb}</span>
+                    <span className="cv-choice-label">{t.design.templates[key].label}</span>
+                    <span className="cv-choice-blurb">{t.design.templates[key].blurb}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
             <fieldset className="cv-choice-group">
-              <legend className="field-label">Typeface</legend>
+              <legend className="field-label">{t.design.typeface}</legend>
               <div className="cv-choices cv-choices--4">
                 {CV_FONTS.map((key) => (
                   <label key={key} className={`cv-choice cv-choice--font${doc.font === key ? ' is-selected' : ''}`}>
@@ -370,12 +367,12 @@ export default function CvPage() {
               </div>
             </fieldset>
             <fieldset className="cv-choice-group">
-              <legend className="field-label">Paper</legend>
+              <legend className="field-label">{t.design.paper}</legend>
               <div className="cv-segmented">
                 {CV_PAGE_SIZES.map((size) => (
                   <label key={size} className={doc.pageSize === size ? 'is-selected' : undefined}>
                     <input type="radio" name="cv-page" checked={doc.pageSize === size} onChange={() => edit({ pageSize: size })} />
-                    {size === 'A4' ? 'A4' : 'US Letter'}
+                    {size === 'A4' ? 'A4' : t.design.letter}
                   </label>
                 ))}
               </div>
@@ -385,17 +382,17 @@ export default function CvPage() {
           {/* ---- About you ------------------------------------------ */}
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">About you</h3>
+              <h3 className="view-section-title">{t.about.title}</h3>
               <Link className="link-quiet" to="/profile/edit">
-                Edit profile details
+                {t.about.editProfile}
               </Link>
             </div>
             <label className="field">
-              <span className="field-label">Headline</span>
+              <span className="field-label">{t.about.headline}</span>
               <input
                 type="text"
                 maxLength={300}
-                placeholder={suggestedHeadline(profile) || 'e.g. Visual artist, based in Kyiv'}
+                placeholder={suggestedHeadline(profile, m) || t.about.headlinePlaceholder}
                 value={doc.headline ?? ''}
                 onChange={(e) => edit({ headline: e.target.value || null })}
               />
@@ -403,15 +400,15 @@ export default function CvPage() {
             <div className="cv-toggles">
               <label className="checkbox-row">
                 <input type="checkbox" checked={doc.includePhoto} onChange={(e) => edit({ includePhoto: e.target.checked })} />
-                <span>Photo</span>
+                <span>{t.about.photo}</span>
               </label>
               <label className="btn btn-ghost btn-sm">
-                {busy === 'photo' ? 'Uploading…' : profile.hasPhoto ? 'Change photo' : 'Add photo'}
+                {busy === 'photo' ? t.file.uploading : profile.hasPhoto ? t.about.changePhoto : t.about.addPhoto}
                 <input type="file" accept="image/*" hidden onChange={handlePhoto} />
               </label>
               <label className="checkbox-row">
                 <input type="checkbox" checked={doc.includeContact} onChange={(e) => edit({ includeContact: e.target.checked })} />
-                <span>Contact details (email, location, social)</span>
+                <span>{t.about.contact}</span>
               </label>
             </div>
           </section>
@@ -419,25 +416,26 @@ export default function CvPage() {
           {/* ---- Exhibitions ---------------------------------------- */}
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">Exhibitions</h3>
+              <h3 className="view-section-title">{t.exhibitions.title}</h3>
               <label className="checkbox-row">
                 <input
                   type="checkbox"
                   checked={doc.includeExhibitions}
                   onChange={(e) => edit({ includeExhibitions: e.target.checked })}
                 />
-                <span>Include</span>
+                <span>{t.exhibitions.include}</span>
               </label>
             </div>
             {exhibitions.length === 0 ? (
               <p className="muted">
-                No documented exhibitions yet. <Link to="/exhibitions/new">Document a show</Link> and it can go on your CV.
+                {t.exhibitions.none} <Link to="/exhibitions/new">{t.exhibitions.noneLink}</Link>{' '}
+                {t.exhibitions.noneAfter}
               </p>
             ) : (
               <>
                 <div className="cv-exh-bulk">
                   <span className="muted">
-                    {doc.exhibitions.length} of {exhibitions.length} on the CV
+                    {fmt(t.exhibitions.count, { selected: doc.exhibitions.length, total: exhibitions.length })}
                   </span>
                   <button
                     type="button"
@@ -451,10 +449,10 @@ export default function CvPage() {
                       })
                     }
                   >
-                    Select all
+                    {t.exhibitions.selectAll}
                   </button>
                   <button type="button" className="link-quiet" onClick={() => edit({ exhibitions: [] })}>
-                    Clear
+                    {t.exhibitions.clear}
                   </button>
                 </div>
                 <ul className={`cv-exh-list${doc.includeExhibitions ? '' : ' is-off'}`}>
@@ -468,20 +466,20 @@ export default function CvPage() {
                           <span>
                             <span className="cv-exh-name">
                               {e.name}
-                              {isNew(e) && <span className="cv-new">New</span>}
+                              {isNew(e) && <span className="cv-new">{t.exhibitions.new}</span>}
                             </span>
                             <span className="cv-exh-meta">{[exhibitionYears(e), place].filter(Boolean).join(' · ')}</span>
                           </span>
                         </label>
                         {kind && (
                           <select
-                            aria-label={`Heading for ${e.name}`}
+                            aria-label={fmt(t.exhibitions.headingFor, { name: e.name })}
                             value={kind}
                             onChange={(ev) => setKind(e.id, ev.target.value as CvExhibitionKind)}
                           >
                             {CV_EXHIBITION_KINDS.map((k) => (
-                              <option key={k} value={k} title={KIND_HEADINGS[k]}>
-                                {KIND_LABELS[k]}
+                              <option key={k} value={k} title={t.doc.kind[k]}>
+                                {t.exhibitions.kind[k]}
                               </option>
                             ))}
                           </select>
@@ -497,9 +495,9 @@ export default function CvPage() {
           {/* ---- Free-text sections --------------------------------- */}
           <section className="card form-section">
             <div className="section-head">
-              <h3 className="view-section-title">Sections</h3>
+              <h3 className="view-section-title">{t.sections.title}</h3>
               <button type="button" className="link-quiet" onClick={addSection}>
-                + Add section
+                {t.sections.add}
               </button>
             </div>
             <div className="cv-sections">
@@ -508,26 +506,26 @@ export default function CvPage() {
                   <div className="cv-section-edit-head">
                     <input
                       type="checkbox"
-                      aria-label={`Include ${section.title}`}
+                      aria-label={fmt(t.sections.include, { title: section.title })}
                       checked={section.include}
                       onChange={(e) => editSection(section.key, { include: e.target.checked })}
                     />
                     <input
                       type="text"
                       className="cv-section-title-input"
-                      aria-label="Section title"
+                      aria-label={t.sections.sectionTitle}
                       maxLength={120}
                       value={section.title}
                       onChange={(e) => editSection(section.key, { title: e.target.value })}
                     />
                     <span className="cv-section-order">
-                      <button type="button" className="link-quiet" aria-label={`Move ${section.title} up`} disabled={index === 0} onClick={() => moveSection(index, -1)}>
+                      <button type="button" className="link-quiet" aria-label={fmt(t.sections.moveUp, { title: section.title })} disabled={index === 0} onClick={() => moveSection(index, -1)}>
                         ↑
                       </button>
                       <button
                         type="button"
                         className="link-quiet"
-                        aria-label={`Move ${section.title} down`}
+                        aria-label={fmt(t.sections.moveDown, { title: section.title })}
                         disabled={index === doc.sections.length - 1}
                         onClick={() => moveSection(index, 1)}
                       >
@@ -537,7 +535,7 @@ export default function CvPage() {
                         <button
                           type="button"
                           className="link-quiet"
-                          aria-label={`Remove ${section.title}`}
+                          aria-label={fmt(t.sections.remove, { title: section.title })}
                           onClick={() => edit({ sections: doc.sections.filter((s) => s.key !== section.key) })}
                         >
                           ✕
@@ -548,7 +546,7 @@ export default function CvPage() {
                   <textarea
                     rows={section.key === 'statement' ? 4 : 3}
                     maxLength={20000}
-                    placeholder={SECTION_HINTS[section.key] ?? 'One entry per line. Start a line with a year to put it in the year column.'}
+                    placeholder={t.sections.hint[section.key] ?? t.sections.hintDefault}
                     value={section.text ?? ''}
                     onChange={(e) => editSection(section.key, { text: e.target.value })}
                   />
@@ -560,7 +558,7 @@ export default function CvPage() {
 
         {/* ---- Live preview ------------------------------------------- */}
         <div className="cv-preview-col">
-          <p className="eyebrow cv-preview-label">Preview</p>
+          <p className="eyebrow cv-preview-label">{t.preview}</p>
           <CvPreview model={model} photoUrl={previewPhoto} />
         </div>
       </div>
