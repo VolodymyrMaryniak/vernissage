@@ -62,6 +62,7 @@ describe('ExhibitionForm', () => {
     renderForm({
       initial: {
         id: 'a',
+        roles: ['Curator'],
         name: 'Northern Lights',
         startDate: '2026-05-01',
         endDate: null,
@@ -90,5 +91,28 @@ describe('ExhibitionForm', () => {
     expect(screen.getByLabelText('Location')).toHaveValue('Kyiv');
     expect(screen.getByLabelText('Aim')).toHaveValue('Explore light.');
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+  });
+
+  it('preselects the role for a single-role account', async () => {
+    const { onSubmit } = renderForm({ accountRoles: ['Artist'] });
+
+    expect(screen.getByRole('checkbox', { name: 'I exhibited' })).toBeChecked();
+    await userEvent.type(screen.getByPlaceholderText(/Light & Shadow/), 'Solo');
+    await userEvent.click(screen.getByRole('button', { name: /create/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roles: ['Artist'] }));
+  });
+
+  it('lets a multi-role account pick its roles in the show', async () => {
+    const { onSubmit } = renderForm({ accountRoles: ['Artist', 'Curator'] });
+
+    expect(screen.getByRole('checkbox', { name: 'I exhibited' })).not.toBeChecked();
+    expect(screen.queryByRole('checkbox', { name: 'We hosted it' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('checkbox', { name: 'I curated' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'I exhibited' }));
+    await userEvent.type(screen.getByPlaceholderText(/Light & Shadow/), 'Both hats');
+    await userEvent.click(screen.getByRole('button', { name: /create/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roles: ['Curator', 'Artist'] }));
   });
 });

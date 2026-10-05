@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Vernissage.Api.Models;
 
 namespace Vernissage.Api.Dtos;
@@ -25,6 +26,12 @@ public class ExhibitionWriteDto
 
     [MaxLength(500)]
     public string? GalleryLocation { get; set; }
+
+    /// <summary>
+    /// The role(s) you had in this show: any of "Gallery", "Curator", "Artist".
+    /// Omit to leave unchanged on update (none on create).
+    /// </summary>
+    public string[]? Roles { get; set; }
 
     public string? Explication { get; set; }
 
@@ -62,6 +69,9 @@ public class ExhibitionQueryParams
 
     /// <summary>Only exhibitions starting on/before this date.</summary>
     public DateOnly? To { get; set; }
+
+    /// <summary>Only exhibitions where the owner's role includes this one ("Gallery", "Curator" or "Artist").</summary>
+    public string? Role { get; set; }
 
     /// <summary>
     /// Restrict the list to the authenticated caller's own exhibitions.
@@ -117,6 +127,13 @@ public class ExhibitionSummaryDto
     /// <summary>Venue (gallery or institution); used e.g. for CV entries.</summary>
     public string? GalleryLocation { get; set; }
     public Guid? OwnerId { get; set; }
+
+    /// <summary>Raw role flags, projected in the query; exposed as <see cref="Roles"/>.</summary>
+    [JsonIgnore]
+    public CreatorRoles OwnerRoles { get; set; }
+
+    /// <summary>The owner's role(s) in this show.</summary>
+    public string[] Roles => CreatorRolesMapper.ToNames(OwnerRoles);
     public int MediaCount { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
@@ -133,6 +150,8 @@ public class ExhibitionDetailDto
     public string? Focus { get; set; }
     public string? Curator { get; set; }
     public Guid? OwnerId { get; set; }
+    /// <summary>The owner's role(s) in this show.</summary>
+    public string[] Roles { get; set; } = [];
     public string? GalleryLocation { get; set; }
     public string? Explication { get; set; }
     public string? InvestigationMaterial { get; set; }

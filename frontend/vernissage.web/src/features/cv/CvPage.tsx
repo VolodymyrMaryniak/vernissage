@@ -34,9 +34,13 @@ const SECTION_HINTS: Record<string, string> = {
 
 const ACCEPTED_CV_FILES = '.pdf,.doc,.docx,.odt,.rtf,.txt';
 
-/** The kind a newly added exhibition starts as: curators curate, artists show. */
-function defaultKind(profile: Profile): CvExhibitionKind {
-  return profile.roles.includes('Curator') && !profile.roles.includes('Artist') ? 'curated' : 'group';
+/**
+ * The heading a newly added exhibition starts under: the role recorded on the
+ * show wins ("I curated" → Curated), else the account's roles.
+ */
+function defaultKind(profile: Profile, show?: ExhibitionSummary): CvExhibitionKind {
+  const roles = show?.roles?.length ? show.roles : profile.roles;
+  return roles.includes('Curator') && !roles.includes('Artist') ? 'curated' : 'group';
 }
 
 function formatDate(value: string): string {
@@ -80,7 +84,7 @@ export default function CvPage() {
             : {
                 ...c.document,
                 headline: c.document.headline ?? (suggestedHeadline(p) || null),
-                exhibitions: list.map((e) => ({ exhibitionId: e.id, kind: defaultKind(p) })),
+                exhibitions: list.map((e) => ({ exhibitionId: e.id, kind: defaultKind(p, e) })),
               },
         );
       })
@@ -126,7 +130,7 @@ export default function CvPage() {
     edit({
       exhibitions: selected.has(id)
         ? doc.exhibitions.filter((e) => e.exhibitionId !== id)
-        : [...doc.exhibitions, { exhibitionId: id, kind: defaultKind(profile) }],
+        : [...doc.exhibitions, { exhibitionId: id, kind: defaultKind(profile, exhibitions.find((e) => e.id === id)) }],
     });
 
   const setKind = (id: string, kind: CvExhibitionKind) =>
@@ -166,7 +170,7 @@ export default function CvPage() {
         ...doc,
         exhibitions: [
           ...doc.exhibitions,
-          ...added.map((e) => ({ exhibitionId: e.id, kind: defaultKind(latestProfile) })),
+          ...added.map((e) => ({ exhibitionId: e.id, kind: defaultKind(latestProfile, e) })),
         ],
       };
       const saved = await saveCv(next, true);
@@ -442,7 +446,7 @@ export default function CvPage() {
                       edit({
                         exhibitions: exhibitions.map((e) => ({
                           exhibitionId: e.id,
-                          kind: selected.get(e.id) ?? defaultKind(profile),
+                          kind: selected.get(e.id) ?? defaultKind(profile, e),
                         })),
                       })
                     }

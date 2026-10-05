@@ -20,6 +20,7 @@ function buildQuery(filters?: ExhibitionFilters): string {
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   if (filters.mine) params.set('mine', 'true');
+  if (filters.role) params.set('role', filters.role);
   if (filters.page) params.set('page', String(filters.page));
   if (filters.pageSize) params.set('pageSize', String(filters.pageSize));
   const query = params.toString();

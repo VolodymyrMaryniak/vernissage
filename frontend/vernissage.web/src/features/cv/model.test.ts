@@ -34,6 +34,7 @@ function show(id: string, name: string, startDate: string, extra: Partial<Exhibi
     curator: null,
     galleryLocation: null,
     ownerId: 'u1',
+    roles: [],
     mediaCount: 0,
     createdAtUtc: '2026-01-01T00:00:00Z',
     updatedAtUtc: '2026-01-01T00:00:00Z',

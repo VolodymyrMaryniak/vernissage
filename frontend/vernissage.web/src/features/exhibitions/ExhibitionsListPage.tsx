@@ -6,6 +6,8 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import { useAuth } from '../auth/useAuth';
 import ExhibitionList from './ExhibitionList';
 import ExhibitionSearchBar from './ExhibitionSearchBar';
+import { ROLE_BADGE } from './roles';
+import type { CreatorRole } from '../../types/auth';
 
 const PAGE_SIZE = 20;
 
@@ -20,6 +22,8 @@ export default function ExhibitionsListPage() {
   const [filters, setFilters] = useState<ExhibitionFilters>({});
   // Private workspace list: always the caller's own shows (no public browsing).
   const [page, setPage] = useState(1);
+  const [role, setRole] = useState<CreatorRole | null>(null);
+  const accountRoles = user?.roles ?? [];
   const hasFilters = Object.values(filters).some(Boolean);
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -27,7 +31,7 @@ export default function ExhibitionsListPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await listExhibitions({ ...filters, mine: true, page, pageSize: PAGE_SIZE });
+      const result = await listExhibitions({ ...filters, mine: true, role: role ?? undefined, page, pageSize: PAGE_SIZE });
       setSummaries(result.items);
       setTotal(result.total);
     } catch (err) {
@@ -35,7 +39,7 @@ export default function ExhibitionsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [filters, page]);
+  }, [filters, page, role]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -72,6 +76,19 @@ export default function ExhibitionsListPage() {
           </Link>
         </div>
       </header>
+
+      {accountRoles.length > 1 && (
+        <div className="role-filter" role="group" aria-label="Filter by your role">
+          <button type="button" aria-pressed={role === null} onClick={() => { setRole(null); setPage(1); }}>
+            All
+          </button>
+          {accountRoles.map((r) => (
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => { setRole(r); setPage(1); }}>
+              {ROLE_BADGE[r]}
+            </button>
+          ))}
+        </div>
+      )}
 
       <ExhibitionSearchBar onSearch={handleSearch} />
 

@@ -1,3 +1,5 @@
+import type { CreatorRole } from './auth';
+
 // Mirrors Vernissage.Api.Models.MediaCategory (numeric enum).
 // Declared as a const object (+ union type) rather than a TS `enum` because
 // the project compiles with `erasableSyntaxOnly`.
@@ -44,6 +46,8 @@ export interface ExhibitionFilters {
   focus?: string;
   from?: string;
   to?: string;
+  /** Only shows where your role includes this one. */
+  role?: CreatorRole;
   /** Restrict to the signed-in user's own exhibitions (requires a token). */
   mine?: boolean;
   /** 1-based page number. */
@@ -71,6 +75,8 @@ export interface ExhibitionSummary {
   /** Venue (gallery or institution). */
   galleryLocation: string | null;
   ownerId: string | null;
+  /** The owner's role(s) in this show. */
+  roles: CreatorRole[];
   mediaCount: number;
   createdAtUtc: string;
   updatedAtUtc: string;
@@ -85,6 +91,8 @@ export interface ExhibitionDetail {
   focus: string | null;
   curator: string | null;
   ownerId: string | null;
+  /** The owner's role(s) in this show. */
+  roles: CreatorRole[];
   galleryLocation: string | null;
   explication: string | null;
   investigationMaterial: string | null;
@@ -110,6 +118,8 @@ export interface ExhibitionWrite {
   focus: string | null;
   curator: string | null;
   galleryLocation: string | null;
+  /** Your role(s) in this show. */
+  roles?: CreatorRole[];
   explication: string | null;
   investigationMaterial: string | null;
   team: string | null;

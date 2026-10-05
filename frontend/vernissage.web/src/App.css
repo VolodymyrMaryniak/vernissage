@@ -4953,3 +4953,330 @@ fieldset.field > legend {
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- Roles: chips, badges, filter (exhibition form, My exhibitions) ---- */
+.role-in-show {
+  border: 0;
+  padding: 0;
+  margin: 0 0 18px;
+}
+
+.role-in-show legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.role-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.role-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.role-chip:has(input:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.role-chip.is-on,
+.role-chip.is-preview {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.role-chip.is-on::before {
+  content: '✓';
+  font-size: 0.8em;
+}
+
+.role-chip.is-preview {
+  cursor: default;
+}
+
+.role-chips--lg .role-chip {
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+.field-hint {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-mute);
+}
+
+.index-row-roles {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: 10px;
+}
+
+.role-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.role-badge--artist { border-color: color-mix(in oklab, var(--peony) 40%, var(--line)); color: var(--peony); }
+.role-badge--curator { border-color: color-mix(in oklab, var(--olive) 70%, var(--ink)); color: color-mix(in oklab, var(--olive) 40%, var(--ink)); }
+.role-badge--gallery { border-color: var(--ink-soft); color: var(--ink); }
+
+.role-filter {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.role-filter button {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.role-filter button[aria-pressed='true'] {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+/* ---- How it works ---------------------------------------------- */
+.audience--how .how-title {
+  font-size: clamp(3.6rem, 11vw, 8.5rem);
+  line-height: 0.9;
+}
+
+.how-subtitle {
+  margin: -6px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--ink-soft);
+}
+
+.how-subtitle em {
+  font-style: italic;
+  color: var(--brand);
+}
+
+.inventory-ledger {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.inventory-ledger li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  row-gap: 10px;
+  padding: 20px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.inventory-code {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ink-mute);
+}
+
+.inventory-text {
+  display: grid;
+  gap: 4px;
+}
+
+.inventory-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--ink);
+}
+
+.inventory-body {
+  color: var(--ink-mute);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.how-audiences {
+  display: grid;
+  gap: 16px;
+  margin-top: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.how-audience {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 26px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.how-audience ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.how-audience-link {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Each column borrows its audience page's look. */
+.how-audience--artists {
+  background:
+    radial-gradient(70% 60% at 100% 0%, rgba(168, 23, 42, 0.1), transparent 70%),
+    #fbf6f0;
+}
+
+.how-audience--curators {
+  background:
+    linear-gradient(color-mix(in oklab, var(--olive) 25%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, color-mix(in oklab, var(--olive) 25%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+    #f7f8ef;
+}
+
+.how-audience--galleries {
+  background: #1a1715;
+  border-color: #1a1715;
+}
+
+.how-audience--galleries h3,
+.how-audience--galleries .how-audience-link {
+  color: #f6f2ec;
+}
+
+.how-audience--galleries ul {
+  color: #c9c1b8;
+}
+
+.how-audience--galleries .eyebrow {
+  color: #e8a1a8;
+}
+
+/* Role mixer */
+.role-mixer {
+  display: grid;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+@media (min-width: 900px) {
+  .role-mixer {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+.role-mixer-pick,
+.role-mixer-result {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.role-mixer-card {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 18px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(168, 23, 42, 0.07), transparent 70%),
+    var(--surface);
+}
+
+.role-mixer-card-roles {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.role-mixer-card-name {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--ink);
+}
+
+.role-mixer-adds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.role-add {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 3px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  animation: dot-in 0.2s ease-out;
+}
+
+.role-add--artist { border-left-color: var(--peony); }
+.role-add--curator { border-left-color: color-mix(in oklab, var(--olive) 70%, var(--ink)); }
+.role-add--gallery { border-left-color: var(--ink); }
+.role-add--all { border-left-color: var(--brand); font-weight: 600; color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .role-add { animation: none; }
+}

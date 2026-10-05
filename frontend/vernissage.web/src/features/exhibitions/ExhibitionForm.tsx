@@ -1,6 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import type { ExhibitionDetail, ExhibitionWrite } from '../../types/exhibition';
+import { CREATOR_ROLES } from '../../types/auth';
+import type { CreatorRole } from '../../types/auth';
 import { FIELD_SECTIONS } from './fields';
+import { ROLE_IN_SHOW } from './roles';
 
 interface Props {
   initial?: ExhibitionDetail;
@@ -11,10 +14,14 @@ interface Props {
   actionsSticky?: boolean;
   onSubmit: (payload: ExhibitionWrite) => void;
   onCancel: () => void;
+  /** The signed-in account's roles; drives the "your role in this show" choices. */
+  accountRoles?: CreatorRole[];
 }
 
-function emptyForm(initial?: ExhibitionDetail): ExhibitionWrite {
+function emptyForm(initial: ExhibitionDetail | undefined, accountRoles: CreatorRole[]): ExhibitionWrite {
   return {
+    // A new show for a single-role account is that role; with several, you pick.
+    roles: initial?.roles ?? (accountRoles.length === 1 ? [...accountRoles] : []),
     name: initial?.name ?? '',
     startDate: initial?.startDate ?? null,
     endDate: initial?.endDate ?? null,
@@ -39,7 +46,7 @@ function emptyForm(initial?: ExhibitionDetail): ExhibitionWrite {
 // of how complete the record is.
 function completeness(form: ExhibitionWrite): { filled: number; total: number } {
   const keys = Object.keys(form) as (keyof ExhibitionWrite)[];
-  const optional = keys.filter((k) => k !== 'name');
+  const optional = keys.filter((k) => k !== 'name' && k !== 'roles');
   const filled = optional.filter((k) => {
     const v = form[k];
     return v !== null && v !== '';
@@ -54,8 +61,22 @@ export default function ExhibitionForm({
   actionsSticky = true,
   onSubmit,
   onCancel,
+  accountRoles = [],
 }: Props) {
-  const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial));
+  const [form, setForm] = useState<ExhibitionWrite>(() => emptyForm(initial, accountRoles));
+  // Offer the account's roles, plus any already on the record; everything if unknown.
+  const roleChoices = CREATOR_ROLES.filter(
+    (r) => accountRoles.length === 0 || accountRoles.includes(r) || (form.roles ?? []).includes(r),
+  );
+
+  const toggleRole = (role: CreatorRole) =>
+    setForm((prev) => {
+      const current = prev.roles ?? [];
+      return {
+        ...prev,
+        roles: current.includes(role) ? current.filter((r) => r !== role) : [...current, role],
+      };
+    });
 
   const update = (key: keyof ExhibitionWrite, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value === '' ? null : value }));
@@ -88,6 +109,21 @@ export default function ExhibitionForm({
           <h3>Basics</h3>
           <p>The essentials that identify this exhibition.</p>
         </div>
+
+        <fieldset className="role-in-show">
+          <legend className="field-label">Your role in this show</legend>
+          <div className="role-chips">
+            {roleChoices.map((role) => (
+              <label key={role} className={`role-chip${(form.roles ?? []).includes(role) ? ' is-on' : ''}`}>
+                <input type="checkbox" checked={(form.roles ?? []).includes(role)} onChange={() => toggleRole(role)} />
+                {ROLE_IN_SHOW[role]}
+              </label>
+            ))}
+          </div>
+          {roleChoices.length > 1 && (
+            <p className="field-hint">Pick all that apply: it sorts the show in My exhibitions and on your CV.</p>
+          )}
+        </fieldset>
 
         <label className="field">
           <span className="field-label">
