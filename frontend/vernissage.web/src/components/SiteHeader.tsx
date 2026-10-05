@@ -4,6 +4,7 @@ import { useAuth } from '../features/auth/useAuth';
 import { useAppConfig } from '../features/config/useAppConfig';
 import Logo from './Logo';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import ThemeToggle from '../theme/ThemeToggle';
 import { useMessages } from '../i18n/useI18n';
 
 export default function SiteHeader() {
@@ -69,6 +70,7 @@ export default function SiteHeader() {
             </nav>
 
             <div className="site-header-actions">
+              <ThemeToggle />
               <LanguageSwitcher variant="select" />
               {user ? (
                 <>

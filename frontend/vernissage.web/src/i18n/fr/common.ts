@@ -16,6 +16,7 @@ const common: Common = {
     comingSoon: 'Bientôt disponible',
     planned: 'Prévu',
     language: 'Langue',
+    theme: { toDark: 'Passer au thème sombre', toLight: 'Passer au thème clair' },
     requestFailed: 'Une erreur est survenue. Veuillez réessayer.',
   },
   nav: {

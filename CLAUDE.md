@@ -195,6 +195,22 @@ galleries and institutions), not a public archive:
   Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
   Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
 
+## Colour: burgundy, light and dark themes
+
+- The brand colour is **burgundy** `#7D1D32` (`--peony` in `App.css`, the logo dot,
+  the favicon and the CV accent). `--brand-fill` is the red behind white text
+  (buttons, active chips); on light it equals `--peony`.
+- **Dark theme** is opt-in (light is the default; the OS setting is ignored): a
+  sun/moon toggle in the header and footer sets `<html data-theme="dark">`, saved
+  in `localStorage` (`vernissage.theme`) and applied in `main.tsx` before the first
+  render. `src/theme/` holds the store and toggle. All dark values are token
+  overrides in the `:root[data-theme='dark'] .app` block at the end of `App.css`,
+  plus a few overrides for backgrounds that are literals. In dark, `--peony` is a
+  lighter rose-burgundy (`#cc6680`) so red *text* stays legible, and `--brand-fill`
+  a deep burgundy so white text on it stays AA. Use tokens, not literal colours, in
+  new styles; literals are only for surfaces that are dark in both themes (reel,
+  lightbox, photo overlays) or for paper objects (CV preview pages).
+
 ## Languages (English, French, Ukrainian)
 
 - The UI is translated into **English (default), French and Ukrainian** with a small

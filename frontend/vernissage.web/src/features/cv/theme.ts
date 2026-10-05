@@ -34,7 +34,7 @@ export const CV_THEMES: Record<CvTemplate, CvTheme> = {
     roundPhoto: true,
   },
   modern: {
-    accent: '#a8172a',
+    accent: '#7d1d32',
     muted: '#6b6460',
     sidebar: '#f4f1ec',
     nameSize: 22,
@@ -47,7 +47,7 @@ export const CV_THEMES: Record<CvTemplate, CvTheme> = {
     roundPhoto: true,
   },
   minimal: {
-    accent: '#a8172a',
+    accent: '#7d1d32',
     muted: '#8a817b',
     sidebar: null,
     nameSize: 28,

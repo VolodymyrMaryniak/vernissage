@@ -13,6 +13,7 @@ const common = {
     comingSoon: 'Coming soon',
     planned: 'Planned',
     language: 'Language',
+    theme: { toDark: 'Switch to dark theme', toLight: 'Switch to light theme' },
     requestFailed: 'Something went wrong. Please try again.',
   },
   nav: {

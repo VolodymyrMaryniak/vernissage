@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import ThemeToggle from '../theme/ThemeToggle';
 import { useMessages } from '../i18n/useI18n';
 
 export default function SiteFooter() {
@@ -49,7 +50,10 @@ export default function SiteFooter() {
           <div className="footer-col">
             <h4>{m.footer.about}</h4>
             <p>{m.footer.aboutText}</p>
-            <LanguageSwitcher className="lang-switch--footer" />
+            <div className="footer-prefs">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 

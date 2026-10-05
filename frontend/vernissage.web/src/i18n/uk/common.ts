@@ -16,6 +16,7 @@ const common: Common = {
     comingSoon: 'Незабаром',
     planned: 'Заплановано',
     language: 'Мова',
+    theme: { toDark: 'Увімкнути темну тему', toLight: 'Увімкнути світлу тему' },
     requestFailed: 'Щось пішло не так. Спробуйте ще раз.',
   },
   nav: {
