@@ -1,139 +1,122 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
-import Bloom from '../../components/Bloom';
+import MarginCalculator from './demos/MarginCalculator';
+import SeasonPlanner from './demos/SeasonPlanner';
 
-const SETUP_STEPS = [
-  {
-    index: '01',
-    title: 'Set up your gallery workspace',
-    body: 'Open a gallery account and describe the space — name, location, focus and founding year.',
-  },
-  {
-    index: '02',
-    title: 'Document each show in the program',
-    body: 'Every exhibition lands in one catalogue, with installation views, plans, audio and documents attached to the entry.',
-  },
-  {
-    index: '03',
-    title: 'Publish a program-wide archive',
-    body: 'Each show gets a public page, searchable alongside everything else you have shown.',
-  },
+const KPIS = [
+  { label: 'Visitors this season', value: '6,280', bars: [40, 55, 35, 70, 90] },
+  { label: 'Works sold', value: '47', bars: [50, 30, 40, 65, 95] },
+  { label: 'Net after costs', value: '€41,700', bars: [30, 45, 25, 80, 70] },
 ];
 
-const FEATURES = [
-  {
-    index: '01',
-    title: 'Creator roles',
-    body: 'Gallery, curator and artist roles sit on one account in any combination, and the profile adapts to whichever apply.',
-  },
-  {
-    index: '02',
-    title: 'Shared Drive at the gallery level',
-    body: 'Planned: one Drive for the whole program, with a folder per show, so installation views, works-masters and press stay organised across every exhibition.',
-    planned: true,
-  },
-  {
-    index: '03',
-    title: 'A program-wide archive',
-    body: 'Every show is indexed under the gallery and open to researchers and press. Team accounts and per-revision citation are planned.',
-  },
+const TEAM = [
+  { title: 'One account, every role', body: 'Gallery, curator and artist in any combination, with a profile to match.' },
+  { title: 'Private by default', body: 'Costs, sales and visitor numbers are visible only to you.' },
+  { title: 'Shared Drive for the program', body: 'One folder per show for views, masters and press.', planned: true },
 ];
 
 export default function GalleriesPage() {
   useDocumentMeta({
     title: 'For galleries',
     description:
-      'A workspace for galleries, gathering every show your gallery makes into one program-wide, public archive.',
+      'Document every show in your program and see what each one cost, sold and drew, privately and across the whole season.',
   });
 
   return (
-    <>
-      {/* ---- Hero ------------------------------------------------ */}
-      <section className="page-hero">
-        <Bloom />
-        <div className="container page-hero-inner">
-          <p className="eyebrow">For galleries</p>
-          <h1 className="display">
-            One archive for the whole <em>program</em>.
-          </h1>
-          <p className="lede">
-            A workspace built around how galleries actually work — every show catalogued in full
-            and gathered into a program-wide archive that stays readable long after the walls
-            come down.
-          </p>
-          <div className="hero-actions">
-            <Link className="cta" to="/exhibitions/new">
-              Document a show
+    <div className="audience audience--galleries">
+      {/* ---- Hero: the business view ---------------------------- */}
+      <section className="page-hero aud-hero">
+        <div className="container aud-hero-inner">
+          <div className="aud-hero-text">
+            <p className="eyebrow">For galleries &amp; institutions</p>
+            <h1 className="display">
+              Your program, <em>run like a business</em>.
+            </h1>
+            <p className="lede">
+              Document every show, then see what each one cost, sold and drew, privately and across
+              the whole season.
+            </p>
+            <div className="hero-actions">
+              <Link className="cta" to="/register">
+                Set up your gallery
+              </Link>
+            </div>
+          </div>
+          <ul className="kpi-tiles" aria-label="Example season figures">
+            {KPIS.map((k) => (
+              <li key={k.label}>
+                <span className="kpi-label">{k.label}</span>
+                <span className="kpi-value">{k.value}</span>
+                <span className="kpi-bars" aria-hidden="true">
+                  {k.bars.map((b, i) => (
+                    <span key={i} style={{ height: `${b}%` }} />
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ---- Season planner ------------------------------------ */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Your season</p>
+            <h2 className="headline">
+              Every show in the program, <em>with its numbers</em>.
+            </h2>
+            <p className="prose">Click a show to open its figures.</p>
+          </div>
+          <SeasonPlanner />
+        </div>
+      </section>
+
+      {/* ---- Margin calculator --------------------------------- */}
+      <section className="section section--band">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Before you commit</p>
+            <h2 className="headline">
+              What will this show <em>leave you with</em>?
+            </h2>
+            <p className="prose">Move the sliders. Vernissage keeps the real figures for every show you run.</p>
+          </div>
+          <MarginCalculator />
+        </div>
+      </section>
+
+      {/* ---- Team ---------------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <p className="eyebrow">Built for a team</p>
+          <ul className="aud-also">
+            {TEAM.map((t) => (
+              <li key={t.title}>
+                <h3>
+                  {t.title}
+                  {t.planned && <span className="chip-mono chip-planned">Planned</span>}
+                </h3>
+                <p>{t.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="cta-band">
+        <div className="container section cta-band-inner">
+          <div>
+            <p className="eyebrow">Analytics free while in beta</p>
+            <h2 className="headline">Put this season on the record.</h2>
+          </div>
+          <div className="cta-band-actions">
+            <Link className="cta" to="/register">
+              Set up your gallery
             </Link>
           </div>
         </div>
       </section>
-
-      {/* ---- Three-step setup ----------------------------------- */}
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">How it works</p>
-            <h2 className="headline">
-              From a single account to a <em>program</em>-wide record.
-            </h2>
-          </div>
-          <div className="cell-grid cell-grid--3">
-            {SETUP_STEPS.map((step) => (
-              <div className="cell" key={step.index}>
-                <span className="cell-index">{step.index}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---- Feature band --------------------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">Built for a team</p>
-            <h2 className="headline">
-              One catalogue, one <em>archive</em>.
-            </h2>
-          </div>
-          <div className="cell-grid cell-grid--3">
-            {FEATURES.map((feature) => (
-              <div className="cell" key={feature.index}>
-                <span className="cell-index">{feature.index}</span>
-                <h3>
-                  {feature.title}
-                  {feature.planned && <span className="chip-mono chip-planned">Planned</span>}
-                </h3>
-                <p>{feature.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---- CTA band ------------------------------------------- */}
-      <section className="cta-band">
-        <div className="container section cta-band-inner">
-          <div>
-            <p className="eyebrow">Open access, non-commercial</p>
-            <h2 className="headline">One program, properly recorded.</h2>
-          </div>
-          <div>
-            <p className="prose">
-              Gather every show your gallery makes into one archive — catalogued in full, kept
-              open, and readable for good.
-            </p>
-            <div className="cta-band-actions">
-              <Link className="cta" to="/exhibitions/new">
-                Document a show
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+    </div>
   );
 }

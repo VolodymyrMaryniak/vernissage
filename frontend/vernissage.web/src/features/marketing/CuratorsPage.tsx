@@ -1,197 +1,116 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
-import Bloom from '../../components/Bloom';
+import ChecklistDemo from './demos/ChecklistDemo';
+import ShowTimeline from './demos/ShowTimeline';
 
-const STEPS = [
-  {
-    index: '01',
-    title: 'Open a workspace',
-    body: 'Solo, portable, no gallery required. Your archive travels with you from show to show.',
-  },
-  {
-    index: '02',
-    title: 'Document the exhibition',
-    body: 'Catalogue works, dates, installation views and the accompanying essay in one place.',
-  },
-  {
-    index: '03',
-    title: 'Publish to the archive',
-    body: 'A public page that stands as the record long after the walls come down.',
-  },
-];
-
-const WORKS = [
-  {
-    no: '01',
-    title: 'Threshold (Antechamber)',
-    medium: 'Plaster, pigment',
-    year: '2024',
-    status: 'catalogued' as const,
-  },
-  {
-    no: '02',
-    title: 'Load-Bearing',
-    medium: 'Steel, felt',
-    year: '2024',
-    status: 'catalogued' as const,
-  },
-  {
-    no: '03',
-    title: 'Soft Wall (i–iv)',
-    medium: 'Video, sound',
-    year: '2023',
-    status: 'draft' as const,
-  },
-  {
-    no: '04',
-    title: 'Interior, Facing North',
-    medium: 'Graphite on paper',
-    year: '2025',
-    status: 'catalogued' as const,
-  },
-  {
-    no: '05',
-    title: 'Untitled (Scaffold)',
-    medium: 'Cast concrete',
-    year: '2025',
-    status: 'draft' as const,
-  },
+// Shows curated across institutions: the record moves with the curator.
+const CAREER = [
+  { year: '2026', title: 'Soft Architectures', venue: 'Voloshyn Gallery, Kyiv' },
+  { year: '2025', title: 'Quiet Quartet', venue: 'Kunsthalle Wien' },
+  { year: '2024', title: 'The Long Walk', venue: 'Mystetskyi Arsenal, Kyiv' },
+  { year: '2023', title: 'Night Shift', venue: 'Lviv Municipal Art Center' },
 ];
 
 export default function CuratorsPage() {
   useDocumentMeta({
     title: 'For independent curators',
     description:
-      'A solo workspace for cataloguing and documenting exhibitions, and a portable archive that stays with you from show to show.',
+      'One place for every show you curate, from first idea to opening night, that stays yours from one institution to the next.',
   });
 
   return (
-    <>
-      {/* ---- Hero ------------------------------------------------ */}
-      <section className="page-hero">
-        <Bloom />
-        <div className="container page-hero-inner">
-          <p className="eyebrow">For independent curators</p>
-          <h1 className="display">
-            A workspace built for the way exhibitions are <em>actually</em> made.
-          </h1>
-          <p className="lede">
-            Work on your own terms — one curator, one catalogue at a time — and keep a portable
-            record of every show you make, from first checklist to published page.
-          </p>
-          <div className="hero-actions">
-            <Link className="cta" to="/exhibitions/new">
-              Open a workspace
+    <div className="audience audience--curators">
+      {/* ---- Hero: the curatorial desk --------------------------- */}
+      <section className="page-hero aud-hero">
+        <div className="container aud-hero-inner">
+          <div className="aud-hero-text">
+            <p className="eyebrow">For independent curators</p>
+            <h1 className="display">
+              Every show you curate, <em>from first idea to opening night</em>.
+            </h1>
+            <p className="lede">
+              Keep the concept, the checklist, the team and the plans in one place, and take it with
+              you to the next institution.
+            </p>
+            <div className="hero-actions">
+              <Link className="cta" to="/register">
+                Open your workspace
+              </Link>
+            </div>
+          </div>
+          <figure className="wall-label" aria-label="Example wall label">
+            <p className="wall-label-title">Soft Architectures</p>
+            <p>12 March – 30 April 2026</p>
+            <p>Voloshyn Gallery, Kyiv</p>
+            <p className="wall-label-rule" />
+            <p>Five artists · 18 works</p>
+            <p className="wall-label-you">Curated by you</p>
+          </figure>
+        </div>
+      </section>
+
+      {/* ---- Timeline ------------------------------------------ */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">The life of a show</p>
+            <h2 className="headline">
+              Six stages, <em>one record</em>.
+            </h2>
+            <p className="prose">Click a stage to see what you keep there.</p>
+          </div>
+          <ShowTimeline />
+        </div>
+      </section>
+
+      {/* ---- Checklist ----------------------------------------- */}
+      <section className="section section--band">
+        <div className="container aud-split">
+          <div className="section-head">
+            <p className="eyebrow">The checklist</p>
+            <h2 className="headline">
+              Know what&apos;s ready <em>before the van arrives</em>.
+            </h2>
+            <p className="prose">Mark works as catalogued and watch the show come together.</p>
+          </div>
+          <ChecklistDemo />
+        </div>
+      </section>
+
+      {/* ---- Career strip -------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Portable</p>
+            <h2 className="headline">
+              Institutions change. <em>Your record doesn&apos;t.</em>
+            </h2>
+          </div>
+          <ol className="career-strip">
+            {CAREER.map((c) => (
+              <li key={c.title}>
+                <span className="career-year">{c.year}</span>
+                <span className="career-title">{c.title}</span>
+                <span className="career-venue">{c.venue}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="cta-band">
+        <div className="container section cta-band-inner">
+          <div>
+            <p className="eyebrow">Free while in beta</p>
+            <h2 className="headline">Start with the show you&apos;re working on now.</h2>
+          </div>
+          <div className="cta-band-actions">
+            <Link className="cta" to="/register">
+              Open your workspace
             </Link>
           </div>
         </div>
       </section>
-
-      {/* ---- How it works --------------------------------------- */}
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">How it works</p>
-            <h2 className="headline">Three steps, from empty room to citation.</h2>
-          </div>
-          <div className="cell-grid cell-grid--3">
-            {STEPS.map((step) => (
-              <div className="cell" key={step.index}>
-                <span className="cell-index">{step.index}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---- Workspace preview ---------------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">Inside the workspace</p>
-            <h2 className="headline">A catalogue that keeps its own record.</h2>
-          </div>
-          <div className="plaque dashboard">
-            <div className="dashboard-topbar">
-              <span className="name">Soft Architectures</span>
-              <span className="pill-mono">Workspace</span>
-              <span className="saved">Draft · saved 2m ago</span>
-            </div>
-            <div className="dashboard-body">
-              <aside className="dashboard-side">
-                <div className="side-group">
-                  <span className="side-label">Exhibitions</span>
-                  <span className="side-item is-active">● Soft Architectures</span>
-                  <span className="side-item">Quiet Quartet</span>
-                  <span className="side-item">The Long Walk</span>
-                </div>
-                <div className="side-group">
-                  <span className="side-label">Sections</span>
-                  <span className="side-item">Overview</span>
-                  <span className="side-item is-active">Works (18)</span>
-                  <span className="side-item">Installation views</span>
-                  <span className="side-item">Essay</span>
-                  <span className="side-item">Press</span>
-                </div>
-              </aside>
-              <div className="dashboard-main">
-                <table className="mock-table">
-                  <thead>
-                    <tr>
-                      <th>No.</th>
-                      <th>Title</th>
-                      <th>Medium</th>
-                      <th>Year</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {WORKS.map((work) => (
-                      <tr key={work.no}>
-                        <td className="num">{work.no}</td>
-                        <td>{work.title}</td>
-                        <td>{work.medium}</td>
-                        <td className="num">{work.year}</td>
-                        <td>
-                          {work.status === 'catalogued' ? (
-                            <span className="status-pill status-pill--catalogued">Catalogued</span>
-                          ) : (
-                            <span className="status-pill status-pill--draft">Draft</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---- CTA band ------------------------------------------- */}
-      <section className="cta-band">
-        <div className="container section cta-band-inner">
-          <div>
-            <p className="eyebrow">Early access</p>
-            <h2 className="headline">Request early access.</h2>
-          </div>
-          <div>
-            <p className="prose">
-              We are opening workspaces to independent curators a few at a time. Leave an address
-              and we will be in touch when the next set is ready.
-            </p>
-            <form className="request-form" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="you@studio.com" aria-label="Email" />
-              <button type="submit" className="cta">
-                Request access
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-    </>
+    </div>
   );
 }
