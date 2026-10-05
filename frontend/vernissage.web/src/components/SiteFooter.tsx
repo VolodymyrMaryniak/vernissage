@@ -14,9 +14,6 @@ export default function SiteFooter() {
             <h4>Browse</h4>
             <ul>
               <li>
-                <Link to="/archive">The archive</Link>
-              </li>
-              <li>
                 <Link to="/about">How it works</Link>
               </li>
               <li>
@@ -54,7 +51,7 @@ export default function SiteFooter() {
 
         <div className="footer-bar">
           <span className="footer-brand">
-            <Logo size={22} />© {year} Vernissage Archive
+            <Logo size={22} />© {year} Vernissage
           </span>
           <span>v.001 — opened summer 2026</span>
         </div>

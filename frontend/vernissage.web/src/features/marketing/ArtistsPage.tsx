@@ -1,136 +1,121 @@
 import { Link } from 'react-router-dom';
 import { useDocumentMeta } from '../../lib/useDocumentMeta';
-import Bloom from '../../components/Bloom';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
+import CvDemo from './demos/CvDemo';
+import SoldWall from './demos/SoldWall';
 
-const BENEFITS: {
-  index: string;
-  icon: IconName;
-  title: string;
-  body: string;
-  planned?: boolean;
-}[] = [
-  {
-    index: '01',
-    icon: 'palette',
-    title: 'Your works, catalogued',
-    body: 'Medium, dimensions, year and images in structured fields — not scattered across folders.',
-  },
-  {
-    index: '02',
-    icon: 'folder',
-    title: 'Files sort themselves',
-    body: 'A Drive folder per show, foldered by material — masters, press, essays — filed as you upload.',
-    planned: true,
-  },
-  {
-    index: '03',
-    icon: 'portfolio',
-    title: 'Portfolio & CV in a click',
-    body: 'Generate a portfolio or CV for an open call, grant or residency from records you already keep.',
-    planned: true,
-  },
-  {
-    index: '04',
-    icon: 'bell',
-    title: 'Updates while it runs',
-    body: 'Push quick changes mid-show — dates, works, press — and everyone following the entry hears about it.',
-    planned: true,
-  },
-  {
-    index: '05',
-    icon: 'document',
-    title: 'One record per show',
-    body: 'Every exhibition you are in, kept in one place and ready to point a curator at.',
-  },
-  {
-    index: '06',
-    icon: 'globe',
-    title: 'A page you can send',
-    body: 'A public entry anyone can read and link to — no account needed.',
-  },
+const ALSO: { icon: IconName; title: string; body: string; planned?: boolean }[] = [
+  { icon: 'document', title: 'One record per show', body: 'Dates, works, texts, installation views and audio, kept together.' },
+  { icon: 'globe', title: 'A link you can send', body: 'Point a curator at a show page instead of a pile of attachments.' },
+  { icon: 'folder', title: 'Files that sort themselves', body: 'A Drive folder per show, filed by material as you upload.', planned: true },
 ];
+
+// The salon hang in the hero: frames of different sizes, one already sold.
+const FRAMES = ['a', 'b', 'c', 'd', 'e'];
 
 export default function ArtistsPage() {
   useDocumentMeta({
     title: 'For artists',
     description:
-      'Catalogue your works and exhibitions, keep the files in order, and generate a portfolio or CV for submissions from records you already keep.',
+      'Document each show once and Vernissage keeps your CV current, your shows ready to send and a private tally of what sold.',
   });
 
   return (
-    <>
-      {/* ---- Hero ------------------------------------------------ */}
-      <section className="page-hero">
-        <Bloom />
-        <div className="container page-hero-inner">
-          <p className="eyebrow">For artists</p>
-          <h1 className="display">
-            Your work, <em>submission-ready</em>.
-          </h1>
-          <p className="lede">
-            Document each show once. Get the portfolio, the CV and the record back.
-          </p>
-          <div className="hero-actions">
-            <Link className="cta" to="/exhibitions/new">
-              Document a show
-            </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
-            </Link>
+    <div className="audience audience--artists">
+      {/* ---- Hero: a studio wall -------------------------------- */}
+      <section className="page-hero aud-hero">
+        <div className="container aud-hero-inner">
+          <div className="aud-hero-text">
+            <p className="eyebrow">For artists</p>
+            <h1 className="display">
+              You make the work. <em>We keep the record.</em>
+            </h1>
+            <p className="lede">
+              Document each show once, and your CV, your show pages and your sales stay up to date
+              on their own.
+            </p>
+            <div className="hero-actions">
+              <Link className="cta" to="/exhibitions/new">
+                Document a show
+              </Link>
+              <Link className="cta cta--secondary" to="/profile/cv">
+                Build your CV
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* ---- What you get --------------------------------------- */}
-      <section className="section section--band">
-        <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">What you get</p>
-            <h2 className="headline">
-              The work around the work, <em>handled</em>.
-            </h2>
-          </div>
-          <div className="cell-grid cell-grid--3">
-            {BENEFITS.map((benefit) => (
-              <div className="cell cell--icon" key={benefit.title}>
-                <span className="cell-icon">
-                  <Icon name={benefit.icon} />
-                </span>
-                <div className="cell-body">
-                  <span className="cell-label">
-                    <span className="cell-index">{benefit.index}</span>
-                    {benefit.planned && (
-                      <span className="chip-mono chip-planned">Planned</span>
-                    )}
-                  </span>
-                  <h3>{benefit.title}</h3>
-                  <p>{benefit.body}</p>
-                </div>
-              </div>
+          <div className="salon-hang" aria-hidden="true">
+            {FRAMES.map((f) => (
+              <span key={f} className={`salon-frame salon-frame--${f}`}>
+                {f === 'b' && <span className="sold-dot" />}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ---- CTA band ------------------------------------------- */}
+      {/* ---- CV demo ------------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Your CV, always current</p>
+            <h2 className="headline">
+              Open call on Friday? <em>Your CV is already done.</em>
+            </h2>
+            <p className="prose">Try it: every show you document can go straight onto your CV.</p>
+          </div>
+          <CvDemo />
+        </div>
+      </section>
+
+      {/* ---- Sold wall ----------------------------------------- */}
+      <section className="section section--band">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow">Opening night</p>
+            <h2 className="headline">
+              Put a red dot on it. <em>Keep count without a spreadsheet.</em>
+            </h2>
+            <p className="prose">Tap a work to mark it sold.</p>
+          </div>
+          <SoldWall />
+        </div>
+      </section>
+
+      {/* ---- Also ---------------------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <p className="eyebrow">Also in your studio</p>
+          <ul className="aud-also">
+            {ALSO.map((a) => (
+              <li key={a.title}>
+                <span className="cell-icon">
+                  <Icon name={a.icon} />
+                </span>
+                <h3>
+                  {a.title}
+                  {a.planned && <span className="chip-mono chip-planned">Planned</span>}
+                </h3>
+                <p>{a.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="cta-band">
         <div className="container section cta-band-inner">
           <div>
-            <p className="eyebrow">Open access, non-commercial</p>
+            <p className="eyebrow">Free while in beta</p>
             <h2 className="headline">Start with your last show.</h2>
           </div>
           <div className="cta-band-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
             </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
-            </Link>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -34,6 +34,17 @@ export async function listExhibitions(
   );
 }
 
+/** Every exhibition the signed-in user owns, fetching page after page. */
+export async function listAllMyExhibitions(): Promise<ExhibitionSummary[]> {
+  const pageSize = 100; // the API's maximum page size
+  const all: ExhibitionSummary[] = [];
+  for (let page = 1; ; page++) {
+    const result = await listExhibitions({ mine: true, page, pageSize });
+    all.push(...result.items);
+    if (result.items.length === 0 || all.length >= result.total) return all;
+  }
+}
+
 export async function getExhibition(id: string): Promise<ExhibitionDetail> {
   return parseJson<ExhibitionDetail>(await apiFetch(`${RESOURCE}/${id}`));
 }

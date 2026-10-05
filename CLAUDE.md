@@ -168,6 +168,33 @@ app-settings step (`develop_vernissage-api-dev.yml`), so a push to `develop`
 seeds the shared dev DB on the next boot (idempotent, so redeploys don't
 duplicate). This is dev-only — never set the flag on a production environment.
 
+## Workspace: no public archive, profile card, CV
+
+Vernissage is a private documentation tool (individual assistant / B2B for
+galleries and institutions), not a public archive:
+
+- There is **no public archive** page. `/exhibitions` ("My exhibitions") is
+  sign-in only and always lists the caller's own shows (`mine=true`); old
+  `/archive` links redirect there. Exhibition detail pages and the API's
+  `GET`s stay anonymous (shareable links), but nothing in the UI browses
+  other people's shows.
+- `/profile` shows the profile as a **business card**; the form is at
+  `/profile/edit` and returns to the card after saving.
+- **CV** (`/profile/cv`, lazy-loaded; code in `src/features/cv`): users can
+  upload their own CV file and build one from their profile + documented
+  exhibitions. `GET`/`PUT /api/cv` stores the builder document as JSON on the
+  `CurriculumVitae` table (one per user): template, font, page size, headline,
+  toggles, chosen exhibitions with a solo/group/curated label, free-text
+  sections. `PUT` keeps only the caller's own exhibitions; `markGenerated`
+  stamps `generatedAtUtc`, which "Update the CV" uses to pull in shows
+  documented since. `PUT`/`GET`/`DELETE /api/cv/file` handles the uploaded
+  file (PDF/Word/ODT/RTF/TXT, 10 MB, type decided by extension).
+- PDF (`@react-pdf/renderer`) and Word (`docx`) files are generated **in the
+  browser** from one shared `CvModel` (`model.ts`), so the HTML preview, PDF
+  and .docx always match; both libraries are dynamically imported on click.
+  Fonts are bundled in `public/fonts/cv` (OFL, Latin + Cyrillic: EB Garamond,
+  Tinos, Arimo, Cousine); the .docx names the metric-compatible Office fonts.
+
 ## App version endpoint
 
 `GET /api/version` returns `{ version, branch, buildTimeUtc }`. The branch and

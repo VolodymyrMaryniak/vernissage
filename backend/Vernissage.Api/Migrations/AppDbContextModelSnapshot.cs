@@ -233,6 +233,50 @@ namespace Vernissage.Api.Migrations
                     b.ToTable("CostItems");
                 });
 
+            modelBuilder.Entity("Vernissage.Api.Models.CurriculumVitae", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DocumentJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("GeneratedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UploadedContentType")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("UploadedFile")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("UploadedFileName")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<long?>("UploadedFileSize")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("CurriculumVitae");
+                });
+
             modelBuilder.Entity("Vernissage.Api.Models.Exhibition", b =>
                 {
                     b.Property<Guid>("Id")
@@ -417,6 +461,15 @@ namespace Vernissage.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Metrics");
+                });
+
+            modelBuilder.Entity("Vernissage.Api.Models.CurriculumVitae", b =>
+                {
+                    b.HasOne("Vernissage.Api.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Vernissage.Api.Models.Exhibition", b =>

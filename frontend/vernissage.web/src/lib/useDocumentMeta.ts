@@ -24,7 +24,7 @@ function setMeta(selector: string, attr: 'name' | 'property', key: string, conte
  */
 export function useDocumentMeta({ title, description, noIndex }: DocumentMeta): void {
   useEffect(() => {
-    const fullTitle = title ? `${title} · Vernissage` : 'Vernissage · archive';
+    const fullTitle = title ? `${title} · Vernissage` : 'Vernissage';
     document.title = fullTitle;
 
     if (description) {

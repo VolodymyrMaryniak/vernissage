@@ -1,13 +1,14 @@
 import { render } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { InitialEntry } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from './features/auth/AuthContext';
 import { ConfigProvider } from './features/config/ConfigContext';
 
 interface RenderOptions {
-  /** Initial router entry; defaults to "/". */
-  route?: string;
+  /** Initial router entry (a path, or a location with state); defaults to "/". */
+  route?: InitialEntry;
 }
 
 /**

@@ -61,9 +61,6 @@ export default function HowItWorksPage() {
             <Link className="cta" to="/exhibitions/new">
               Document a show
             </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
-            </Link>
           </div>
         </div>
       </section>
@@ -101,9 +98,6 @@ export default function HowItWorksPage() {
           <div className="cta-band-actions">
             <Link className="cta" to="/exhibitions/new">
               Document a show
-            </Link>
-            <Link className="cta cta--secondary" to="/archive">
-              Browse the archive
             </Link>
           </div>
         </div>
