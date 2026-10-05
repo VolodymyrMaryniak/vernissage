@@ -67,6 +67,12 @@ public class Exhibition
     /// </summary>
     public Guid? OwnerId { get; set; }
 
+    /// <summary>
+    /// The role(s) the owner had in this show — artist, curator, gallery, or a mix —
+    /// for accounts that wear more than one hat. <see cref="CreatorRoles.None"/> when not set.
+    /// </summary>
+    public CreatorRoles OwnerRoles { get; set; }
+
     public DateTimeOffset CreatedAtUtc { get; set; }
 
     public DateTimeOffset UpdatedAtUtc { get; set; }

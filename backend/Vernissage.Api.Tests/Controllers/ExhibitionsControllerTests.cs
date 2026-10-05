@@ -55,6 +55,64 @@ public class ExhibitionsControllerTests
     }
 
     [Fact]
+    public async Task Create_StoresTheOwnersRolesInTheShow()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+
+        var created = await CreateSample(controller, d => d.Roles = ["Artist", "Curator"]);
+
+        Assert.Equal(["Curator", "Artist"], created.Roles);
+        var summary = Assert.Single(Page(await controller.GetAll(new ExhibitionQueryParams { Mine = true })).Items);
+        Assert.Equal(["Curator", "Artist"], summary.Roles);
+    }
+
+    [Fact]
+    public async Task Update_WithoutRoles_KeepsTheExistingOnes()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+        var created = await CreateSample(controller, d => d.Roles = ["Curator"]);
+
+        var update = SampleDto();
+        update.Name = "Renamed";
+        var result = Assert.IsType<OkObjectResult>((await controller.Update(created.Id, update)).Result);
+
+        Assert.Equal(["Curator"], Assert.IsType<ExhibitionDetailDto>(result.Value).Roles);
+    }
+
+    [Fact]
+    public async Task CreateAndUpdate_RejectUnknownRoles()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+
+        var bad = SampleDto();
+        bad.Roles = ["Collector"];
+        Assert.IsType<BadRequestObjectResult>((await controller.Create(bad)).Result);
+
+        var created = await CreateSample(controller);
+        Assert.IsType<BadRequestObjectResult>((await controller.Update(created.Id, bad)).Result);
+    }
+
+    [Fact]
+    public async Task GetAll_FiltersByTheOwnersRoleInTheShow()
+    {
+        await using var db = CreateInMemoryDbContext();
+        var controller = OwnerController(db);
+        await CreateSample(controller, d => { d.Name = "Shown in"; d.Roles = ["Artist"]; });
+        await CreateSample(controller, d => { d.Name = "Curated"; d.Roles = ["Curator"]; });
+        await CreateSample(controller, d => { d.Name = "Both"; d.Roles = ["Artist", "Curator"]; });
+        await CreateSample(controller, d => d.Name = "Not set");
+
+        var curated = Page(await controller.GetAll(new ExhibitionQueryParams { Mine = true, Role = "curator" }));
+        var unknown = Page(await controller.GetAll(new ExhibitionQueryParams { Mine = true, Role = "Collector" }));
+
+        Assert.Equal(["Both", "Curated"], curated.Items.Select(e => e.Name).Order());
+        Assert.Empty(unknown.Items);
+    }
+
+    [Fact]
     public async Task Create_PersistsExhibition_AndSetsOwner()
     {
         await using var db = CreateInMemoryDbContext();

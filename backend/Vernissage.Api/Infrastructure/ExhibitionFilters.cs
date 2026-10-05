@@ -32,6 +32,15 @@ public static class ExhibitionFilters
             source = source.Where(e => e.Focus != null && e.Focus.Contains(focus));
         }
 
+        // An unknown role name matches nothing rather than being silently ignored.
+        if (!string.IsNullOrWhiteSpace(query.Role))
+        {
+            var role = CreatorRolesMapper.TryParse([query.Role.Trim()], out var parsed) ? parsed : CreatorRoles.None;
+            source = role == CreatorRoles.None
+                ? source.Where(_ => false)
+                : source.Where(e => (e.OwnerRoles & role) != 0);
+        }
+
         if (query.From is { } from)
         {
             source = source.Where(e => (e.EndDate ?? e.StartDate) >= from);

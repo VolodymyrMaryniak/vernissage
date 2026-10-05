@@ -3,6 +3,10 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import Bloom from '../../components/Bloom';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
+import PhotoSlideshow from './media/PhotoSlideshow';
+import { PHOTOS } from './media/photos';
+import { DEMO_REEL } from './media/demoReel';
+import ShowReel from '../reel/ShowReel';
 
 // How many entries the "latest" strip pulls (1 featured + the rest listed).
 
@@ -100,6 +104,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ---- On view: exhibitions & opening nights ------------- */}
+      <section className="section section--tight home-slides">
+        <div className="container">
+          <PhotoSlideshow photos={PHOTOS} />
+        </div>
+      </section>
+
       {/* ---- Role selection ------------------------------------- */}
       <section className="section">
         <div className="container">
@@ -161,6 +172,23 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ---- Show reel ------------------------------------------ */}
+      <section className="section home-reel">
+        <div className="container home-reel-inner">
+          <div className="section-head home-reel-head">
+            <p className="eyebrow">Show reels</p>
+            <h2 className="headline">
+              Every documented show <em>plays back</em>.
+            </h2>
+            <p className="prose">
+              Vernissage turns an inventory into a short film: installation views, the works,
+              then the numbers. Visitors, sales and costs appear only in your own reel.
+            </p>
+          </div>
+          <ShowReel data={DEMO_REEL} autoPlay endLine="Inventory complete · 18 works · 4 photographs" />
         </div>
       </section>
 

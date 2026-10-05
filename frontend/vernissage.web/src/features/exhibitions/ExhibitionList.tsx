@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ROLE_BADGE } from './roles';
 import type { ExhibitionSummary } from '../../types/exhibition';
 
 interface Props {
@@ -76,6 +77,15 @@ export default function ExhibitionList({
                   {e.name}
                   {e.curator && <span className="artist"> — {e.curator}</span>}
                 </span>
+                {e.roles?.length > 0 && (
+                  <span className="index-row-roles">
+                    {e.roles.map((r) => (
+                      <span key={r} className={`role-badge role-badge--${r.toLowerCase()}`}>
+                        {ROLE_BADGE[r]}
+                      </span>
+                    ))}
+                  </span>
+                )}
               </span>
               {metaParts.length > 0 && (
                 <span className="index-row-meta">

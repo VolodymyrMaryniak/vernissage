@@ -75,6 +75,7 @@ public static class DevDataSeeder
                     Aim = ex.Aim,
                     Notes = ex.Notes,
                     OwnerId = user.Id,
+                    OwnerRoles = CreatorRoles.Artist, // every seed account is an artist
                     CreatedAtUtc = now,
                     UpdatedAtUtc = now,
                 };

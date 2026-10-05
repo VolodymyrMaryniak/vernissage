@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { ExhibitionWrite } from '../../types/exhibition';
 import { updateExhibition } from '../../api/exhibitionsApi';
 import ExhibitionForm from './ExhibitionForm';
+import { useAuth } from '../auth/useAuth';
 import MediaManager from './MediaManager';
 import { useExhibition } from './useExhibition';
 
 export default function ExhibitionEditPage() {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { exhibition, error: loadError, reload } = useExhibition(id);
@@ -37,6 +39,7 @@ export default function ExhibitionEditPage() {
   return (
     <div className="ex-edit">
       <ExhibitionForm
+        accountRoles={user?.roles}
         initial={exhibition}
         submitting={submitting}
         error={saveError}

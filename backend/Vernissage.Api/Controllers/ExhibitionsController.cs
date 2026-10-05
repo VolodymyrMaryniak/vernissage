@@ -58,6 +58,7 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
                 Curator = e.Curator,
                 GalleryLocation = e.GalleryLocation,
                 OwnerId = e.OwnerId,
+                OwnerRoles = e.OwnerRoles,
                 MediaCount = e.Media.Count,
                 CreatedAtUtc = e.CreatedAtUtc,
                 UpdatedAtUtc = e.UpdatedAtUtc,
@@ -99,6 +100,11 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
             return Unauthorized();
         }
 
+        if (InvalidRoles(dto) is { } invalid)
+        {
+            return invalid;
+        }
+
         var now = DateTimeOffset.UtcNow;
         var exhibition = new Exhibition
         {
@@ -127,6 +133,11 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         if (this.CheckOwnership(exhibition) is { } problem)
         {
             return problem;
+        }
+
+        if (InvalidRoles(dto) is { } invalid)
+        {
+            return invalid;
         }
 
         ApplyWrite(exhibition!, dto);
@@ -253,8 +264,19 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         return NoContent();
     }
 
+    private BadRequestObjectResult? InvalidRoles(ExhibitionWriteDto dto) =>
+        dto.Roles is not null && !CreatorRolesMapper.TryParse(dto.Roles, out _)
+            ? BadRequest(new { message = "Roles must be any of: Gallery, Curator, Artist." })
+            : null;
+
     private static void ApplyWrite(Exhibition exhibition, ExhibitionWriteDto dto)
     {
+        // Omitted roles leave the current ones unchanged (older clients don't send them).
+        if (dto.Roles is not null && CreatorRolesMapper.TryParse(dto.Roles, out var roles))
+        {
+            exhibition.OwnerRoles = roles;
+        }
+
         exhibition.Name = dto.Name;
         exhibition.StartDate = dto.StartDate;
         exhibition.EndDate = dto.EndDate;
@@ -284,6 +306,7 @@ public class ExhibitionsController(AppDbContext dbContext) : ControllerBase
         Focus = e.Focus,
         Curator = e.Curator,
         OwnerId = e.OwnerId,
+        Roles = CreatorRolesMapper.ToNames(e.OwnerRoles),
         GalleryLocation = e.GalleryLocation,
         Explication = e.Explication,
         InvestigationMaterial = e.InvestigationMaterial,
