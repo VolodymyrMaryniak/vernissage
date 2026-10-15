@@ -44,7 +44,7 @@ export default function HomePage() {
   useDocumentMeta({ title: t.metaTitle, description: t.metaDescription });
 
   return (
-    <>
+    <div className="home">
       {/* ---- Hero ------------------------------------------------ */}
       <section className="hero">
         <Bloom />
@@ -224,6 +224,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
