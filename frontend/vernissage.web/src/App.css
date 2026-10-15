@@ -5286,6 +5286,45 @@ fieldset.field > legend {
 }
 
 /* ================================================================
+   HOME — one continuous background
+   The page is a single canvas: soft peony and olive glows drift down it,
+   alternating sides, so scrolling never crosses a hard band or seam. The
+   sections on top are transparent and carry no dividing rules.
+   ================================================================ */
+.home {
+  position: relative;
+  background:
+    radial-gradient(60% 14% at 88% 22%, color-mix(in oklab, var(--olive) 22%, transparent), transparent 70%),
+    radial-gradient(65% 14% at 6% 40%, color-mix(in oklab, var(--peony) 9%, transparent), transparent 70%),
+    radial-gradient(60% 13% at 94% 58%, color-mix(in oklab, var(--peony) 8%, transparent), transparent 70%),
+    radial-gradient(70% 14% at 10% 76%, color-mix(in oklab, var(--olive) 22%, transparent), transparent 70%),
+    radial-gradient(75% 10% at 72% 92%, color-mix(in oklab, var(--peony) 9%, transparent), transparent 70%),
+    linear-gradient(
+      180deg,
+      var(--paper) 0%,
+      var(--sun-soft) 30%,
+      var(--paper) 50%,
+      var(--sun-soft) 80%,
+      var(--paper) 100%
+    );
+}
+
+.home .hero,
+.home .section--band,
+.home .cta-band,
+.app:has(.home) .site-footer {
+  background: none;
+  border-top: 0;
+  border-bottom: 0;
+}
+
+/* The hero's pointer bloom fades out at its foot instead of ending on a line. */
+.home .wash-drift {
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+}
+
+/* ================================================================
    HOME — photo slideshow (exhibitions & opening nights)
    ================================================================ */
 .home-slides {
