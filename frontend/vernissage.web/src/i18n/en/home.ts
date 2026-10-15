@@ -1,6 +1,6 @@
 import type { PluralForms } from '../format';
 
-// The Home page, its slideshow and the demo reel.
+// The Home page, its feature photo and the demo reel.
 const home = {
   metaTitle: "Let's document your art show properly",
   metaDescription:
@@ -60,15 +60,8 @@ const home = {
   ctaTitle: 'A working archive, not a portfolio site.',
   ctaBody: 'Start documenting your next show.',
   cta: 'Start documenting',
-  slideshow: {
-    region: 'Exhibitions and opening nights',
-    slide: '{n} of {total}',
-    previous: 'Previous photo',
-    next: 'Next photo',
-    play: 'Play slideshow',
-    pause: 'Pause slideshow',
-    choose: 'Choose a photo',
-    photo: 'Photo {n}: {caption}',
+  feature: {
+    alt: 'A visitor stands before a large rose-and-crimson triptych in a white museum room',
     credit: 'Photo:',
   },
   photos: {

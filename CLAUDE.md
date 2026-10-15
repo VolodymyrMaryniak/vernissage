@@ -255,10 +255,12 @@ galleries and institutions), not a public archive:
 
 ## Home visuals & show reels
 
-- **Home slideshow** (`features/marketing/media/PhotoSlideshow.tsx`): opening-night
-  and installation photos in `public/media/home/*.webp`, all Creative Commons
-  (CC BY / BY-SA 2.0, Flickr). The credit + licence link for the photo on screen is
-  required by the licence; keep it when adding photos (`media/photos.ts`).
+- **Home feature photo**: a single still (no slideshow, no motion) of a visitor before
+  a rose-and-crimson triptych, `public/media/home/feature.webp` — Declan Sun on
+  Unsplash (Unsplash License), credited under the photo. Only use photos with a
+  licence that allows reuse (Unsplash, CC); never images taken from Pinterest or
+  similar re-post sites. The older CC BY / BY-SA Flickr photos in `media/photos.ts`
+  feed the demo reel and keep their credits.
 - **Show reel** (`features/reel`): a short film *generated in the browser* from an
   inventory (title card → installation views → works → numbers → costs → end), played
   like a video with a scene scrubber. No video file is rendered. `scenes.ts` builds

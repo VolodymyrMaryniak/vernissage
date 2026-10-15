@@ -3,8 +3,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta';
 import Bloom from '../../components/Bloom';
 import Icon from '../../components/Icon';
 import type { IconName } from '../../components/Icon';
-import PhotoSlideshow from './media/PhotoSlideshow';
-import { localizedPhotos } from './media/photos';
 import { demoReel } from './media/demoReel';
 import ShowReel from '../reel/ShowReel';
 import { useMessages } from '../../i18n/useI18n';
@@ -31,6 +29,15 @@ const DRIVE_FILES = [
   { path: '/press', files: 9, size: '84 MB' },
   { path: '/essays', files: 3, size: '12 MB' },
 ];
+
+/** Declan Sun, Pudong Art Museum — free under the Unsplash License. */
+const FEATURE_PHOTO = {
+  src: '/media/home/feature.webp',
+  width: 1600,
+  height: 894,
+  creator: 'Declan Sun',
+  sourceUrl: 'https://unsplash.com/photos/vOKvkIf_4QI',
+};
 
 const ROLE_CARDS = [
   { to: '/artists', index: '01', key: 'artist' },
@@ -67,10 +74,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---- On view: exhibitions & opening nights ------------- */}
-      <section className="section section--tight home-slides">
+      {/* ---- On view: one feature photograph -------------------- */}
+      <section className="section section--tight home-feature">
         <div className="container">
-          <PhotoSlideshow photos={localizedPhotos(m)} />
+          <figure className="feature-photo">
+            <img
+              src={FEATURE_PHOTO.src}
+              alt={t.feature.alt}
+              width={FEATURE_PHOTO.width}
+              height={FEATURE_PHOTO.height}
+              decoding="async"
+            />
+            <figcaption className="feature-credit">
+              {t.feature.credit}{' '}
+              <a href={FEATURE_PHOTO.sourceUrl} target="_blank" rel="noreferrer noopener">
+                {FEATURE_PHOTO.creator}
+              </a>{' '}
+              · Unsplash
+            </figcaption>
+          </figure>
         </div>
       </section>
 

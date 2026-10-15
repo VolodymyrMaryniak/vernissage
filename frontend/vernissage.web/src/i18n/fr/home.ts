@@ -59,16 +59,9 @@ const home: Messages['home'] = {
   ctaTitle: 'Une archive de travail, pas un site portfolio.',
   ctaBody: 'Commencez à documenter votre prochaine exposition.',
   cta: 'Commencer à documenter',
-  slideshow: {
-    region: 'Expositions et vernissages',
-    slide: '{n} sur {total}',
-    previous: 'Photo précédente',
-    next: 'Photo suivante',
-    play: 'Lancer le diaporama',
-    pause: 'Mettre le diaporama en pause',
-    choose: 'Choisir une photo',
-    photo: 'Photo {n} : {caption}',
-    credit: 'Photo :',
+  feature: {
+    alt: 'Une visiteuse devant un grand triptyque rose et cramoisi, dans une salle de musée blanche',
+    credit: 'Photo :',
   },
   photos: {
     openingCrowd: {
